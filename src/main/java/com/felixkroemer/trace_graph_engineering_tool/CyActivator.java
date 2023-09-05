@@ -1,37 +1,34 @@
 package com.felixkroemer.trace_graph_engineering_tool;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.LoadNetworkTaskFactory;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.service.util.AbstractCyActivator;
-import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
 
-import java.util.Properties;
+import java.util.Map;
+
+import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
+import static org.cytoscape.work.ServiceProperties.TITLE;
 
 
 public class CyActivator extends AbstractCyActivator {
+
     public CyActivator() {
         super();
     }
 
+    public void start(BundleContext bundleContext) {
 
-    public void start(BundleContext bc) {
+        CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
+        TraceGraphController manager = new TraceGraphController(reg);
 
-        CyNetworkManager cyNetworkManagerServiceRef = getService(bc, CyNetworkManager.class);
-        CyNetworkNaming cyNetworkNamingServiceRef = getService(bc, CyNetworkNaming.class);
-        CyNetworkFactory cyNetworkFactoryServiceRef = getService(bc, CyNetworkFactory.class);
-        CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
-        CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
-        CyNetworkViewManager networkViewManager = getService(bc, CyNetworkViewManager.class);
-
-        CreateNetworkTaskFactory createNetworkTaskFactory = new CreateNetworkTaskFactory(cyNetworkManagerServiceRef, cyNetworkNamingServiceRef, cyNetworkFactoryServiceRef, applicationManager, networkViewFactory, networkViewManager);
-
-        Properties props = new Properties();
-        registerService(bc, createNetworkTaskFactory, TaskFactory.class, props);
+        LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
+        registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Apps.STRING", TITLE, "Import Trace Graph")));
     }
+
 }
 
