@@ -9,6 +9,7 @@ import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
 
 import java.util.Map;
+import java.util.Properties;
 
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
@@ -24,6 +25,8 @@ public class CyActivator extends AbstractCyActivator {
 
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
         TraceGraphController manager = new TraceGraphController(reg);
+
+        registerService(bundleContext, manager, TraceGraphController.class, new Properties());
 
         LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
         registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
