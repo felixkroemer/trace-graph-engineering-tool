@@ -39,6 +39,7 @@ public class TraceGraph {
         }
 
         int[] state = new int[this.pdm.getParameterCount()];
+        CyNode prevNode = null;
         for (CyRow row : rawDataTable.getAllRows()) {
             Map<String, Object> values = row.getAllValues();
             int i = 0;
@@ -53,6 +54,14 @@ public class TraceGraph {
             } else {
                 CyNode node = network.addNode();
                 suidHashMapping.put(hash, node.getSUID());
+                CyRow newRow = nodeTable.getRow(node.getSUID());
+                for (int j = 0; j < this.pdm.getParameterCount(); j++) {
+                    newRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
+                }
+                if (prevNode != null) {
+                    network.addEdge(node, prevNode, true);
+                }
+                prevNode = node;
             }
 
         }
