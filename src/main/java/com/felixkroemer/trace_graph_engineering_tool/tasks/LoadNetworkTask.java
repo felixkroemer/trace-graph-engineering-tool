@@ -1,9 +1,14 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
+import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableFactory;
@@ -16,38 +21,49 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class LoadNetworkTask extends AbstractTask {
 
-    @Tunable(description = "The input data to load", params = "input=true", required = true)
-    public File traceGraph;
-
     @Tunable(description = "The pdm to load", params = "input=true", required = true)
-    public File pdm;
+    public File pdmFile;
 
     private final Logger logger;
+
     private final TraceGraphController controller;
     private final CyTableFactory tableFactory;
+    private final CyNetworkFactory networkFactory;
 
     public LoadNetworkTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.controller = reg.getService(TraceGraphController.class);
         this.tableFactory = reg.getService(CyTableFactory.class);
+        this.networkFactory = reg.getService(CyNetworkFactory.class);
     }
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        CyTable table = parseCSV();
+        ParameterDiscretizationModel pdm = parsePDM();
+        CyTable table = parseCSV(pdm);
+        TraceGraph traceGraph = new TraceGraph(this.networkFactory, pdm, table);
+        controller.registerTraceGraph(traceGraph);
     }
 
-    private CyTable parseCSV() throws Exception {
-        CyTable table = tableFactory.createTable("data", "suid", Long.class, true, true);
+    private ParameterDiscretizationModel parsePDM() throws Exception {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        String pdmString = Files.readString(pdmFile.toPath());
+        return gson.fromJson(pdmString, ParameterDiscretizationModel.class);
+    }
+
+    private CyTable parseCSV(ParameterDiscretizationModel pdm) throws Exception {
+        CyTable table = tableFactory.createTable("data", "id", Long.class, true, true);
         List<String> propertyNames = new ArrayList<>();
         boolean header = true;
-        try (CSVReader reader = new CSVReader(new FileReader(traceGraph))) {
+        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), pdm.getCsv())))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (header) {

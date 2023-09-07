@@ -1,0 +1,283 @@
+{
+  "name": "normal_speed_combined_cleaned",
+  "version": "0.0.1",
+  "csv": "normal_speed_combined_cleaned.csv",
+  "description": "signal data of a 4x4 position matrix plus speed and steering angle",
+  "parameters": [
+    {
+      "name": "r_-3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_-2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_-1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_0",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "r_3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_-3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_-2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_-1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_0",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "mr_3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_-3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_-2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_-1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_0",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "ml_3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_-3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_-2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_-1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_0",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_1",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_2",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "l_3",
+      "type": "byte",
+      "bins": [
+        0.5,
+        1.5,
+        2.5
+      ]
+    },
+    {
+      "name": "speed",
+      "type": "double",
+      "bins": [
+        0,
+        10.37664813,
+        30.83441908,
+        51.33670574,
+        66.66003411
+      ]
+    },
+    {
+      "name": "steering_angle",
+      "type": "double",
+      "bins": [
+        -0.00938785,
+        -0.00258538,
+        -0.00031098,
+        0.00079522,
+        0.00402804,
+        0.01396263
+      ]
+    }
+  ]
+}
