@@ -28,18 +28,23 @@ public class TraceGraph {
         this.network.getRow(network).set(CyNetwork.NAME, pdm.getName());
         this.nodeTable = this.network.getDefaultNodeTable();
         this.edgeTable = this.network.getDefaultEdgeTable();
-        this.suidHashMapping = new HashMap<>(); //TODO: find way to create nodes with specified SUID
+        this.suidHashMapping = new HashMap<>(); //TODO: find way to create nodes with specified SUID (hash as suid)
+        this.initTables();
         this.initNetwork();
     }
 
-    private void initNetwork() {
-
+    private void initTables() {
         for (Parameter param : this.pdm.getParameters()) {
             this.nodeTable.createColumn(param.getName(), Integer.class, false);
         }
+        this.nodeTable.createColumn("visits", Integer.class, false);
+        this.nodeTable.createColumn("frequency", Integer.class, false);
+    }
 
+    private void initNetwork() {
         int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
+        CyNode currentNode = null;
         for (CyRow row : rawDataTable.getAllRows()) {
             Map<String, Object> values = row.getAllValues();
             int i = 0;
@@ -49,21 +54,31 @@ public class TraceGraph {
             }
             long hash = Arrays.hashCode(state);
             Long suid = suidHashMapping.get(hash);
-            if (suid != null) {
+            if (suid != null) { // node for the given state already exists
                 // TODO: append row to reference list of node
-            } else {
-                CyNode node = network.addNode();
-                suidHashMapping.put(hash, node.getSUID());
-                CyRow newRow = nodeTable.getRow(node.getSUID());
+                currentNode = network.getNode(suid);
+                CyRow r = nodeTable.getRow(currentNode.getSUID());
+                if (prevNode == currentNode) { // prevNode cannot be null here
+                    r.set("visits", r.get("visits", Integer.class) + 1);
+                } else {
+                    r.set("frequency", r.get("frequency", Integer.class) + 1);
+                }
+            } else { // node does not exist yet
+                currentNode = network.addNode();
+                suidHashMapping.put(hash, currentNode.getSUID());
+                CyRow newRow = nodeTable.getRow(currentNode.getSUID());
                 for (int j = 0; j < this.pdm.getParameterCount(); j++) {
                     newRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
-                if (prevNode != null) {
-                    network.addEdge(node, prevNode, true);
-                }
-                prevNode = node;
+                newRow.set("visits", 1);
+                newRow.set("frequency", 1);
             }
-
+            if (prevNode != null && prevNode != currentNode) {
+                if (!network.containsEdge(prevNode, currentNode)) {
+                    network.addEdge(prevNode, currentNode, true);
+                }
+            }
+            prevNode = currentNode;
         }
 
     }

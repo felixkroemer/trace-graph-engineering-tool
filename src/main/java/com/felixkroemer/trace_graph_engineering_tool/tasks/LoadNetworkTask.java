@@ -1,9 +1,9 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
@@ -22,9 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class LoadNetworkTask extends AbstractTask {
 
@@ -61,32 +58,27 @@ public class LoadNetworkTask extends AbstractTask {
 
     private CyTable parseCSV(ParameterDiscretizationModel pdm) throws Exception {
         CyTable table = tableFactory.createTable("data", "id", Long.class, true, true);
-        List<String> propertyNames = new ArrayList<>();
+        for (Parameter param : pdm.getParameters()) {
+            table.createColumn(param.getName(), Double.class, false);
+        }
         boolean header = true;
         try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), pdm.getCsv())))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (header) {
-                    Arrays.stream(line).skip(1).forEach(s -> {
-                        table.createColumn(s, Double.class, false);
-                    });
-                    propertyNames.addAll(Arrays.stream(line).skip(1).toList());
                     header = false;
                     continue;
                 }
-                CyRow row;
-                while ((row = table.getRow(Util.genSUID())) == null) {
-                    continue;
-                }
+                CyRow row = table.getRow(Long.parseLong(line[0]));
                 for (int i = 1; i < line.length; i++) {
+                    // csv has some empty entries
                     if (!line[i].isEmpty()) {
-                        row.set(propertyNames.get(i - 1), Double.parseDouble(line[i]));
+                        row.set(pdm.getParameters().get(i - 1).getName(), Double.parseDouble(line[i]));
                     } else {
-                        row.set(propertyNames.get(i - 1), 0.0);
+                        row.set(pdm.getParameters().get(i - 1).getName(), 0.0);
                     }
                 }
             }
-            //table.getRow(10000L).getAllValues().forEach((k, v) -> logger.info(k + ": " + v));
         }
         return table;
     }

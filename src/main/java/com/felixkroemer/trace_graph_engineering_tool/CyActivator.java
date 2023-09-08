@@ -11,8 +11,7 @@ import org.osgi.framework.BundleContext;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
-import static org.cytoscape.work.ServiceProperties.TITLE;
+import static org.cytoscape.work.ServiceProperties.*;
 
 
 public class CyActivator extends AbstractCyActivator {
@@ -30,7 +29,8 @@ public class CyActivator extends AbstractCyActivator {
 
         LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
         registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Apps.STRING", TITLE, "Import Trace Graph")));
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace Graph",
+                        INSERT_SEPARATOR_BEFORE, "true")));
     }
 
 }
