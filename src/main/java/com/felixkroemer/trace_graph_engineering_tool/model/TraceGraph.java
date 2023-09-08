@@ -95,4 +95,8 @@ public class TraceGraph {
     public CyNetwork getNetwork() {
         return this.network;
     }
+
+    public ParameterDiscretizationModel getPDM() {
+        return this.pdm;
+    }
 }

@@ -10,9 +10,11 @@ import java.awt.*;
 
 public class Mappings {
 
-    public static VisualMappingFunction createSizeMapping(int xMin, int xMax, VisualMappingFunctionFactory factory) {
-        ContinuousMapping sizeMapping = (ContinuousMapping) factory.createVisualMappingFunction("visits",
-                Integer.class, BasicVisualLexicon.NODE_SIZE);
+    public static VisualMappingFunction<Integer, Double> createSizeMapping(int xMin, int xMax,
+                                                                           VisualMappingFunctionFactory factory) {
+        ContinuousMapping<Integer, Double> sizeMapping =
+                (ContinuousMapping<Integer, Double>) factory.createVisualMappingFunction("visits", Integer.class,
+                        BasicVisualLexicon.NODE_SIZE);
 
         double steps = 15.0;
 
@@ -26,34 +28,33 @@ public class Mappings {
         BoundaryRangeValues<Double> boundary;
         double y = yMin;
         for (int i = 1; i <= steps + 1; i++) {
-            boundary = new BoundaryRangeValues<Double>(y, y, y);
-            sizeMapping.addPoint(x, boundary);
-            x = xMin + ((xMax - xMin) / steps) * i;
+            boundary = new BoundaryRangeValues<>(y, y, y);
+            sizeMapping.addPoint((int) Math.round(x), boundary);
+            x = (xMin + ((xMax - xMin) / steps) * i);
             y = a * Math.log(b * x);
         }
 
         return sizeMapping;
     }
 
-    public static VisualMappingFunction createColorMapping(int xMin, int xMax, VisualMappingFunctionFactory factory) {
-        ContinuousMapping mapping = (ContinuousMapping) factory.createVisualMappingFunction("frequency",
-                Integer.class, BasicVisualLexicon.NODE_FILL_COLOR);
+    public static VisualMappingFunction<Integer, Paint> createColorMapping(int xMin, int xMax,
+                                                                           VisualMappingFunctionFactory factory) {
+        ContinuousMapping<Integer, Paint> mapping =
+                (ContinuousMapping<Integer, Paint>) factory.createVisualMappingFunction("frequency", Integer.class,
+                        BasicVisualLexicon.NODE_FILL_COLOR);
 
 
-        double stepSmall = xMin;
-        BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<Paint>(Color.BLUE, Color.BLUE, Color.BLUE);
+        BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
 
-        double stepMedium = (xMax - xMin) * 0.1;
-        BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<Paint>(Color.GREEN, Color.GREEN,
-                Color.GREEN);
+        int stepMedium = (int) Math.round((xMax - xMin) * 0.1);
+        BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<>(Color.GREEN, Color.GREEN, Color.GREEN);
 
-        double stepLarge = xMax;
-        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<Paint>(Color.RED, Color.RED, Color.RED);
+        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
 
 
-        mapping.addPoint(stepSmall, boundarySmall);
+        mapping.addPoint(xMin, boundarySmall);
         mapping.addPoint(stepMedium, boundaryMedium);
-        mapping.addPoint(stepLarge, boundaryLarge);
+        mapping.addPoint(xMax, boundaryLarge);
 
         return mapping;
     }

@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.util.TaskMonitorStub;
@@ -83,9 +84,11 @@ public class TraceGraphController {
 
         VisualMappingFunction sizeMapping = Mappings.createSizeMapping(1, 2000, visualMappingFunctionFactory);
         VisualMappingFunction colorMapping = Mappings.createColorMapping(1, 1600, visualMappingFunctionFactory);
+        VisualMappingFunction tooltipMapping = new TooltipMapping(tg.getPDM());
 
         style.addVisualMappingFunction(sizeMapping);
         style.addVisualMappingFunction(colorMapping);
+        style.addVisualMappingFunction(tooltipMapping);
         this.visualMappingManager.setCurrentVisualStyle(style);
 
 
