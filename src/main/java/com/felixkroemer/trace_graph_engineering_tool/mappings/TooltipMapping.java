@@ -12,6 +12,7 @@ import org.cytoscape.view.vizmap.VisualMappingFunction;
 public class TooltipMapping implements VisualMappingFunction<CyRow, String> {
 
     public ParameterDiscretizationModel pdm;
+    private CyRow lastRow;
 
     public TooltipMapping(ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
@@ -19,7 +20,7 @@ public class TooltipMapping implements VisualMappingFunction<CyRow, String> {
 
     @Override
     public String getMappingColumnName() {
-        return null;
+        return "SUID";
     }
 
     @Override
@@ -43,8 +44,11 @@ public class TooltipMapping implements VisualMappingFunction<CyRow, String> {
     public String getMappedValue(CyRow row) {
         StringBuilder sb = new StringBuilder();
         for (Parameter p : this.pdm.getParameters()) {
-            sb.append(p.getName()).append(":").append(row.get(p.getName(), Integer.class)).append("\n");
+            sb.append(p.getName()).append(":");
+            sb.append(row.get(p.getName(), Integer.class));
+            sb.append("\n");
         }
+        this.lastRow = row;
         return sb.toString();
     }
 }

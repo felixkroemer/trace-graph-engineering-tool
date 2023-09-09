@@ -39,6 +39,9 @@ public class TraceGraph {
         }
         this.nodeTable.createColumn("visits", Integer.class, false);
         this.nodeTable.createColumn("frequency", Integer.class, false);
+
+        CyTable networkTable = this.network.getDefaultNetworkTable();
+        networkTable.createColumn("traceGraphMarker", Integer.class, true);
     }
 
     private void initNetwork() {
