@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.util;
 
+import org.cytoscape.model.CyRow;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
@@ -57,6 +58,11 @@ public class Mappings {
         mapping.addPoint(xMax, boundaryLarge);
 
         return mapping;
+    }
+
+    public static VisualMappingFunction<CyRow, String> createTooltipMapping(VisualMappingFunctionFactory factory) {
+        // parameters are not needed here because column name, column type and vp are fixed
+        return factory.createVisualMappingFunction(null, null, null);
     }
 
 }

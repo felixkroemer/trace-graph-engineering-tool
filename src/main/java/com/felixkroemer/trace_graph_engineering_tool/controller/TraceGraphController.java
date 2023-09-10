@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.util.TaskMonitorStub;
@@ -10,7 +9,9 @@ import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -20,6 +21,8 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.*;
+import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleEvent;
+import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleListener;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
@@ -30,7 +33,7 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TraceGraphController implements NetworkAboutToBeDestroyedListener {
+public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentVisualStyleListener {
 
     private final Logger logger;
 
@@ -44,7 +47,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener {
     private CyApplicationManager applicationManager;
     private VisualMappingManager visualMappingManager;
     private VisualStyleFactory visualStyleFactory;
-    private VisualMappingFunctionFactory visualMappingFunctionFactory;
 
     private TraceGraphPanel panel;
 
@@ -62,10 +64,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener {
         this.applicationManager = registrar.getService(CyApplicationManager.class);
         this.visualMappingManager = registrar.getService(VisualMappingManager.class);
         this.visualStyleFactory = registrar.getService(VisualStyleFactory.class);
-        // Ensure we get org.cytoscape.view.vizmap.internal.mappings.PassthroughMappingFactory, then cast to
-        // PassthroughMapping
-        this.visualMappingFunctionFactory = registrar.getService(VisualMappingFunctionFactory.class, "(mapping" +
-                ".type=continuous)");
     }
 
     //TODO split up
@@ -96,17 +94,24 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener {
 
         VisualStyle style = visualStyleFactory.createVisualStyle("default");
 
+        // Ensure we get org.cytoscape.view.vizmap.internal.mappings.PassthroughMappingFactory, then cast to
+        // PassthroughMapping
+        VisualMappingFunctionFactory visualMappingFunctionFactory =
+                registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
+        VisualMappingFunctionFactory tooltipMappingFunctionFactory =
+                registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=tooltip)");
+
         VisualMappingFunction<Integer, Double> sizeMapping = Mappings.createSizeMapping(1, 2000,
                 visualMappingFunctionFactory);
         VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, 1600,
                 visualMappingFunctionFactory);
-        TooltipMapping tooltipMapping = new TooltipMapping(tg.getPDM());
+        VisualMappingFunction<CyRow, String> tooltipMapping =
+                Mappings.createTooltipMapping(tooltipMappingFunctionFactory);
 
         style.addVisualMappingFunction(sizeMapping);
         style.addVisualMappingFunction(colorMapping);
+        style.addVisualMappingFunction(tooltipMapping);
 
-        // TODO: find problem when creating non-tg network and switching back and forth
-        //style.addVisualMappingFunction(tooltipMapping);
         this.visualMappingManager.setCurrentVisualStyle(style);
 
         style.apply(view);
@@ -126,18 +131,35 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener {
     @Override
     public void handleEvent(NetworkAboutToBeDestroyedEvent e) {
         // TODO: find way to refer from CyNetwork to TraceGraph
-        int index = -1;
-        for (int i = 0; i < traceGraphs.size(); i++) {
-            if (e.getNetwork() == traceGraphs.get(i).getNetwork()) ;
-            index = i;
-            break;
-        }
-        if (index != -1) {
-            this.traceGraphs.remove(index);
+        TraceGraph tr = findTraceGraphForNetwork(e.getNetwork());
+        if (tr != null) {
+            this.traceGraphs.remove(tr);
         }
         if (this.traceGraphs.isEmpty()) {
             this.hidePanel();
         }
     }
 
+    private TraceGraph findTraceGraphForNetwork(CyNetwork network) {
+        int index = -1;
+        for (int i = 0; i < traceGraphs.size(); i++) {
+            if (network == traceGraphs.get(i).getNetwork()) ;
+            index = i;
+            break;
+        }
+        if (index >= 0) {
+            return traceGraphs.get(index);
+        } else {
+            return null;
+        }
+    }
+
+    public TraceGraph getActiveTraceGraph() {
+        return findTraceGraphForNetwork(applicationManager.getCurrentNetwork());
+    }
+
+    @Override
+    public void handleEvent(SetCurrentVisualStyleEvent e) {
+        logger.info(e.toString());
+    }
 }

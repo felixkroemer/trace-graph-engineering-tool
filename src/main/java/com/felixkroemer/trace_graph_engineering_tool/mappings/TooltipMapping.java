@@ -7,12 +7,11 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 
-public class TooltipMapping implements VisualMappingFunction<CyRow, String> {
+public class TooltipMapping implements PassthroughMapping<CyRow, String> {
 
     public ParameterDiscretizationModel pdm;
-    private CyRow lastRow;
 
     public TooltipMapping(ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
@@ -48,7 +47,6 @@ public class TooltipMapping implements VisualMappingFunction<CyRow, String> {
             sb.append(row.get(p.getName(), Integer.class));
             sb.append("\n");
         }
-        this.lastRow = row;
         return sb.toString();
     }
 }
