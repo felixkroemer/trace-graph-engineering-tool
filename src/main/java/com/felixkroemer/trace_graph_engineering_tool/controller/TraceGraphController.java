@@ -88,9 +88,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
 
         networkManager.addNetwork(tg.getNetwork());
         networkViewManager.addNetworkView(view);
-        for (CyLayoutAlgorithm l : this.layoutManager.getAllLayouts()) {
-            logger.info(l.getName());
-        }
 
         VisualStyle style = visualStyleFactory.createVisualStyle("default");
 

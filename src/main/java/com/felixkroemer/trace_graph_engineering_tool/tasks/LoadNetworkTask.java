@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -57,7 +58,7 @@ public class LoadNetworkTask extends AbstractTask {
     }
 
     private CyTable parseCSV(ParameterDiscretizationModel pdm) throws Exception {
-        CyTable table = tableFactory.createTable("data", "id", Integer.class, true, true);
+        CyTable table = tableFactory.createTable("data", Columns.SOURCE_ID, Integer.class, true, true);
         for (Parameter param : pdm.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }

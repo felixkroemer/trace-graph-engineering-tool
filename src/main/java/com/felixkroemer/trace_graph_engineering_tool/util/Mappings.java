@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.util;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
@@ -14,8 +15,8 @@ public class Mappings {
     public static VisualMappingFunction<Integer, Double> createSizeMapping(int xMin, int xMax,
                                                                            VisualMappingFunctionFactory factory) {
         ContinuousMapping<Integer, Double> sizeMapping =
-                (ContinuousMapping<Integer, Double>) factory.createVisualMappingFunction("visits", Integer.class,
-                        BasicVisualLexicon.NODE_SIZE);
+                (ContinuousMapping<Integer, Double>) factory.createVisualMappingFunction(Columns.NODE_VISITS,
+                        Integer.class, BasicVisualLexicon.NODE_SIZE);
 
         double steps = 15.0;
 
@@ -41,8 +42,8 @@ public class Mappings {
     public static VisualMappingFunction<Integer, Paint> createColorMapping(int xMin, int xMax,
                                                                            VisualMappingFunctionFactory factory) {
         ContinuousMapping<Integer, Paint> mapping =
-                (ContinuousMapping<Integer, Paint>) factory.createVisualMappingFunction("frequency", Integer.class,
-                        BasicVisualLexicon.NODE_FILL_COLOR);
+                (ContinuousMapping<Integer, Paint>) factory.createVisualMappingFunction(Columns.NODE_FREQUENCY,
+                        Integer.class, BasicVisualLexicon.NODE_FILL_COLOR);
 
 
         BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);

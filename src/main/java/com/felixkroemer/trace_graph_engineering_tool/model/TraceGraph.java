@@ -37,14 +37,14 @@ public class TraceGraph {
             this.nodeTable.createColumn(param.getName(), Integer.class, false);
         }
         // cannot set default here because object will be shared
-        this.nodeTable.createColumn("visits", Integer.class, false);
-        this.nodeTable.createColumn("frequency", Integer.class, false);
-        this.nodeTable.createListColumn("sourceRows", Integer.class, false);
+        this.nodeTable.createColumn(Columns.NODE_VISITS, Integer.class, false);
+        this.nodeTable.createColumn(Columns.NODE_FREQUENCY, Integer.class, false);
+        this.nodeTable.createListColumn(Columns.NODE_SOURCE_ROWS, Integer.class, false);
 
-        this.edgeTable.createColumn("passes", Integer.class, false, 1);
+        this.edgeTable.createColumn(Columns.EDGE_TRAVERSALS, Integer.class, false, 1);
 
         CyTable networkTable = this.network.getDefaultNetworkTable();
-        networkTable.createColumn("traceGraphMarker", Integer.class, true);
+        networkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
     }
 
     private void initNetwork() {
@@ -65,9 +65,9 @@ public class TraceGraph {
                 currentNode = network.getNode(suid);
                 currentRow = nodeTable.getRow(currentNode.getSUID());
                 if (prevNode == currentNode) { // prevNode cannot be null here
-                    currentRow.set("visits", currentRow.get("visits", Integer.class) + 1);
+                    currentRow.set(Columns.NODE_VISITS, currentRow.get(Columns.NODE_VISITS, Integer.class) + 1);
                 } else {
-                    currentRow.set("frequency", currentRow.get("frequency", Integer.class) + 1);
+                    currentRow.set(Columns.NODE_FREQUENCY, currentRow.get(Columns.NODE_FREQUENCY, Integer.class) + 1);
                 }
             } else { // node does not exist yet
                 currentNode = network.addNode();
@@ -76,18 +76,20 @@ public class TraceGraph {
                 for (int j = 0; j < this.pdm.getParameterCount(); j++) {
                     currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
-                currentRow.set("visits", 1);
-                currentRow.set("frequency", 1);
-                currentRow.set("sourceRows", new ArrayList<>());
+                currentRow.set(Columns.NODE_VISITS, 1);
+                currentRow.set(Columns.NODE_FREQUENCY, 1);
+                currentRow.set(Columns.NODE_SOURCE_ROWS, new ArrayList<>());
             }
-            currentRow.getList("sourceRows", Integer.class).add(sourceRow.get("id", Integer.class));
+            currentRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
+                    Integer.class));
             if (prevNode != null && prevNode != currentNode) {
                 CyEdge edge;
                 if ((edge = getEdge(prevNode, currentNode)) == null) {
                     network.addEdge(prevNode, currentNode, true);
                 } else {
                     CyRow edgeTableRow = this.edgeTable.getRow(edge.getSUID());
-                    edgeTableRow.set("passes", edgeTableRow.get("passes", Integer.class) + 1);
+                    edgeTableRow.set(Columns.EDGE_TRAVERSALS, edgeTableRow.get(Columns.EDGE_TRAVERSALS,
+                            Integer.class) + 1);
                 }
             }
             prevNode = currentNode;
