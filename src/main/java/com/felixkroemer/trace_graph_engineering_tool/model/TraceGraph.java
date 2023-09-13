@@ -13,7 +13,7 @@ public class TraceGraph {
 
     private final CyNetwork network;
     private ParameterDiscretizationModel pdm;
-    private CyTable rawDataTable;
+    private CyTable sourceTable;
     private CyTable nodeTable;
     private CyTable edgeTable;
     private Map<Long, Long> suidHashMapping;
@@ -21,7 +21,7 @@ public class TraceGraph {
     public TraceGraph(CyNetworkFactory networkFactory, ParameterDiscretizationModel pdm, CyTable rawData) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.pdm = pdm;
-        this.rawDataTable = rawData;
+        this.sourceTable = rawData;
         this.network = networkFactory.createNetwork();
 
         this.network.getRow(network).set(CyNetwork.NAME, pdm.getName());
@@ -48,11 +48,11 @@ public class TraceGraph {
     }
 
     private void initNetwork() {
-        int[] state = new int[this.pdm.getParameterCount()];
+        int[] state = new int[this.pdm.getParameters().size()];
         CyNode prevNode = null;
         CyNode currentNode = null;
         CyRow currentRow = null;
-        for (CyRow sourceRow : rawDataTable.getAllRows()) {
+        for (CyRow sourceRow : sourceTable.getAllRows()) {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
@@ -73,7 +73,7 @@ public class TraceGraph {
                 currentNode = network.addNode();
                 suidHashMapping.put(hash, currentNode.getSUID());
                 currentRow = nodeTable.getRow(currentNode.getSUID());
-                for (int j = 0; j < this.pdm.getParameterCount(); j++) {
+                for (int j = 0; j < this.pdm.getParameters().size(); j++) {
                     currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
                 currentRow.set(Columns.NODE_VISITS, 1);

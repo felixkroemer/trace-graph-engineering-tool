@@ -36,7 +36,7 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
 
         registerService(bundleContext, controller, TraceGraphController.class, new Properties());
         registerService(bundleContext, controller, NetworkAboutToBeDestroyedListener.class, new Properties());
-        registerService(bundleContext, panel, SetCurrentNetworkListener.class, new Properties());
+        registerService(bundleContext, controller, SetCurrentNetworkListener.class, new Properties());
 
         LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
         registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,

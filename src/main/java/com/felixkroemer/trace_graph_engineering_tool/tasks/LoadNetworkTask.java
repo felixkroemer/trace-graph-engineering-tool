@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
@@ -44,9 +45,9 @@ public class LoadNetworkTask extends AbstractTask {
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        ParameterDiscretizationModel pdm = parsePDM();
-        CyTable table = parseCSV(pdm);
-        TraceGraph traceGraph = new TraceGraph(this.networkFactory, pdm, table);
+        ParameterDiscretizationModel dto = parsePDM();
+        CyTable table = parseCSV(dto);
+        TraceGraph traceGraph = new TraceGraph(this.networkFactory, dto, table);
         controller.registerTraceGraph(traceGraph);
     }
 
@@ -54,7 +55,8 @@ public class LoadNetworkTask extends AbstractTask {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
         String pdmString = Files.readString(pdmFile.toPath());
-        return gson.fromJson(pdmString, ParameterDiscretizationModel.class);
+        ParameterDiscretizationModelDTO dto = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
+        return new ParameterDiscretizationModel(dto);
     }
 
     private CyTable parseCSV(ParameterDiscretizationModel pdm) throws Exception {
@@ -63,7 +65,7 @@ public class LoadNetworkTask extends AbstractTask {
             table.createColumn(param.getName(), Double.class, false);
         }
         boolean header = true;
-        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), pdm.getCsv())))) {
+        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), pdm.getCSV())))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (header) {

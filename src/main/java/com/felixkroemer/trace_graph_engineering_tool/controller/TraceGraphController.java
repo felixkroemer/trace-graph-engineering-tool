@@ -3,9 +3,12 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.util.TaskMonitorStub;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
+import org.cytoscape.application.events.SetCurrentNetworkEvent;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
@@ -25,7 +28,6 @@ import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleEvent;
 import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleListener;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +35,8 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentVisualStyleListener {
+public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentVisualStyleListener,
+        SetCurrentNetworkListener {
 
     private final Logger logger;
 
@@ -43,7 +46,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     private CyNetworkViewFactory networkViewFactory;
     private CyNetworkViewManager networkViewManager;
     private CyLayoutAlgorithmManager layoutManager;
-    private TaskManager taskManager;
     private CyApplicationManager applicationManager;
     private VisualMappingManager visualMappingManager;
     private VisualStyleFactory visualStyleFactory;
@@ -60,10 +62,11 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         this.networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkViewManager = registrar.getService(CyNetworkViewManager.class);
         this.layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
-        this.taskManager = registrar.getService(TaskManager.class);
         this.applicationManager = registrar.getService(CyApplicationManager.class);
         this.visualMappingManager = registrar.getService(VisualMappingManager.class);
         this.visualStyleFactory = registrar.getService(VisualStyleFactory.class);
+
+        this.showPanel();
     }
 
     //TODO split up
@@ -158,5 +161,13 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     @Override
     public void handleEvent(SetCurrentVisualStyleEvent e) {
         logger.info(e.toString());
+    }
+
+    @Override
+    public void handleEvent(SetCurrentNetworkEvent e) {
+        if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
+            TraceGraph tg = this.findTraceGraphForNetwork(e.getNetwork());
+            this.panel.setModel(tg);
+        }
     }
 }
