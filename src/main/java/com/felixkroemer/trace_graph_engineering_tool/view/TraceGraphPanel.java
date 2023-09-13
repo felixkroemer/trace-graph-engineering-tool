@@ -30,7 +30,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
     }
 
     public void init() {
-        this.tabs.add("PDM", new PDMPanel());
+        this.tabs.add("PDM", this.pdmPanel);
         this.add(this.tabs, BorderLayout.CENTER);
     }
 

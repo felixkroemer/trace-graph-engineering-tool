@@ -35,9 +35,9 @@ public class PDMPanel extends JPanel {
     }
 
     public void setPDM(ParameterDiscretizationModel pdm) {
-
-        this.pdmList.setModel(pdm);
+        SwingUtilities.invokeLater(() -> {
+            this.pdmList.setModel(pdm);
+        });
     }
-
 
 }
