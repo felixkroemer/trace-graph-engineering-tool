@@ -48,15 +48,19 @@ public class Mappings {
 
         BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
 
-        int stepMedium = (int) Math.round((xMax - xMin) * 0.1);
+        int stepMedium = (int) Math.round((xMax - xMin) * 0.05);
         BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<>(Color.GREEN, Color.GREEN, Color.GREEN);
 
-        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
+        int stepLarge = (int) Math.round((xMax - xMin) * 0.1);
+        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(Color.ORANGE, Color.ORANGE, Color.ORANGE);
+
+        BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
 
 
         mapping.addPoint(xMin, boundarySmall);
         mapping.addPoint(stepMedium, boundaryMedium);
-        mapping.addPoint(xMax, boundaryLarge);
+        mapping.addPoint(stepLarge, boundaryLarge);
+        mapping.addPoint(xMax, boundaryMax);
 
         return mapping;
     }

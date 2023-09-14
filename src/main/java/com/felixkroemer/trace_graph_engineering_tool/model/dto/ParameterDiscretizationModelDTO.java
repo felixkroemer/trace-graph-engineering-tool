@@ -1,7 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.model.dto;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-
 import java.util.List;
 
 public class ParameterDiscretizationModelDTO {
@@ -9,7 +7,7 @@ public class ParameterDiscretizationModelDTO {
     private String version;
     private String csv;
     private String description;
-    private List<Parameter> parameters;
+    private List<ParameterDTO> parameters;
 
     public String getName() {
         return name;
@@ -43,11 +41,11 @@ public class ParameterDiscretizationModelDTO {
         this.description = description;
     }
 
-    public List<Parameter> getParameters() {
+    public List<ParameterDTO> getParameters() {
         return parameters;
     }
 
-    public void setParameters(List<Parameter> parameters) {
+    public void setParameters(List<ParameterDTO> parameters) {
         this.parameters = parameters;
     }
 

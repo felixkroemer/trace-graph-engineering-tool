@@ -22,6 +22,7 @@ public class PDMPanel extends JPanel {
 
         this.pdmList = new JList<>();
         this.pdmList.setLayoutOrientation(JList.VERTICAL);
+        this.pdmList.setCellRenderer(new ParameterCellRenderer());
         this.innerPanel = new JPanel(new BorderLayout());
         this.scrollPane = new JScrollPane(this.innerPanel);
         this.init();
@@ -29,9 +30,8 @@ public class PDMPanel extends JPanel {
 
     private void init() {
         setLayout(new BorderLayout());
-        this.scrollPane.add(pdmList);
-        this.add(this.scrollPane, BorderLayout.CENTER);
         this.innerPanel.add(this.pdmList, BorderLayout.CENTER);
+        this.add(this.scrollPane, BorderLayout.CENTER);
     }
 
     public void setPDM(ParameterDiscretizationModel pdm) {

@@ -1,8 +1,10 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
@@ -17,7 +19,10 @@ public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
         this.version = dto.getVersion();
         this.csv = dto.getCsv();
         this.description = dto.getDescription();
-        this.parameters = dto.getParameters();
+        this.parameters = new ArrayList<>(dto.getParameterCount());
+        for (ParameterDTO param : dto.getParameters()) {
+            this.parameters.add(new Parameter(param));
+        }
     }
 
     public List<Parameter> getParameters() {

@@ -12,9 +12,14 @@ import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 public class TooltipMapping implements PassthroughMapping<CyRow, String> {
 
     public ParameterDiscretizationModel pdm;
+    private int maxLength;
 
     public TooltipMapping(ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
+        this.maxLength = 0;
+        for (Parameter p : pdm.getParameters()) {
+            maxLength = Math.max(p.getName().length(), maxLength);
+        }
     }
 
     @Override
@@ -43,7 +48,8 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
     public String getMappedValue(CyRow row) {
         StringBuilder sb = new StringBuilder();
         for (Parameter p : this.pdm.getParameters()) {
-            sb.append(p.getName()).append(":");
+            sb.append(p.getName());
+            sb.append('\t');
             sb.append(row.get(p.getName(), Integer.class));
             sb.append("\n");
         }
