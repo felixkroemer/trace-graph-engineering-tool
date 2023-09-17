@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -35,18 +34,17 @@ public class PDMPanel extends JPanel {
         this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
 
-    public void setPDM(ParameterDiscretizationModel pdm) {
+    public void registerCallbacks(ParameterDiscretizationModel pdm) {
         SwingUtilities.invokeLater(() -> {
             this.innerPanel.removeAll();
-            TraceGraphController controller = reg.getService(TraceGraphController.class);
             pdm.forEach(p -> {
-                ParameterCell cell = new ParameterCell(p);
+                ParameterCell cell = new ParameterCell(p, reg);
                 p.addObserver(cell);
                 cell.getCheckBox().addItemListener(e -> {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
-                        controller.onParameterEnabled(p);
+                        p.enable();
                     } else {
-                        controller.onParameterDisabled(p);
+                        p.disable();
                     }
                 });
                 this.innerPanel.add(cell);

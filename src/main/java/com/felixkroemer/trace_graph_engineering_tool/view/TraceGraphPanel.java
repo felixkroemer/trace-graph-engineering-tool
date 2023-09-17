@@ -57,7 +57,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
         return "TraceGraphPanel";
     }
 
-    public void setModel(TraceGraph tg) {
-        this.pdmPanel.setPDM(tg.getPDM());
+    public void registerCallbacks(TraceGraph tg) {
+        this.pdmPanel.registerCallbacks(tg.getPDM());
     }
 }

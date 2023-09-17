@@ -33,10 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener {
+public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
+        PropertyChangeListener {
 
     private final Logger logger;
 
@@ -173,7 +176,8 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
                     this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
                 }
                 this.currentNetwork = traceGraph;
-                this.panel.setModel(this.currentNetwork);
+                this.currentNetwork.getPDM().forEach(p -> p.addObserver(this));
+                this.panel.registerCallbacks(this.currentNetwork);
             }
         }
     }
@@ -187,21 +191,18 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         taskManager.execute(iterator);
     }
 
-    public void onParameterDisabled(Parameter param) {
-        param.disable();
-        this.currentNetwork.updateTraceGraph();
-        this.applyWorkingLayout();
-    }
-
-    public void onParameterEnabled(Parameter param) {
-        param.enable();
-        this.currentNetwork.updateTraceGraph();
-        this.applyWorkingLayout();
-    }
-
     public void onBinsChanged(Parameter param, List<Double> bins) {
         param.setBins(bins);
-        this.currentNetwork.updateTraceGraph();
-        this.applyWorkingLayout();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+            case "bins":
+            case "enabled":
+                this.currentNetwork.updateTraceGraph();
+                this.applyWorkingLayout();
+                break;
+        }
     }
 }
