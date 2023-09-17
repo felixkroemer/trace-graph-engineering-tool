@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.LoadNetworkTaskFactory;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.ManualTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.ResetTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
@@ -47,6 +48,10 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
         ResetTaskFactory resetTaskFactory = new ResetTaskFactory(reg);
         registerService(bundleContext, resetTaskFactory, TaskFactory.class, Util.genProperties(Map.of(TITLE, "RESET",
                 IN_TOOL_BAR, "true", MENU_GRAVITY, "4.10", LARGE_ICON_ID, "cy::IMPORT_NET")));
+
+        ManualTaskFactory manualTaskFactory = new ManualTaskFactory(reg);
+        registerService(bundleContext, manualTaskFactory, TaskFactory.class, Util.genProperties(Map.of(TITLE, "MANUAL"
+                , IN_TOOL_BAR, "true", MENU_GRAVITY, "4.11", LARGE_ICON_ID, "cy::IMPORT_NET")));
 
         TooltipMappingFactory tooltipMappingFactory = new TooltipMappingFactory(reg);
         registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,

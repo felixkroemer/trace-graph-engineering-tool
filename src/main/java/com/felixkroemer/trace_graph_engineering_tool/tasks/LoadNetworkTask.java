@@ -10,10 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
-import org.cytoscape.model.CyTableFactory;
+import org.cytoscape.model.*;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
@@ -48,7 +45,8 @@ public class LoadNetworkTask extends AbstractTask {
         ParameterDiscretizationModelDTO dto = parsePDM();
         ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
         CyTable table = parseCSV(dto);
-        TraceGraph traceGraph = new TraceGraph(this.networkFactory, pdm, table);
+        CyNetwork network = networkFactory.createNetwork();
+        TraceGraph traceGraph = new TraceGraph(network, pdm, table);
         controller.registerTraceGraph(traceGraph);
     }
 

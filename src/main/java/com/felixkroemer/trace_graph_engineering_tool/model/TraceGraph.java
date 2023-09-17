@@ -12,7 +12,7 @@ public class TraceGraph {
 
     private final Logger logger;
 
-    private final CyNetwork network;
+    private CyNetwork network;
     private ParameterDiscretizationModel pdm;
     private CyTable sourceTable;
     private CyTable nodeTable;
@@ -20,11 +20,11 @@ public class TraceGraph {
     private Map<Long, Long> suidHashMapping;
     private PropertyChangeSupport pcs;
 
-    public TraceGraph(CyNetworkFactory networkFactory, ParameterDiscretizationModel pdm, CyTable rawData) {
+    public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm, CyTable rawData) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.pdm = pdm;
         this.sourceTable = rawData;
-        this.network = networkFactory.createNetwork();
+        this.network = network;
 
         this.network.getRow(network).set(CyNetwork.NAME, pdm.getName());
         this.nodeTable = this.network.getDefaultNodeTable();
@@ -35,9 +35,7 @@ public class TraceGraph {
     }
 
     private void initTables() {
-        for (Parameter param : this.pdm.getParameters()) {
-            this.nodeTable.createColumn(param.getName(), Integer.class, false);
-        }
+        this.pdm.forEach(p -> this.nodeTable.createColumn(p.getName(), Integer.class, false));
         // cannot set default here because object will be shared
         this.nodeTable.createColumn(Columns.NODE_VISITS, Integer.class, false);
         this.nodeTable.createColumn(Columns.NODE_FREQUENCY, Integer.class, false);
@@ -50,7 +48,7 @@ public class TraceGraph {
     }
 
     private void initNetwork() {
-        int[] state = new int[this.pdm.getParameters().size()];
+        int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
         CyNode currentNode = null;
         CyRow currentRow = null;
@@ -58,7 +56,11 @@ public class TraceGraph {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
-                state[i] = findBucket((Double) values.get(param.getName()), param);
+                if (param.isEnabled()) {
+                    state[i] = findBucket((Double) values.get(param.getName()), param);
+                } else {
+                    state[i] = 0;
+                }
                 i++;
             }
             long hash = Arrays.hashCode(state);
@@ -126,5 +128,11 @@ public class TraceGraph {
     public ParameterDiscretizationModel getPDM() {
         return this.pdm;
     }
-    
+
+    public void updateTraceGraph() {
+        this.network.removeNodes(this.network.getNodeList());
+        suidHashMapping.clear();
+        this.initNetwork();
+    }
+
 }

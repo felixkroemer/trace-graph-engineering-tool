@@ -4,7 +4,6 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Arrays;
 import java.util.List;
 
 public class Parameter {
@@ -36,17 +35,18 @@ public class Parameter {
 
     public void enable() {
         this.enabled = true;
-        pcs.firePropertyChange("parameter", false, true);
+        pcs.firePropertyChange("enabled", false, true);
     }
 
     public void disable() {
         this.enabled = false;
-        pcs.firePropertyChange("parameter", true, false);
-        this.setBins(Arrays.asList(new Double[]{Double.MAX_VALUE}));
+        pcs.firePropertyChange("enabled", true, false);
     }
 
     public void setBins(List<Double> bins) {
-
+        List<Double> oldBins = this.bins;
+        this.bins = bins;
+        pcs.firePropertyChange("bins", oldBins, this.bins);
     }
 
     public void addObserver(PropertyChangeListener l) {

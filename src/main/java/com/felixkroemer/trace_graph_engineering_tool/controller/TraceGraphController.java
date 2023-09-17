@@ -14,6 +14,7 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
@@ -25,10 +26,9 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.*;
-import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleEvent;
-import org.cytoscape.view.vizmap.events.SetCurrentVisualStyleListener;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +36,7 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentVisualStyleListener,
-        SetCurrentNetworkListener {
+public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener {
 
     private final Logger logger;
 
@@ -46,12 +45,14 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     private CyServiceRegistrar registrar;
 
     private CyNetworkManager networkManager;
+    private CyNetworkFactory networkFactory;
     private CyNetworkViewFactory networkViewFactory;
     private CyNetworkViewManager networkViewManager;
     private CyLayoutAlgorithmManager layoutManager;
     private CyApplicationManager applicationManager;
     private VisualMappingManager visualMappingManager;
     private VisualStyleFactory visualStyleFactory;
+
 
     private TraceGraphPanel panel;
 
@@ -62,6 +63,7 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         this.registrar = registrar;
 
         this.networkManager = registrar.getService(CyNetworkManager.class);
+        this.networkFactory = registrar.getService(CyNetworkFactory.class);
         this.networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkViewManager = registrar.getService(CyNetworkViewManager.class);
         this.layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
@@ -146,9 +148,10 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     private TraceGraph findTraceGraphForNetwork(CyNetwork network) {
         int index = -1;
         for (int i = 0; i < traceGraphs.size(); i++) {
-            if (network == traceGraphs.get(i).getNetwork()) ;
-            index = i;
-            break;
+            if (network == traceGraphs.get(i).getNetwork()) {
+                index = i;
+                break;
+            }
         }
         if (index >= 0) {
             return traceGraphs.get(index);
@@ -162,27 +165,43 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     }
 
     @Override
-    public void handleEvent(SetCurrentVisualStyleEvent e) {
-        logger.info(e.toString());
-    }
-
-    @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
             TraceGraph traceGraph = this.findTraceGraphForNetwork(e.getNetwork());
             if (traceGraph != null) {
-                this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
+                if (this.currentNetwork != null) {
+                    this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
+                }
                 this.currentNetwork = traceGraph;
                 this.panel.setModel(this.currentNetwork);
             }
         }
     }
 
+    public void applyWorkingLayout() {
+        CyNetworkView view = applicationManager.getCurrentNetworkView();
+        CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("grid");
+        Object context = layoutFactory.getDefaultLayoutContext();
+        TaskIterator iterator = layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+        TaskManager<?, ?> taskManager = registrar.getService(TaskManager.class);
+        taskManager.execute(iterator);
+    }
+
     public void onParameterDisabled(Parameter param) {
-        logger.info("Param {} disabled", param.getName());
+        param.disable();
+        this.currentNetwork.updateTraceGraph();
+        this.applyWorkingLayout();
     }
 
     public void onParameterEnabled(Parameter param) {
-        logger.info("Param {} enabled", param.getName());
+        param.enable();
+        this.currentNetwork.updateTraceGraph();
+        this.applyWorkingLayout();
+    }
+
+    public void onBinsChanged(Parameter param, List<Double> bins) {
+        param.setBins(bins);
+        this.currentNetwork.updateTraceGraph();
+        this.applyWorkingLayout();
     }
 }

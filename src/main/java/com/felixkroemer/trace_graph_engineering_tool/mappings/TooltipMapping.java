@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.mappings;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyRow;
@@ -17,9 +16,8 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
     public TooltipMapping(ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
         this.maxLength = 0;
-        for (Parameter p : pdm.getParameters()) {
-            maxLength = Math.max(p.getName().length(), maxLength);
-        }
+        pdm.forEach(p -> maxLength = Math.max(p.getName().length(), maxLength));
+
     }
 
     @Override
@@ -47,12 +45,12 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
     @Override
     public String getMappedValue(CyRow row) {
         StringBuilder sb = new StringBuilder();
-        for (Parameter p : this.pdm.getParameters()) {
+        this.pdm.forEach(p -> {
             sb.append(p.getName());
             sb.append('\t');
             sb.append(row.get(p.getName(), Integer.class));
             sb.append("\n");
-        }
+        });
         return sb.toString();
     }
 }

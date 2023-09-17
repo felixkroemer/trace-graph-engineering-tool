@@ -21,12 +21,12 @@ public class ParameterDiscretizationModel {
     private List<Parameter> parameters;
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
+        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.name = dto.getName();
         this.version = dto.getVersion();
         this.csv = dto.getCsv();
         this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         for (ParameterDTO param : dto.getParameters()) {
             this.parameters.add(new Parameter(param));
         }
@@ -34,6 +34,10 @@ public class ParameterDiscretizationModel {
 
     public List<Parameter> getParameters() {
         return this.parameters;
+    }
+
+    public int getParameterCount() {
+        return this.parameters.size();
     }
 
     public void forEach(Consumer<Parameter> consumer) {
@@ -75,6 +79,16 @@ public class ParameterDiscretizationModel {
                     logger.warn("Parameter {} is already disabled", name);
                 }
             }
+        } else {
+            throw new IllegalArgumentException(String.format("Parameter %s is unknown.", name));
+        }
+    }
+
+    public void setBins(String name, List<Double> bins) {
+        Parameter p = this.getParameter(name);
+        if (p != null) {
+            p.setBins(bins);
+
         } else {
             throw new IllegalArgumentException(String.format("Parameter %s is unknown.", name));
         }
