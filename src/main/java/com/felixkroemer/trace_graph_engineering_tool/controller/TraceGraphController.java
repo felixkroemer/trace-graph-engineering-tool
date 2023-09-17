@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.util.TaskMonitorStub;
@@ -41,7 +42,9 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     private final Logger logger;
 
     private List<TraceGraph> traceGraphs;
+    private TraceGraph currentNetwork;
     private CyServiceRegistrar registrar;
+
     private CyNetworkManager networkManager;
     private CyNetworkViewFactory networkViewFactory;
     private CyNetworkViewManager networkViewManager;
@@ -55,9 +58,9 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraphPanel panel) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.panel = panel;
-
         this.traceGraphs = new LinkedList<>();
         this.registrar = registrar;
+
         this.networkManager = registrar.getService(CyNetworkManager.class);
         this.networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkViewManager = registrar.getService(CyNetworkViewManager.class);
@@ -166,8 +169,20 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
-            TraceGraph tg = this.findTraceGraphForNetwork(e.getNetwork());
-            this.panel.setModel(tg);
+            TraceGraph traceGraph = this.findTraceGraphForNetwork(e.getNetwork());
+            if (traceGraph != null) {
+                this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
+                this.currentNetwork = traceGraph;
+                this.panel.setModel(this.currentNetwork);
+            }
         }
+    }
+
+    public void onParameterDisabled(Parameter param) {
+        logger.info("Param {} disabled", param.getName());
+    }
+
+    public void onParameterEnabled(Parameter param) {
+        logger.info("Param {} enabled", param.getName());
     }
 }

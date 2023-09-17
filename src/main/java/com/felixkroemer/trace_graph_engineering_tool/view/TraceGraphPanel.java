@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +16,14 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
     private Logger logger;
     private JTabbedPane tabs;
     private PDMPanel pdmPanel;
+    private CyServiceRegistrar reg;
 
-    public TraceGraphPanel() {
+    public TraceGraphPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.tabs = new JTabbedPane(JTabbedPane.BOTTOM);
-        this.pdmPanel = new PDMPanel();
+        this.pdmPanel = new PDMPanel(reg);
+        this.reg = reg;
         init();
     }
 

@@ -31,7 +31,7 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
 
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
-        TraceGraphPanel panel = new TraceGraphPanel();
+        TraceGraphPanel panel = new TraceGraphPanel(reg);
         TraceGraphController controller = new TraceGraphController(reg, panel);
 
         registerService(bundleContext, controller, TraceGraphController.class, new Properties());

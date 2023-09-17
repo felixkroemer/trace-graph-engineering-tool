@@ -2,12 +2,18 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import org.cytoscape.application.CyUserLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
+public class ParameterDiscretizationModel {
+
+    private final Logger logger;
+
     private String name;
     private String version;
     private String csv;
@@ -20,6 +26,7 @@ public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
         this.csv = dto.getCsv();
         this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
+        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         for (ParameterDTO param : dto.getParameters()) {
             this.parameters.add(new Parameter(param));
         }
@@ -27,6 +34,12 @@ public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
 
     public List<Parameter> getParameters() {
         return this.parameters;
+    }
+
+    public void forEach(Consumer<Parameter> consumer) {
+        for (Parameter param : this.parameters) {
+            consumer.accept(param);
+        }
     }
 
     public String getCSV() {
@@ -37,14 +50,34 @@ public class ParameterDiscretizationModel extends AbstractListModel<Parameter> {
         return this.name;
     }
 
-    @Override
-    public int getSize() {
-        return parameters.size();
+    public Parameter getParameter(String name) {
+        for (Parameter p : this.parameters) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
     }
 
-    @Override
-    public Parameter getElementAt(int index) {
-        return this.parameters.get(index);
+    public void setParameterEnabled(String name, boolean enabled) throws IllegalArgumentException {
+        Parameter p = this.getParameter(name);
+        if (p != null) {
+            if (p.isEnabled()) {
+                if (!enabled) {
+                    p.enable();
+                } else {
+                    logger.warn("Parameter {} is already enabled", name);
+                }
+            } else {
+                if (enabled) {
+                    p.disable();
+                } else {
+                    logger.warn("Parameter {} is already disabled", name);
+                }
+            }
+        } else {
+            throw new IllegalArgumentException(String.format("Parameter %s is unknown.", name));
+        }
     }
 }
 

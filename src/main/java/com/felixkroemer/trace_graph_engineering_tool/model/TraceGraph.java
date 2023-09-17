@@ -5,6 +5,7 @@ import org.cytoscape.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 
 public class TraceGraph {
@@ -17,6 +18,7 @@ public class TraceGraph {
     private CyTable nodeTable;
     private CyTable edgeTable;
     private Map<Long, Long> suidHashMapping;
+    private PropertyChangeSupport pcs;
 
     public TraceGraph(CyNetworkFactory networkFactory, ParameterDiscretizationModel pdm, CyTable rawData) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -56,7 +58,7 @@ public class TraceGraph {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
-                state[i] = getBucket((Double) values.get(param.getName()), param);
+                state[i] = findBucket((Double) values.get(param.getName()), param);
                 i++;
             }
             long hash = Arrays.hashCode(state);
@@ -108,7 +110,7 @@ public class TraceGraph {
         return null;
     }
 
-    private int getBucket(Double value, Parameter param) {
+    private int findBucket(Double value, Parameter param) {
         for (int i = 0; i < param.getBins().size(); i++) {
             if (value < param.getBins().get(i)) {
                 return i;
@@ -124,4 +126,5 @@ public class TraceGraph {
     public ParameterDiscretizationModel getPDM() {
         return this.pdm;
     }
+    
 }

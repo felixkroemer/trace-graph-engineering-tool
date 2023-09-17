@@ -2,9 +2,9 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,27 +45,28 @@ public class LoadNetworkTask extends AbstractTask {
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        ParameterDiscretizationModel dto = parsePDM();
+        ParameterDiscretizationModelDTO dto = parsePDM();
+        ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
         CyTable table = parseCSV(dto);
-        TraceGraph traceGraph = new TraceGraph(this.networkFactory, dto, table);
+        TraceGraph traceGraph = new TraceGraph(this.networkFactory, pdm, table);
         controller.registerTraceGraph(traceGraph);
     }
 
-    private ParameterDiscretizationModel parsePDM() throws Exception {
+    private ParameterDiscretizationModelDTO parsePDM() throws Exception {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
         String pdmString = Files.readString(pdmFile.toPath());
         ParameterDiscretizationModelDTO dto = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
-        return new ParameterDiscretizationModel(dto);
+        return dto;
     }
 
-    private CyTable parseCSV(ParameterDiscretizationModel pdm) throws Exception {
+    private CyTable parseCSV(ParameterDiscretizationModelDTO dto) throws Exception {
         CyTable table = tableFactory.createTable("data", Columns.SOURCE_ID, Integer.class, true, true);
-        for (Parameter param : pdm.getParameters()) {
+        for (ParameterDTO param : dto.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }
         boolean header = true;
-        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), pdm.getCSV())))) {
+        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), dto.getCsv())))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (header) {
@@ -76,9 +77,9 @@ public class LoadNetworkTask extends AbstractTask {
                 for (int i = 1; i < line.length; i++) {
                     // csv has some empty entries
                     if (!line[i].isEmpty()) {
-                        row.set(pdm.getParameters().get(i - 1).getName(), Double.parseDouble(line[i]));
+                        row.set(dto.getParameters().get(i - 1).getName(), Double.parseDouble(line[i]));
                     } else {
-                        row.set(pdm.getParameters().get(i - 1).getName(), 0.0);
+                        row.set(dto.getParameters().get(i - 1).getName(), 0.0);
                     }
                 }
             }
