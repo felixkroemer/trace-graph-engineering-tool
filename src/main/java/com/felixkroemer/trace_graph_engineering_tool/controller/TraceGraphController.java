@@ -169,16 +169,16 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
 
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
+        if (this.currentNetwork != null) {
+            this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
+        }
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
-            TraceGraph traceGraph = this.findTraceGraphForNetwork(e.getNetwork());
-            if (traceGraph != null) {
-                if (this.currentNetwork != null) {
-                    this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
-                }
-                this.currentNetwork = traceGraph;
-                this.currentNetwork.getPDM().forEach(p -> p.addObserver(this));
-                this.panel.registerCallbacks(this.currentNetwork);
-            }
+            this.currentNetwork = this.findTraceGraphForNetwork(e.getNetwork());
+            this.currentNetwork.getPDM().forEach(p -> p.addObserver(this));
+            this.panel.registerCallbacks(this.currentNetwork);
+        } else {
+            this.currentNetwork = null;
+            this.panel.clear();
         }
     }
 

@@ -51,4 +51,8 @@ public class PDMPanel extends JPanel {
             });
         });
     }
+
+    public void clear() {
+        this.innerPanel.removeAll();
+    }
 }
