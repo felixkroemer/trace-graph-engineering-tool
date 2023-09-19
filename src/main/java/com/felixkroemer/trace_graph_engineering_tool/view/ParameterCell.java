@@ -38,9 +38,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             SwingUtilities.invokeLater(() -> {
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
-                d.setContentPane(new SelectBinsPanel());
+                d.setContentPane(new SelectBinsPanel(parameter));
                 d.setModalityType(APPLICATION_MODAL);
-                int res = d.showDialog();
+                d.showDialog();
                 // parameter.setBins(...)
             });
         });

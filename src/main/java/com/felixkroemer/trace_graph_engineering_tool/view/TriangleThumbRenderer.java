@@ -10,9 +10,9 @@ import java.awt.*;
 
 public final class TriangleThumbRenderer extends JComponent implements ThumbRenderer {
 
-    private final Color FOCUS_COLOR = Color.BLUE;
-    private final Color SELECTION_COLOR = Color.GREEN;
-    private final Color DEFAULT_COLOR = Color.CYAN;
+    private final Color FOCUS_COLOR = Color.GRAY;
+    private final Color SELECTION_COLOR = Color.BLACK;
+    private final Color DEFAULT_COLOR = Color.BLACK;
 
     private static final int STROKE_WIDTH = 1;
 

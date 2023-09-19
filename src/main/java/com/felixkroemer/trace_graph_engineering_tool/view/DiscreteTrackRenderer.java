@@ -14,19 +14,13 @@ import java.util.List;
 
 public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
-    private static final Dimension MIN_SIZE = new Dimension(200, 100);
     private static final int ICON_SIZE = 32;
     private static final int THUMB_WIDTH = 12;
-    private static final int V_PADDING = 20;
 
     static final BasicStroke STROKE1 = new BasicStroke(1.0f);
-    static final Color BORDER_COLOR = Color.GREEN;
-    static final Color LABEL_COLOR = Color.BLUE;
-    static final Color BACKGROUND_COLOR = Color.magenta;
-
-    //private int smallIconSize = 20;
-    private int trackHeight = 70;
-    private int arrowBarYPosition = trackHeight + 50;
+    static final Color BORDER_COLOR = Color.BLACK;
+    static final Color LABEL_COLOR = Color.BLACK;
+    static final Color BACKGROUND_COLOR = Color.WHITE;
 
     private final String title;
 
@@ -34,8 +28,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     public DiscreteTrackRenderer() {
         this.title = "Sample Title";
-        this.setBackground(Color.yellow);
-        this.setMinimumSize(MIN_SIZE);
     }
 
     @Override
@@ -50,15 +42,16 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         final Graphics2D g = (Graphics2D) gfx;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        trackHeight = slider.getHeight() - 100;
-        arrowBarYPosition = trackHeight + 50;
+        //private int smallIconSize = 20;
+        int trackHeight = slider.getHeight() - 100;
+        int arrowBarYPosition = trackHeight + 50;
 
         final int trackWidth = slider.getWidth() - THUMB_WIDTH;
         g.translate(THUMB_WIDTH / 2, 12);
 
         final double minValue = 0;
-        final double maxValue = 100;
-        final double valueRange = 100;
+        final double maxValue = 1;
+        final double valueRange = 1;
         final List<Thumb<Integer>> stops = slider.getModel().getSortedThumbs();
         final int numPoints = stops.size();
 
@@ -124,7 +117,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
         // Draw Icons
         for (i = 0; i < stops.size(); i++) {
-            int newX = (int) (trackWidth * (fractions[i] / 100));
+            int newX = (int) (trackWidth * fractions[i]);
 
             p2.setLocation(newX, 5);
             g.setColor(LABEL_COLOR);
@@ -135,7 +128,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
             g.setColor(LABEL_COLOR);
             //g.setFont(SMALL_FONT);
 
-            final Float curPositionValue = ((Number) (((fractions[i] / 100) * valueRange) + minValue)).floatValue();
+            final Float curPositionValue = ((Number) ((fractions[i] * valueRange) + minValue)).floatValue();
             final String valueString = String.format("%.5f", curPositionValue);
 
             int flipLimit = 90;

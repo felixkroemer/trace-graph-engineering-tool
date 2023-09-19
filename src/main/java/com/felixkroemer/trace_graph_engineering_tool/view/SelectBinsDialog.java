@@ -14,10 +14,10 @@ public class SelectBinsDialog extends JDialog {
 
     private Logger logger;
 
-    public int showDialog() {
+    public void showDialog() {
         this.pack();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
-        return 4;
     }
 
 }
