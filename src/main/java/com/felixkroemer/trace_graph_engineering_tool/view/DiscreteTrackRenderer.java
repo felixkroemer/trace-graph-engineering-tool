@@ -22,12 +22,14 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     static final Color LABEL_COLOR = Color.BLACK;
     static final Color BACKGROUND_COLOR = Color.WHITE;
 
-    private final String title;
+    private float minValue;
+    private float maxValue;
 
     private JXMultiThumbSlider<Integer> slider;
 
-    public DiscreteTrackRenderer() {
-        this.title = "Sample Title";
+    public DiscreteTrackRenderer(float minValue, float maxValue) {
+        this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 
     @Override
@@ -49,19 +51,14 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         final int trackWidth = slider.getWidth() - THUMB_WIDTH;
         g.translate(THUMB_WIDTH / 2, 12);
 
-        final double minValue = 0;
-        final double maxValue = 1;
-        final double valueRange = 1;
         final List<Thumb<Integer>> stops = slider.getModel().getSortedThumbs();
         final int numPoints = stops.size();
 
         // set up the data for the gradient
         final float[] fractions = new float[numPoints];
-        final Object[] objectValues = new Object[numPoints];
         int i = 0;
 
         for (Thumb<Integer> thumb : stops) {
-            objectValues[i] = thumb.getObject();
             fractions[i] = thumb.getPosition();
             i++;
         }
@@ -90,10 +87,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         final String maxStr = "Max=" + maxValue;
         int strWidth = SwingUtilities.computeStringWidth(g.getFontMetrics(), maxStr);
         g.drawString(maxStr, trackWidth - strWidth - 26, arrowBarYPosition + 35);
-
-        g.setColor(LABEL_COLOR);
-        strWidth = SwingUtilities.computeStringWidth(g.getFontMetrics(), title);
-        g.drawString(title, (trackWidth / 2) - (strWidth / 2), arrowBarYPosition + 35);
 
         if (numPoints == 0) {
             g.setColor(BORDER_COLOR);
@@ -128,6 +121,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
             g.setColor(LABEL_COLOR);
             //g.setFont(SMALL_FONT);
 
+            final float valueRange = maxValue - minValue;
             final Float curPositionValue = ((Number) ((fractions[i] * valueRange) + minValue)).floatValue();
             final String valueString = String.format("%.5f", curPositionValue);
 

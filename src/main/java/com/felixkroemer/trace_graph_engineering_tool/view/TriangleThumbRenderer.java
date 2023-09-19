@@ -64,14 +64,9 @@ public final class TriangleThumbRenderer extends JComponent implements ThumbRend
         this.selectedIndex = slider.getSelectedIndex();
         this.currentIndex = index;
 
-        final Object currentValue = slider.getModel().getThumbAt(index).getObject();
+        if (selected || selectedIndex == currentIndex) setForeground(FOCUS_COLOR);
+        else setForeground(DEFAULT_COLOR);
 
-        if (currentValue.getClass() == Color.class) {
-            setForeground((Color) currentValue);
-        } else {
-            if (selected || selectedIndex == currentIndex) setForeground(FOCUS_COLOR);
-            else setForeground(DEFAULT_COLOR);
-        }
 
         return this;
     }
