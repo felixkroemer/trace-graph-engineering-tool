@@ -129,9 +129,12 @@ public class TraceGraph {
         return this.pdm;
     }
 
-    public void updateTraceGraph() {
+    public void clearNetwork() {
         this.network.removeNodes(this.network.getNodeList());
         suidHashMapping.clear();
+    }
+
+    public void reinitNetwork() {
         this.initNetwork();
     }
 

@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoadNetworkTask extends AbstractTask {
 
@@ -43,8 +46,16 @@ public class LoadNetworkTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         ParameterDiscretizationModelDTO dto = parsePDM();
-        ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
         CyTable table = parseCSV(dto);
+        Map<String, Double[]> minMaxValues = new HashMap<>();
+        dto.getParameters().forEach(p -> {
+            double max = table.getAllRows().stream().max(Comparator.comparingDouble(o -> o.get(p.getName(),
+                    Double.class))).get().get(p.getName(), Double.class);
+            double min = table.getAllRows().stream().min(Comparator.comparingDouble(o -> o.get(p.getName(),
+                    Double.class))).get().get(p.getName(), Double.class);
+            minMaxValues.put(p.getName(), new Double[]{max, min});
+        });
+        ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto, minMaxValues);
         CyNetwork network = networkFactory.createNetwork();
         TraceGraph traceGraph = new TraceGraph(network, pdm, table);
         controller.registerTraceGraph(traceGraph);

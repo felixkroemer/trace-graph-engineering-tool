@@ -45,7 +45,7 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
     @Override
     public String getMappedValue(CyRow row) {
         StringBuilder sb = new StringBuilder();
-        this.pdm.forEach(p -> sb.append(String.format("%-20s%4d\n", p.getName(), row.get(p.getName(), Integer.class)).replace(" ", "_")));
+        this.pdm.forEach(p -> sb.append(String.format("%-20s%4d\n", p.getName(), row.get(p.getName(), Integer.class))));
         return sb.toString();
     }
 }

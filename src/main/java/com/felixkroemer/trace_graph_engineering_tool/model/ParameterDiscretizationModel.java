@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ParameterDiscretizationModel {
@@ -20,7 +21,7 @@ public class ParameterDiscretizationModel {
     private String description;
     private List<Parameter> parameters;
 
-    public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
+    public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto, Map<String, Double[]> minMaxValues) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.name = dto.getName();
         this.version = dto.getVersion();
@@ -28,7 +29,7 @@ public class ParameterDiscretizationModel {
         this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO param : dto.getParameters()) {
-            this.parameters.add(new Parameter(param));
+            this.parameters.add(new Parameter(param, minMaxValues.get(param.getName())));
         }
     }
 

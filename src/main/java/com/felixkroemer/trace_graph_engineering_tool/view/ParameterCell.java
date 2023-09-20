@@ -41,11 +41,12 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 d.setContentPane(new SelectBinsPanel(parameter));
                 d.setModalityType(APPLICATION_MODAL);
                 d.showDialog();
-                // parameter.setBins(...)
             });
         });
         this.add(this.editButton, BorderLayout.EAST);
-        this.setPreferredSize(new Dimension(getPreferredSize().height, getPreferredSize().height));
+
+        this.label.setEnabled(parameter.isEnabled());
+        this.editButton.setEnabled(parameter.isEnabled());
     }
 
     public JCheckBox getCheckBox() {

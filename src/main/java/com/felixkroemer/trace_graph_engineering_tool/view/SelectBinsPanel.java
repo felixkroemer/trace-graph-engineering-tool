@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class SelectBinsPanel extends JPanel {
@@ -52,9 +51,8 @@ public class SelectBinsPanel extends JPanel {
         this.confirmButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
             List<Float> positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
-            double maxValue = Collections.max(this.bins);
-            double minValue = Collections.min(this.bins);
-            List<Double> newBuckets = positions.stream().map(p -> (p * (maxValue - minValue)) + minValue).toList();
+            List<Double> newBuckets =
+                    positions.stream().map(p -> (p * (param.getMaximum() - param.getMinimum())) + param.getMinimum()).toList();
             this.param.setBins(newBuckets);
         });
 
@@ -67,15 +65,13 @@ public class SelectBinsPanel extends JPanel {
 
     public void initSlider() {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
-        double minValue = Collections.min(this.bins);
-        double maxValue = Collections.max(this.bins);
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
-        this.slider.setTrackRenderer(new DiscreteTrackRenderer((float) minValue, (float) maxValue));
+        this.slider.setTrackRenderer(new DiscreteTrackRenderer((float) param.getMinimum(), (float) param.getMaximum()));
         this.add(slider, BorderLayout.CENTER);
 
         for (double bin : this.bins) {
-            this.slider.getModel().addThumb((float) ((bin - minValue) / (maxValue - minValue)), null);
+            this.slider.getModel().addThumb((float) ((bin - param.getMinimum()) / (param.getMaximum() - param.getMinimum())), null);
         }
     }
 }

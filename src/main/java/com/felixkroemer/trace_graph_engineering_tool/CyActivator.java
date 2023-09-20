@@ -56,6 +56,17 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
         TooltipMappingFactory tooltipMappingFactory = new TooltipMappingFactory(reg);
         registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,
                 Util.genProperties(Map.of("service.type", "factory", "mapping.type", "tooltip")));
+
+        registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
+                , TraceGraphController.class);
+
+    }
+
+    public void handleControllerDeregistration(TraceGraphController controller, Map<Object, Object> serviceProps) {
+        controller.clearTraceGraphs();
+    }
+
+    public void handleControllerRegistration(TraceGraphController controller, Map<Object, Object> serviceProps) {
     }
 
     @Override

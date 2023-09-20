@@ -26,9 +26,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.*;
-import org.cytoscape.work.Task;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,9 +184,9 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         CyNetworkView view = applicationManager.getCurrentNetworkView();
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("grid");
         Object context = layoutFactory.getDefaultLayoutContext();
-        TaskIterator iterator = layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
-        TaskManager<?, ?> taskManager = registrar.getService(TaskManager.class);
-        taskManager.execute(iterator);
+        var taskIterator = layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+        TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
+        manager.execute(taskIterator);
     }
 
     public void onBinsChanged(Parameter param, List<Double> bins) {
@@ -200,9 +198,27 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         switch (evt.getPropertyName()) {
             case "bins":
             case "enabled":
-                this.currentNetwork.updateTraceGraph();
-                this.applyWorkingLayout();
+                TaskIterator iterator = new TaskIterator(new AbstractTask() {
+                    @Override
+                    public void run(TaskMonitor taskMonitor) throws Exception {
+                        currentNetwork.clearNetwork();
+                        currentNetwork.reinitNetwork();
+                    }
+                });
+                // throws weird error if run asynchronously
+                // runs on awt event thread
+                // TODO: check if running async is possible
+                var taskManager = registrar.getService(SynchronousTaskManager.class);
+                taskManager.execute(iterator);
+                applyWorkingLayout();
                 break;
+        }
+    }
+
+    public void clearTraceGraphs() {
+        for (var tg : this.traceGraphs) {
+            //network destroyed handler will delete it from this.traceGraphs
+            networkManager.destroyNetwork(tg.getNetwork());
         }
     }
 }

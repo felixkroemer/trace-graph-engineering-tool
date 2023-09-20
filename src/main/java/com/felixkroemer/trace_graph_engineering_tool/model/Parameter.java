@@ -12,13 +12,17 @@ public class Parameter {
     private List<Double> bins;
     private boolean enabled;
     private PropertyChangeSupport pcs;
+    private double minimum;
+    private double maximum;
 
-    public Parameter(ParameterDTO dto) {
+    public Parameter(ParameterDTO dto, Double[] minMax) {
         this.name = dto.getName();
         this.type = dto.getType();
         this.bins = dto.getBins();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
+        this.maximum = minMax[0];
+        this.minimum = minMax[1];
     }
 
     public String getName() {
@@ -56,5 +60,13 @@ public class Parameter {
 
     public void clearObservers() {
         this.pcs = new PropertyChangeSupport(this);
+    }
+
+    public double getMinimum() {
+        return this.minimum;
+    }
+
+    public double getMaximum() {
+        return this.maximum;
     }
 }
