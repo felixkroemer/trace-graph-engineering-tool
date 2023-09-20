@@ -10,7 +10,6 @@ import org.jdesktop.swingx.multislider.TrackRenderer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.List;
 
 
@@ -117,7 +116,18 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.setColor(BACKGROUND_COLOR);
         g.fillRect(0, 5, trackWidth, trackHeight);
 
-        final Point2D point = new Point2D.Float(0, 5);
+        g.setColor(LABEL_COLOR);
+        g.setStroke(STROKE1);
+
+        var positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
+        var newDist =
+                getDistribution(positions.stream().map(f -> f * (param.getMaximum() - param.getMinimum()) + param.getMinimum()).toList());
+
+        String frequency = "" + newDist[0];
+        var width = g.getFontMetrics().stringWidth(frequency);
+        if (width < (int) (trackWidth * stops.get(0).getPosition())) {
+            g.drawString(frequency, (trackWidth * stops.get(0).getPosition()) / 2 - width / 2, trackHeight / 2);
+        }
 
         // Draw Icons
         for (int i = 0; i < stops.size(); i++) {
@@ -129,13 +139,10 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
                 nextX = trackWidth;
             }
 
-            point.setLocation(x, 5);
-            g.setColor(LABEL_COLOR);
-            g.setStroke(STROKE1);
-
             g.drawLine(x, 5, x, trackHeight + 4);
-            String frequency = "" + initialDistribution[i];
-            var width = g.getFontMetrics().stringWidth(frequency);
+
+            frequency = "" + newDist[i + 1];
+            width = g.getFontMetrics().stringWidth(frequency);
             if (width < nextX - x) {
                 g.drawString(frequency, x + (nextX - x) / 2 - width / 2, trackHeight / 2);
             }
@@ -182,6 +189,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.translate(-THUMB_WIDTH / 2, -12);
     }
 
+    @Override
     public JComponent getRendererComponent(JXMultiThumbSlider slider) {
         this.slider = slider;
         return this;
