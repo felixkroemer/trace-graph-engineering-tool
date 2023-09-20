@@ -125,6 +125,10 @@ public class TraceGraph {
         return this.network;
     }
 
+    public CyTable getSourceTable() {
+        return this.sourceTable;
+    }
+
     public ParameterDiscretizationModel getPDM() {
         return this.pdm;
     }

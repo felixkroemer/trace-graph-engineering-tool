@@ -2,6 +2,8 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 // based on org/cytoscape/view/vizmap/gui/internal/view/editor/mappingeditor/DiscreteTrackRenderer.java
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import org.cytoscape.model.CyTable;
 import org.jdesktop.swingx.JXMultiThumbSlider;
 import org.jdesktop.swingx.multislider.Thumb;
 import org.jdesktop.swingx.multislider.TrackRenderer;
@@ -24,12 +26,18 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     private float minValue;
     private float maxValue;
+    private CyTable sourceTable;
+    private Parameter param;
+    private int[] initialDistribution;
 
-    private JXMultiThumbSlider<Integer> slider;
+    private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue) {
+    public DiscreteTrackRenderer(float minValue, float maxValue, CyTable sourceTable, Parameter param) {
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.sourceTable = sourceTable;
+        this.param = param;
+        this.initialDistribution = getDistribution(param.getBins());
     }
 
     @Override
@@ -38,30 +46,38 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         paintComponent(g);
     }
 
+    private int[] getDistribution(List<Double> bins) {
+        int[] dist = new int[bins.size() + 1];
+        this.sourceTable.getAllRows().forEach(row -> {
+            double value = row.get(param.getName(), Double.class);
+            int i = 0;
+            for (double d : bins) {
+                if (value <= d) {
+                    dist[i]++;
+                    break;
+                }
+                i++;
+            }
+            if (value > bins.get(bins.size() - 1)) {
+                dist[bins.size()]++;
+            }
+        });
+        return dist;
+    }
+
     @Override
     protected void paintComponent(Graphics gfx) {
         // Turn AA on
         final Graphics2D g = (Graphics2D) gfx;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        //private int smallIconSize = 20;
         int trackHeight = slider.getHeight() - 100;
         int arrowBarYPosition = trackHeight + 50;
 
         final int trackWidth = slider.getWidth() - THUMB_WIDTH;
         g.translate(THUMB_WIDTH / 2, 12);
 
-        final List<Thumb<Integer>> stops = slider.getModel().getSortedThumbs();
-        final int numPoints = stops.size();
-
-        // set up the data for the gradient
-        final float[] fractions = new float[numPoints];
-        int i = 0;
-
-        for (Thumb<Integer> thumb : stops) {
-            fractions[i] = thumb.getPosition();
-            i++;
-        }
+        final List<Thumb<Void>> stops = slider.getModel().getSortedThumbs();
 
         // Draw arrow
         g.setStroke(STROKE1);
@@ -78,7 +94,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.drawLine(0, arrowBarYPosition, 15, arrowBarYPosition - 30);
         g.drawLine(15, arrowBarYPosition - 30, 25, arrowBarYPosition - 30);
 
-        //g.setFont(SMALL_FONT);
         g.drawString("Min=" + minValue, 28, arrowBarYPosition - 25);
 
         g.drawLine(trackWidth, arrowBarYPosition, trackWidth - 15, arrowBarYPosition + 30);
@@ -88,7 +103,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         int strWidth = SwingUtilities.computeStringWidth(g.getFontMetrics(), maxStr);
         g.drawString(maxStr, trackWidth - strWidth - 26, arrowBarYPosition + 35);
 
-        if (numPoints == 0) {
+        if (stops.isEmpty()) {
             g.setColor(BORDER_COLOR);
             g.setStroke(new BasicStroke(1.5f));
             g.drawRect(0, 5, trackWidth, trackHeight);
@@ -102,69 +117,63 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.setColor(BACKGROUND_COLOR);
         g.fillRect(0, 5, trackWidth, trackHeight);
 
-        final Point2D p1 = new Point2D.Float(0, 5);
-        final Point2D p2 = new Point2D.Float(0, 5);
-
-        int iconLocX;
-        int iconLocY;
+        final Point2D point = new Point2D.Float(0, 5);
 
         // Draw Icons
-        for (i = 0; i < stops.size(); i++) {
-            int newX = (int) (trackWidth * fractions[i]);
+        for (int i = 0; i < stops.size(); i++) {
+            int x = (int) (trackWidth * stops.get(i).getPosition());
+            int nextX = x;
+            if (i < stops.size() - 1) {
+                nextX = (int) (trackWidth * stops.get(i + 1).getPosition());
+            } else {
+                nextX = trackWidth;
+            }
 
-            p2.setLocation(newX, 5);
+            point.setLocation(x, 5);
             g.setColor(LABEL_COLOR);
             g.setStroke(STROKE1);
 
-            g.drawLine(newX, 5, newX, trackHeight + 4);
+            g.drawLine(x, 5, x, trackHeight + 4);
+            String frequency = "" + initialDistribution[i];
+            var width = g.getFontMetrics().stringWidth(frequency);
+            if (width < nextX - x) {
+                g.drawString(frequency, x + (nextX - x) / 2 - width / 2, trackHeight / 2);
+            }
 
-            g.setColor(LABEL_COLOR);
-            //g.setFont(SMALL_FONT);
 
             final float valueRange = maxValue - minValue;
-            final Float curPositionValue = ((Number) ((fractions[i] * valueRange) + minValue)).floatValue();
+            final Float curPositionValue =
+                    ((Number) ((stops.get(i).getPosition() * valueRange) + minValue)).floatValue();
             final String valueString = String.format("%.5f", curPositionValue);
 
             int flipLimit = 90;
-            int borderVal = trackWidth - newX;
+            int borderVal = trackWidth - x;
 
             if (((i % 2) == 0) && (flipLimit < borderVal)) {
-                g.drawLine(newX, arrowBarYPosition, newX + 20, arrowBarYPosition - 15);
-                g.drawLine(newX + 20, arrowBarYPosition - 15, newX + 30, arrowBarYPosition - 15);
+                g.drawLine(x, arrowBarYPosition, x + 20, arrowBarYPosition - 15);
+                g.drawLine(x + 20, arrowBarYPosition - 15, x + 30, arrowBarYPosition - 15);
                 g.setColor(LABEL_COLOR);
-                g.drawString(valueString, newX + 33, arrowBarYPosition - 11);
+                g.drawString(valueString, x + 33, arrowBarYPosition - 11);
             } else if (((i % 2) == 1) && (flipLimit < borderVal)) {
-                g.drawLine(newX, arrowBarYPosition, newX + 20, arrowBarYPosition + 15);
-                g.drawLine(newX + 20, arrowBarYPosition + 15, newX + 30, arrowBarYPosition + 15);
+                g.drawLine(x, arrowBarYPosition, x + 20, arrowBarYPosition + 15);
+                g.drawLine(x + 20, arrowBarYPosition + 15, x + 30, arrowBarYPosition + 15);
                 g.setColor(LABEL_COLOR);
-                g.drawString(valueString, newX + 33, arrowBarYPosition + 19);
+                g.drawString(valueString, x + 33, arrowBarYPosition + 19);
             } else if (((i % 2) == 0) && (flipLimit >= borderVal)) {
-                g.drawLine(newX, arrowBarYPosition, newX - 20, arrowBarYPosition - 15);
-                g.drawLine(newX - 20, arrowBarYPosition - 15, newX - 30, arrowBarYPosition - 15);
+                g.drawLine(x, arrowBarYPosition, x - 20, arrowBarYPosition - 15);
+                g.drawLine(x - 20, arrowBarYPosition - 15, x - 30, arrowBarYPosition - 15);
                 g.setColor(LABEL_COLOR);
-                g.drawString(valueString, newX - 90, arrowBarYPosition - 11);
+                g.drawString(valueString, x - 90, arrowBarYPosition - 11);
             } else {
-                g.drawLine(newX, arrowBarYPosition, newX - 20, arrowBarYPosition + 15);
-                g.drawLine(newX - 20, arrowBarYPosition + 15, newX - 30, arrowBarYPosition + 15);
+                g.drawLine(x, arrowBarYPosition, x - 20, arrowBarYPosition + 15);
+                g.drawLine(x - 20, arrowBarYPosition + 15, x - 30, arrowBarYPosition + 15);
                 g.setColor(LABEL_COLOR);
-                g.drawString(valueString, newX - 90, arrowBarYPosition + 19);
+                g.drawString(valueString, x - 90, arrowBarYPosition + 19);
             }
 
             g.setColor(LABEL_COLOR);
-            g.fillOval(newX - 3, arrowBarYPosition - 3, 6, 6);
-
-            iconLocX = (int) (p2.getX() - ((p2.getX() - p1.getX()) / 2 + ICON_SIZE / 2));
-            iconLocY = (int) (trackHeight / 2 - ICON_SIZE / 2 + p2.getY());
-
-            p1.setLocation(p2);
+            g.fillOval(x - 3, arrowBarYPosition - 3, 6, 6);
         }
-
-        // Draw last region (above region)
-        p2.setLocation(trackWidth, 5);
-
-        iconLocX = (int) (p2.getX() - ((p2.getX() - p1.getX()) / 2 + ICON_SIZE / 2));
-        iconLocY = (int) (trackHeight / 2 - ICON_SIZE / 2 + p2.getY());
-
 
         g.setColor(BORDER_COLOR);
         g.setStroke(new BasicStroke(1.5f));

@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
@@ -36,9 +37,11 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.editButton.setFont(iconManager.getIconFont(14.0f));
         this.editButton.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
+                var controller = reg.getService(TraceGraphController.class);
+                var sourceTable = controller.getActiveTraceGraph().getSourceTable();
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
-                d.setContentPane(new SelectBinsPanel(parameter));
+                d.setContentPane(new SelectBinsPanel(parameter, sourceTable));
                 d.setModalityType(APPLICATION_MODAL);
                 d.showDialog();
             });
