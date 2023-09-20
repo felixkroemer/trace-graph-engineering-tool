@@ -13,18 +13,18 @@ import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyRow;
+import org.cytoscape.model.*;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
+import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
 import org.cytoscape.view.vizmap.*;
 import org.cytoscape.work.*;
 import org.slf4j.Logger;
@@ -33,29 +33,29 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
+
 public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
-        PropertyChangeListener {
+        PropertyChangeListener, SelectedNodesAndEdgesListener {
 
     private final Logger logger;
 
     private List<TraceGraph> traceGraphs;
-    private TraceGraph currentNetwork;
+    private TraceGraph currentTraceGraph;
     private CyServiceRegistrar registrar;
-
     private CyNetworkManager networkManager;
-    private CyNetworkFactory networkFactory;
     private CyNetworkViewFactory networkViewFactory;
     private CyNetworkViewManager networkViewManager;
     private CyLayoutAlgorithmManager layoutManager;
     private CyApplicationManager applicationManager;
     private VisualMappingManager visualMappingManager;
     private VisualStyleFactory visualStyleFactory;
-
-
     private TraceGraphPanel panel;
+    private RenderingMode mode;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraphPanel panel) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -64,13 +64,13 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         this.registrar = registrar;
 
         this.networkManager = registrar.getService(CyNetworkManager.class);
-        this.networkFactory = registrar.getService(CyNetworkFactory.class);
         this.networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkViewManager = registrar.getService(CyNetworkViewManager.class);
         this.layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         this.applicationManager = registrar.getService(CyApplicationManager.class);
         this.visualMappingManager = registrar.getService(VisualMappingManager.class);
         this.visualStyleFactory = registrar.getService(VisualStyleFactory.class);
+        this.mode = RenderingMode.FULL;
 
         this.showPanel();
     }
@@ -167,15 +167,15 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
 
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
-        if (this.currentNetwork != null) {
-            this.currentNetwork.getPDM().forEach(Parameter::clearObservers);
+        if (this.currentTraceGraph != null) {
+            this.currentTraceGraph.getPDM().forEach(Parameter::clearObservers);
         }
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
-            this.currentNetwork = this.findTraceGraphForNetwork(e.getNetwork());
-            this.currentNetwork.getPDM().forEach(p -> p.addObserver(this));
-            this.panel.registerCallbacks(this.currentNetwork);
+            this.currentTraceGraph = this.findTraceGraphForNetwork(e.getNetwork());
+            this.currentTraceGraph.getPDM().forEach(p -> p.addObserver(this));
+            this.panel.registerCallbacks(this.currentTraceGraph);
         } else {
-            this.currentNetwork = null;
+            this.currentTraceGraph = null;
             this.panel.clear();
         }
     }
@@ -196,13 +196,12 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "bins":
-            case "enabled":
+            case "bins", "enabled" -> {
                 TaskIterator iterator = new TaskIterator(new AbstractTask() {
                     @Override
                     public void run(TaskMonitor taskMonitor) throws Exception {
-                        currentNetwork.clearNetwork();
-                        currentNetwork.reinitNetwork();
+                        currentTraceGraph.clearNetwork();
+                        currentTraceGraph.reinitNetwork();
                     }
                 });
                 // throws weird error if run asynchronously
@@ -211,7 +210,7 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
                 var taskManager = registrar.getService(SynchronousTaskManager.class);
                 taskManager.execute(iterator);
                 applyWorkingLayout();
-                break;
+            }
         }
     }
 
@@ -219,6 +218,66 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         for (var tg : this.traceGraphs) {
             //network destroyed handler will delete it from this.traceGraphs
             networkManager.destroyNetwork(tg.getNetwork());
+        }
+    }
+
+    private void hideAllEdges() {
+        for (var networkView : networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork())) {
+            for (var edgeView : networkView.getEdgeViews()) {
+                networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+                edgeView.setLockedValue(EDGE_VISIBLE, false);
+            }
+        }
+    }
+
+    public void setMode(RenderingMode mode) {
+        this.mode = mode;
+        if (this.currentTraceGraph != null) {
+            switch (mode) {
+                case SELECTED -> {
+                    hideAllEdges();
+                    var networkViews = networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork());
+                    for (var networkView : networkViews) {
+                        CyNetwork network = networkView.getModel();
+                        List<CyEdge> adjacentEdges = new ArrayList<>();
+                        CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true).forEach(n -> {
+                            adjacentEdges.addAll(network.getAdjacentEdgeList(n, CyEdge.Type.DIRECTED));
+                        });
+                        adjacentEdges.forEach(e -> {
+                            View<CyEdge> edgeView = networkView.getEdgeView(e);
+                            edgeView.clearValueLock(EDGE_VISIBLE);
+                            network.getRow(e).set(CyNetwork.SELECTED, true);
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void handleEvent(SelectedNodesAndEdgesEvent event) {
+        if (this.currentTraceGraph != null) {
+            switch (mode) {
+                case SELECTED -> {
+                    if (event.edgesChanged() && !event.nodesChanged()) {
+                        return;
+                    }
+                    hideAllEdges();
+                    var networkViews = networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork());
+                    for (var networkView : networkViews) {
+                        CyNetwork network = networkView.getModel();
+                        List<CyEdge> adjacentEdges = new ArrayList<>();
+                        CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true).forEach(n -> {
+                            adjacentEdges.addAll(network.getAdjacentEdgeList(n, CyEdge.Type.DIRECTED));
+                        });
+                        adjacentEdges.forEach(e -> {
+                            View<CyEdge> edgeView = networkView.getEdgeView(e);
+                            edgeView.clearValueLock(EDGE_VISIBLE);
+                            network.getRow(e).set(CyNetwork.SELECTED, true);
+                        });
+                    }
+                }
+            }
         }
     }
 }

@@ -125,9 +125,13 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
         String frequency = "" + newDist[0];
         var width = g.getFontMetrics().stringWidth(frequency);
+        float pos = (trackWidth * stops.get(0).getPosition()) / 2 - width / 2;
         if (width < (int) (trackWidth * stops.get(0).getPosition())) {
-            g.drawString(frequency, (trackWidth * stops.get(0).getPosition()) / 2 - width / 2, trackHeight / 2);
+            g.drawString(frequency, pos, (float) trackHeight / 2);
         }
+/*        int diff = newDist[0] - initialDistribution[0];
+        g.setColor(diff > 0 ? Color.GREEN : Color.RED);
+        g.drawString("" + diff, pos, (float) trackHeight / 2 + 20);*/
 
         // Draw Icons
         for (int i = 0; i < stops.size(); i++) {
@@ -143,10 +147,14 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
             frequency = "" + newDist[i + 1];
             width = g.getFontMetrics().stringWidth(frequency);
+            pos = x + (nextX - x) / 2 - width / 2;
             if (width < nextX - x) {
-                g.drawString(frequency, x + (nextX - x) / 2 - width / 2, trackHeight / 2);
+                g.drawString(frequency, pos, trackHeight / 2);
             }
-
+/*            diff = newDist[i + 1] - initialDistribution[i + 1];
+            g.setColor(diff > 0 ? Color.GREEN : Color.red);
+            g.drawString("" + diff, pos, (float) trackHeight / 2 + 20);
+            g.setColor(LABEL_COLOR);*/
 
             final float valueRange = maxValue - minValue;
             final Float curPositionValue =
