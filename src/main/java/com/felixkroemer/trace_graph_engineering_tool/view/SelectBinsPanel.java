@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -70,6 +71,14 @@ public class SelectBinsPanel extends JPanel {
 
         this.cancelButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
+        });
+
+        this.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "removeSelectedThumb");
+        this.getActionMap().put("removeSelectedThumb", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                slider.getModel().removeThumb(slider.getSelectedIndex());
+            }
         });
 
         this.add(buttonPanel, BorderLayout.SOUTH);
