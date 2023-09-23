@@ -30,13 +30,6 @@ public abstract class AbstractDisplayManager {
         }
     }
 
-    protected void showALlEdges() {
-        for (var edgeView : networkView.getEdgeViews()) {
-            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
-            edgeView.setVisualProperty(EDGE_VISIBLE, true);
-        }
-    }
-
     public CyNetworkView getNetworkView() {
         return this.networkView;
     }

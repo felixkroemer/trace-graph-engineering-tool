@@ -56,11 +56,7 @@ public class TraceGraph {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
-                if (param.isEnabled()) {
-                    state[i] = findBucket((Double) values.get(param.getName()), param);
-                } else {
-                    state[i] = 0;
-                }
+                state[i] = findBucket((Double) values.get(param.getName()), param);
                 i++;
             }
             long hash = Arrays.hashCode(state);
@@ -100,10 +96,8 @@ public class TraceGraph {
         }
     }
 
-    // CyEdge.Type.OUTGOING or CyEdge.Type.INCOMING are necessary, network.containsEdge returns true for both
-    // directions, same if CyEdge.Type.DIRECTED is used
-    private CyEdge getEdge(CyNode source, CyNode target) {
-        List<CyEdge> edges = this.network.getAdjacentEdgeList(source, CyEdge.Type.OUTGOING);
+    public CyEdge getEdge(CyNode source, CyNode target) {
+        List<CyEdge> edges = this.network.getAdjacentEdgeList(source, CyEdge.Type.DIRECTED);
         for (CyEdge edge : edges) {
             if (edge.getTarget() == target) {
                 return edge;
@@ -119,6 +113,22 @@ public class TraceGraph {
             }
         }
         return param.getBins().size();
+    }
+
+    /*
+     * Find the node that a row in the sourceTable belongs to
+     */
+    public CyNode findNode(int sourceTableIndex) {
+        CyRow sourceRow = this.sourceTable.getRow(sourceTableIndex);
+        Map<String, Object> values = sourceRow.getAllValues();
+        int[] state = new int[this.pdm.getParameterCount()];
+        int i = 0;
+        for (Parameter param : pdm.getParameters()) {
+            state[i] = findBucket((Double) values.get(param.getName()), param);
+            i++;
+        }
+        long hash = Arrays.hashCode(state);
+        return this.network.getNode(suidHashMapping.get(hash));
     }
 
     public CyNetwork getNetwork() {

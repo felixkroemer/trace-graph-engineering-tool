@@ -70,6 +70,10 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
         registerService(bundleContext, fullModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Full Mode")));
 
+        RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RenderingMode.TRACES);
+        registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
+
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
                 , TraceGraphController.class);
 

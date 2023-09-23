@@ -16,6 +16,5 @@ public class DefaultDisplayManager extends AbstractDisplayManager {
 
     @Override
     public void enable() {
-        this.showALlEdges();
     }
 }

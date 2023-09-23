@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.AbstractDisplayManager;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.DefaultDisplayManager;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.SelectedDisplayManager;
+import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
@@ -30,6 +31,7 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
+import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
 import org.cytoscape.work.*;
 import org.slf4j.Logger;
@@ -43,6 +45,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
@@ -97,6 +101,8 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         style.addVisualMappingFunction(colorMapping);
         style.addVisualMappingFunction(tooltipMapping);
 
+        style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
+
         return style;
     }
 
@@ -111,7 +117,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
                 columnView.setVisualProperty(COLUMN_VISIBLE, false);
             }
         }
-
     }
 
     //TODO split up
@@ -246,11 +251,20 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         }
     }
 
+    protected void showALlEdges() {
+        networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork()).forEach(v -> {
+            for (var edgeView : v.getEdgeViews()) {
+                v.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+                edgeView.setVisualProperty(EDGE_VISIBLE, true);
+            }
+        });
+    }
+
     public void setMode(RenderingMode mode) {
         if (this.currentTraceGraph != null) {
             var view = networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork()).iterator().next();
+            this.showALlEdges();
             // does not reveal hidden nodes or edges for some reason
-            // EDGE_VISIBLE and NODE_VISIBLE only consider the locked/bypass value
             visualMappingManager.setVisualStyle(createInitialVisualStyle(), view);
             switch (mode) {
                 case FULL -> {
@@ -258,6 +272,9 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
                 }
                 case SELECTED -> {
                     this.displayManager = new SelectedDisplayManager(view, this.currentTraceGraph);
+                }
+                case TRACES -> {
+                    this.displayManager = new TracesDisplayManager(view, this.currentTraceGraph, 2);
                 }
             }
         }
