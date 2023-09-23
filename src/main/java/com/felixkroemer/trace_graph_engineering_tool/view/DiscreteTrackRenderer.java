@@ -10,6 +10,7 @@ import org.jdesktop.swingx.multislider.TrackRenderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 
@@ -27,7 +28,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     private float maxValue;
     private CyTable sourceTable;
     private Parameter param;
-    private int[] initialDistribution;
+    private BufferedImage heatMap;
 
     private JXMultiThumbSlider<Void> slider;
 
@@ -36,7 +37,19 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         this.maxValue = maxValue;
         this.sourceTable = sourceTable;
         this.param = param;
-        this.initialDistribution = getDistribution(param.getBins());
+        var allRows = sourceTable.getAllRows();
+        double[][] array = new double[1000][1];
+        var min = param.getMinimum();
+        var max = param.getMaximum();
+        for (int i = 0; i < allRows.size(); i++) {
+            double value = allRows.get(i).get(param.getName(), Double.class);
+            int bucket = (int) (999 * (value - min) / (max - min));
+            array[bucket][0]++;
+        }
+        Color[] palette = new Color[]{new Color(235, 231, 108), new Color(240, 184, 110), new Color(237, 123, 123),
+                new Color(131, 96, 150)};
+        Color[] gradient = HeatMap.createMultiGradient(palette, 100);
+        this.heatMap = new HeatMap(array, gradient).drawData();
     }
 
     @Override
@@ -112,9 +125,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
         g.setStroke(STROKE1);
 
-        // Fill background
-        g.setColor(BACKGROUND_COLOR);
-        g.fillRect(0, 5, trackWidth, trackHeight);
+        g.drawImage(this.heatMap, 0, 5, trackWidth, trackHeight, null);
 
         g.setColor(LABEL_COLOR);
         g.setStroke(STROKE1);
