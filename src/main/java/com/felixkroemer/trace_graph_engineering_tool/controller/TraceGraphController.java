@@ -14,6 +14,7 @@ import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyRow;
@@ -27,6 +28,8 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
+import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.vizmap.*;
 import org.cytoscape.work.*;
 import org.slf4j.Logger;
@@ -35,8 +38,12 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
         PropertyChangeListener, SelectedNodesAndEdgesListener {
@@ -67,8 +74,6 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         this.layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         this.visualMappingManager = registrar.getService(VisualMappingManager.class);
         this.visualStyleFactory = registrar.getService(VisualStyleFactory.class);
-
-        this.showPanel();
     }
 
     public VisualStyle createInitialVisualStyle() {
@@ -95,6 +100,20 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         return style;
     }
 
+    private void hideUnneededColumns() {
+        var tableViewManager = registrar.getService(CyTableViewManager.class);
+        var nodeTableView = tableViewManager.getTableView(currentTraceGraph.getNetwork().getDefaultNodeTable());
+        var columnViews = nodeTableView.getColumnViews();
+        Set<String> parameterNames = new HashSet<>();
+        this.currentTraceGraph.getPDM().forEach(p -> parameterNames.add(p.getName()));
+        for (View<CyColumn> columnView : columnViews) {
+            if (!parameterNames.contains(columnView.getModel().getName())) {
+                columnView.setVisualProperty(COLUMN_VISIBLE, false);
+            }
+        }
+
+    }
+
     //TODO split up
     public void registerTraceGraph(TraceGraph tg) {
         traceGraphs.add(tg);
@@ -108,10 +127,12 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
 
         this.displayManager = new SelectedDisplayManager(view, tg);
 
-        applyWorkingLayout();
-
         networkManager.addNetwork(tg.getNetwork());
         networkViewManager.addNetworkView(view);
+
+        this.hideUnneededColumns();
+
+        applyWorkingLayout();
     }
 
     private void showPanel() {
@@ -185,23 +206,35 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         param.setBins(bins);
     }
 
+    private void updateTraceGraph() {
+        TaskIterator iterator = new TaskIterator(new AbstractTask() {
+            @Override
+            public void run(TaskMonitor taskMonitor) {
+                currentTraceGraph.clearNetwork();
+                currentTraceGraph.reinitNetwork();
+            }
+        });
+        // throws weird error if run asynchronously
+        // runs on awt event thread
+        // TODO: check if running async is possible
+        var taskManager = registrar.getService(SynchronousTaskManager.class);
+        taskManager.execute(iterator);
+        applyWorkingLayout();
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "bins", "enabled" -> {
-                TaskIterator iterator = new TaskIterator(new AbstractTask() {
-                    @Override
-                    public void run(TaskMonitor taskMonitor) {
-                        currentTraceGraph.clearNetwork();
-                        currentTraceGraph.reinitNetwork();
-                    }
-                });
-                // throws weird error if run asynchronously
-                // runs on awt event thread
-                // TODO: check if running async is possible
-                var taskManager = registrar.getService(SynchronousTaskManager.class);
-                taskManager.execute(iterator);
-                applyWorkingLayout();
+            case "enabled" -> {
+                var tableViewManager = registrar.getService(CyTableViewManager.class);
+                var nodeTableView = tableViewManager.getTableView(currentTraceGraph.getNetwork().getDefaultNodeTable());
+                Parameter param = (Parameter) evt.getSource();
+                var columnView = nodeTableView.getColumnView(param.getName());
+                columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
+                updateTraceGraph();
+            }
+            case "bins" -> {
+                updateTraceGraph();
             }
         }
     }

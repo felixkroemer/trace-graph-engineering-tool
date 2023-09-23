@@ -48,9 +48,8 @@ public class Parameter {
     }
 
     public void setBins(List<Double> bins) {
-        List<Double> oldBins = this.bins;
         this.bins = bins;
-        pcs.firePropertyChange("bins", oldBins, this.bins);
+        pcs.firePropertyChange("bins", null, this.bins);
     }
 
     public void addObserver(PropertyChangeListener l) {
