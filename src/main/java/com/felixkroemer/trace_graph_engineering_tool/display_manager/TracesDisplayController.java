@@ -1,13 +1,14 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +29,17 @@ public class TracesDisplayController extends AbstractDisplayController {
     private Logger logger;
 
     private int length;
-    private CyTable sourceTable;
     private int colorIndex = 0;
     private HashMap<CyEdge, Integer> edgeVisits;
     private PropertyChangeSupport pcs;
+    private CyServiceRegistrar registrar;
 
-    public TracesDisplayController(CyNetworkView view, TraceGraph traceGraph, int length) {
+    public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                   int length) {
         super(view, traceGraph);
+        this.registrar = registrar;
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;
-        this.sourceTable = this.traceGraph.getSourceTable();
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
     }
@@ -83,6 +85,7 @@ public class TracesDisplayController extends AbstractDisplayController {
             }
             if (nextNode != node) {
                 found++;
+                // also collect trailing rows that map to the same node
                 if (found == length + 1) {
                     break;
                 }
@@ -142,9 +145,23 @@ public class TracesDisplayController extends AbstractDisplayController {
         if (event.getSelectedEdges().size() == 1) {
             traces.addAll(this.getTraces(event.getSelectedEdges().iterator().next(), true));
         }
+
+        drawTraces(traces);
+
+        var manager = registrar.getService(TraceGraphManager.class);
+        var factory = manager.getShowTraceDetailsTaskFactory();
+        if (!traces.isEmpty()) {
+            factory.setTraces(traces);
+        } else {
+            factory.setTraces(null);
+        }
+    }
+
+    public void drawTraces(Set<Trace> traces) {
         colorIndex = 0;
         for (var trace : traces) {
             Color color = getNextColor();
+            logger.info(trace.toString());
             for (int i = 0; i < trace.getSequence().size() - 1; i++) {
                 CyEdge edge;
                 // is null if the edge is a self edge

@@ -110,7 +110,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener {
                 this.displayManager = new SelectedDisplayController(view, this.traceGraph);
             }
             case TRACES -> {
-                this.displayManager = new TracesDisplayController(view, this.traceGraph, 2);
+                this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
             }
         }
     }

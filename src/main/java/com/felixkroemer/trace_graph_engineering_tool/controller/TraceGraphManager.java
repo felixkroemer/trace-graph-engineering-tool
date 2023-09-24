@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceDetailsTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
@@ -13,22 +14,31 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.task.NetworkViewTaskFactory;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
+import static org.cytoscape.work.ServiceProperties.TITLE;
 
 public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener {
 
     private CyServiceRegistrar registrar;
     private Set<TraceGraphController> controllers;
     private final TraceGraphPanel panel;
+    private final ShowTraceDetailsTaskFactory showTraceDetailsTaskFactory;
 
     public TraceGraphManager(CyServiceRegistrar registrar, TraceGraphPanel panel) {
         this.registrar = registrar;
         this.panel = panel;
         this.controllers = new HashSet<>();
+        this.showTraceDetailsTaskFactory = new ShowTraceDetailsTaskFactory(registrar);
+        this.registrar.registerService(showTraceDetailsTaskFactory, NetworkViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Tasks", TITLE, "Show Trace Details")));
     }
-    
+
     public void registerTraceGraph(TraceGraph traceGraph) {
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         this.controllers.add(controller);
@@ -85,6 +95,10 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
             var networkManager = registrar.getService(CyNetworkManager.class);
             networkManager.destroyNetwork(controller.getTraceGraph().getNetwork());
         }
+    }
+
+    public ShowTraceDetailsTaskFactory getShowTraceDetailsTaskFactory() {
+        return this.showTraceDetailsTaskFactory;
     }
 
 }

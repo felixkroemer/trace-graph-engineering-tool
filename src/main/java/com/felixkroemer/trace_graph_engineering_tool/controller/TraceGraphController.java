@@ -96,6 +96,10 @@ public class TraceGraphController implements PropertyChangeListener {
         }
     }
 
+    public RenderingController getRenderingController() {
+        return this.renderingController;
+    }
+
     public void setMode(RenderingMode mode) {
         renderingController.setMode(mode);
     }
