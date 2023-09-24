@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
@@ -251,19 +250,9 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
         }
     }
 
-    protected void showALlEdges() {
-        networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork()).forEach(v -> {
-            for (var edgeView : v.getEdgeViews()) {
-                v.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
-                edgeView.setVisualProperty(EDGE_VISIBLE, true);
-            }
-        });
-    }
-
     public void setMode(RenderingMode mode) {
         if (this.currentTraceGraph != null) {
             var view = networkViewManager.getNetworkViews(this.currentTraceGraph.getNetwork()).iterator().next();
-            this.showALlEdges();
             // does not reveal hidden nodes or edges for some reason
             visualMappingManager.setVisualStyle(createInitialVisualStyle(), view);
             switch (mode) {
@@ -275,7 +264,11 @@ public class TraceGraphController implements NetworkAboutToBeDestroyedListener, 
                 }
                 case TRACES -> {
                     this.displayManager = new TracesDisplayManager(view, this.currentTraceGraph, 2);
+                    this.panel.showTracesPanel((TracesDisplayManager) this.displayManager);
                 }
+            }
+            if (!(this.displayManager instanceof TracesDisplayManager)) {
+                this.panel.hideTracesPanel();
             }
         }
     }

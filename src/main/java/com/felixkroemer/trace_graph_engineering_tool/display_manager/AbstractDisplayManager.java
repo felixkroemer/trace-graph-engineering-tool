@@ -23,6 +23,13 @@ public abstract class AbstractDisplayManager {
 
     public abstract void enable();
 
+    protected void showALlEdges() {
+        for (var edgeView : networkView.getEdgeViews()) {
+            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+            edgeView.setVisualProperty(EDGE_VISIBLE, true);
+        }
+    }
+
     protected void hideAllEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
             networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
