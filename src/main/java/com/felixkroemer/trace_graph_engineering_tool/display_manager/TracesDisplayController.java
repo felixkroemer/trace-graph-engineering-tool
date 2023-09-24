@@ -15,8 +15,9 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.List;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -70,51 +71,88 @@ public class TracesDisplayController extends AbstractDisplayController {
         pcs.addPropertyChangeListener("traces", l);
     }
 
-    private void showTraceEdges(CyIdentifiable identifiable, boolean isEdge) {
-        Set<Trace> traces = new HashSet<>();
-        List<CyEdge> edges;
-        List<Integer> sourceRows;
-        if (isEdge) {
-            var table = this.traceGraph.getNetwork().getDefaultEdgeTable();
-            sourceRows = table.getRow(identifiable.getSUID()).getList(Columns.EDGE_SOURCE_ROWS, Integer.class);
-        } else {
-            var table = this.traceGraph.getNetwork().getDefaultNodeTable();
-            sourceRows = table.getRow(identifiable.getSUID()).getList(Columns.NODE_SOURCE_ROWS, Integer.class);
-        }
-        colorIndex = 0;
-        this.edgeVisits.clear();
-        for (int i : sourceRows) {
-            edges = new LinkedList<>();
-            Color color = getNextColor();
-            CyNode previousNode = null;
-            for (int j = -length; j <= length + (isEdge ? 1 : 0); j++) {
-                if (i + j > 0 && i + j <= this.sourceTable.getRowCount()) {
-                    CyNode n = traceGraph.findNode(i + j);
-                    if (previousNode != null && previousNode != n) {
-                        CyEdge edge = traceGraph.getEdge(previousNode, n);
-                        edges.add(edge);
-                        this.colorEdge(edge, color);
-                    } else {
-                        edges.add(Trace.SELF_EDGE);
-                    }
-                    previousNode = n;
+    public void findNextNodes(int index, Trace trace, boolean up) {
+        CyNode node = traceGraph.findNode(index);
+        CyNode nextNode;
+        int found = 0;
+        while (true) {
+            index = up ? index - 1 : index + 1;
+            nextNode = traceGraph.findNode(index);
+            if (nextNode == null) {
+                return;
+            }
+            if (nextNode != node) {
+                found++;
+                if (found == length + 1) {
+                    break;
                 }
             }
-            traces.add(new Trace(color, edges));
+            if (up) {
+                trace.addBefore(nextNode, index);
+            } else {
+                trace.addAfter(nextNode, index);
+            }
+            node = nextNode;
         }
-        this.pcs.firePropertyChange("traces", null, traces);
     }
 
-    @Override
+    private Set<Trace> getTraces(CyIdentifiable identifiable, boolean isEdge) {
+        Set<Trace> traces = new HashSet<>();
+        Set<Integer> sourceRows;
+        Set<Integer> foundIndices = new HashSet<>();
+        CyNode startNode;
+        if (isEdge) {
+            var table = this.traceGraph.getNetwork().getDefaultEdgeTable();
+            sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.EDGE_SOURCE_ROWS,
+                    Integer.class));
+            startNode = ((CyEdge) identifiable).getSource();
+        } else {
+            var table = this.traceGraph.getNetwork().getDefaultNodeTable();
+            sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.NODE_SOURCE_ROWS,
+                    Integer.class));
+            startNode = ((CyNode) identifiable);
+        }
+        this.edgeVisits.clear();
+        var iterator = sourceRows.iterator();
+        while (iterator.hasNext()) {
+            int sourceIndex = iterator.next();
+            iterator.remove();
+            if (foundIndices.contains(sourceIndex)) {
+                continue;
+            }
+            Trace trace = new Trace(startNode, sourceIndex);
+            traces.add(trace);
+            findNextNodes(sourceIndex, trace, true);
+            findNextNodes(sourceIndex, trace, false);
+            for (var node : trace.getSequence()) {
+                foundIndices.add(node.getValue1());
+            }
+        }
+        return traces;
+    }
+
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         if (event.nodesChanged() || event.edgesChanged()) {
             this.hideAllEdges();
         }
+        Set<Trace> traces = new HashSet<>();
         if (event.getSelectedNodes().size() == 1) {
-            this.showTraceEdges(event.getSelectedNodes().iterator().next(), false);
+            traces.addAll(this.getTraces(event.getSelectedNodes().iterator().next(), false));
         }
         if (event.getSelectedEdges().size() == 1) {
-            this.showTraceEdges(event.getSelectedEdges().iterator().next(), true);
+            traces.addAll(this.getTraces(event.getSelectedEdges().iterator().next(), true));
+        }
+        colorIndex = 0;
+        for (var trace : traces) {
+            Color color = getNextColor();
+            for (int i = 0; i < trace.getSequence().size() - 1; i++) {
+                CyEdge edge;
+                // is null if the edge is a self edge
+                if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
+                        trace.getSequence().get(i + 1).getValue0())) != null) {
+                    this.colorEdge(edge, color);
+                }
+            }
         }
     }
 

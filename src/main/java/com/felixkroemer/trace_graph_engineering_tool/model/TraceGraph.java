@@ -107,9 +107,9 @@ public class TraceGraph {
     }
 
     public CyEdge getEdge(CyNode source, CyNode target) {
-        List<CyEdge> edges = this.network.getAdjacentEdgeList(source, CyEdge.Type.DIRECTED);
+        List<CyEdge> edges = this.network.getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
         for (CyEdge edge : edges) {
-            if (edge.getTarget() == target) {
+            if (edge.getTarget() == target && edge.getSource() == source) {
                 return edge;
             }
         }
