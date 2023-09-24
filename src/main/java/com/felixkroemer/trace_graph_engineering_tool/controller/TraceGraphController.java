@@ -28,10 +28,8 @@ public class TraceGraphController implements PropertyChangeListener {
 
     private final Logger logger;
 
-    private final TraceGraph traceGraph;
     private final CyServiceRegistrar registrar;
-    private final CyNetworkManager networkManager;
-    private final CyNetworkViewManager networkViewManager;
+    private final TraceGraph traceGraph;
     private final RenderingController renderingController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
@@ -40,12 +38,12 @@ public class TraceGraphController implements PropertyChangeListener {
         this.traceGraph = traceGraph;
         this.renderingController = new RenderingController(registrar, traceGraph);
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
-        this.networkManager = registrar.getService(CyNetworkManager.class);
-        this.networkViewManager = registrar.getService(CyNetworkViewManager.class);
     }
 
     public void registerNetwork() {
+        var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.addNetwork(traceGraph.getNetwork());
+        var networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(renderingController.getView());
         this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
         this.hideUnneededColumns();

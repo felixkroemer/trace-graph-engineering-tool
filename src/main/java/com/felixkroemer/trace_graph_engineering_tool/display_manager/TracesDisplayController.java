@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
@@ -26,7 +27,6 @@ public class TracesDisplayController extends AbstractDisplayController {
     private Logger logger;
 
     private int length;
-    private CyTable nodeTable;
     private CyTable sourceTable;
     private int colorIndex = 0;
     private HashMap<CyEdge, Integer> edgeVisits;
@@ -36,7 +36,6 @@ public class TracesDisplayController extends AbstractDisplayController {
         super(view, traceGraph);
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;
-        this.nodeTable = this.traceGraph.getNetwork().getDefaultNodeTable();
         this.sourceTable = this.traceGraph.getSourceTable();
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
@@ -63,8 +62,6 @@ public class TracesDisplayController extends AbstractDisplayController {
             v.setVisualProperty(EDGE_WIDTH, visits * 1.5);
             v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
-            v.setVisualProperty(EDGE_STROKE_SELECTED_PAINT, color);
-            v.setVisualProperty(EDGE_TARGET_ARROW_SELECTED_PAINT, color);
             v.setVisualProperty(EDGE_VISIBLE, true);
         });
     }
@@ -73,37 +70,51 @@ public class TracesDisplayController extends AbstractDisplayController {
         pcs.addPropertyChangeListener("traces", l);
     }
 
+    private void showTraceEdges(CyIdentifiable identifiable, boolean isEdge) {
+        Set<Trace> traces = new HashSet<>();
+        List<CyEdge> edges;
+        List<Integer> sourceRows;
+        if (isEdge) {
+            var table = this.traceGraph.getNetwork().getDefaultEdgeTable();
+            sourceRows = table.getRow(identifiable.getSUID()).getList(Columns.EDGE_SOURCE_ROWS, Integer.class);
+        } else {
+            var table = this.traceGraph.getNetwork().getDefaultNodeTable();
+            sourceRows = table.getRow(identifiable.getSUID()).getList(Columns.NODE_SOURCE_ROWS, Integer.class);
+        }
+        colorIndex = 0;
+        this.edgeVisits.clear();
+        for (int i : sourceRows) {
+            edges = new LinkedList<>();
+            Color color = getNextColor();
+            CyNode previousNode = null;
+            for (int j = -length; j <= length + (isEdge ? 1 : 0); j++) {
+                if (i + j > 0 && i + j <= this.sourceTable.getRowCount()) {
+                    CyNode n = traceGraph.findNode(i + j);
+                    if (previousNode != null && previousNode != n) {
+                        CyEdge edge = traceGraph.getEdge(previousNode, n);
+                        edges.add(edge);
+                        this.colorEdge(edge, color);
+                    } else {
+                        edges.add(Trace.SELF_EDGE);
+                    }
+                    previousNode = n;
+                }
+            }
+            traces.add(new Trace(color, edges));
+        }
+        this.pcs.firePropertyChange("traces", null, traces);
+    }
+
     @Override
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
-        if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
+        if (event.nodesChanged() || event.edgesChanged()) {
             this.hideAllEdges();
-            Set<Trace> traces = new HashSet<>();
-            List<CyEdge> edges;
-            var node = event.getSelectedNodes().iterator().next();
-            List<Integer> sourceRows = nodeTable.getRow(node.getSUID()).getList(Columns.NODE_SOURCE_ROWS,
-                    Integer.class);
-            colorIndex = 0;
-            this.edgeVisits.clear();
-            for (int i : sourceRows) {
-                edges = new LinkedList<>();
-                Color color = getNextColor();
-                CyNode previousNode = null;
-                for (int j = -length; j <= length; j++) {
-                    if (i + j > 0 && i + j <= this.sourceTable.getRowCount()) {
-                        CyNode n = traceGraph.findNode(i + j);
-                        if (previousNode != null && previousNode != n) {
-                            CyEdge edge = traceGraph.getEdge(previousNode, n);
-                            edges.add(edge);
-                            this.colorEdge(edge, color);
-                        } else {
-                            edges.add(Trace.SELF_EDGE);
-                        }
-                        previousNode = n;
-                    }
-                }
-                traces.add(new Trace(color, edges));
-            }
-            this.pcs.firePropertyChange("traces", null, traces);
+        }
+        if (event.getSelectedNodes().size() == 1) {
+            this.showTraceEdges(event.getSelectedNodes().iterator().next(), false);
+        }
+        if (event.getSelectedEdges().size() == 1) {
+            this.showTraceEdges(event.getSelectedEdges().iterator().next(), true);
         }
     }
 

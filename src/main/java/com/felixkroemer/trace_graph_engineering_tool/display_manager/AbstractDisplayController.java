@@ -25,15 +25,22 @@ public abstract class AbstractDisplayController {
 
     protected void showALlEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
-            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
             edgeView.setVisualProperty(EDGE_VISIBLE, true);
         }
     }
 
     protected void hideAllEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
-            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
             edgeView.setVisualProperty(EDGE_VISIBLE, false);
+        }
+    }
+
+    protected void deselectAll() {
+        for (var edgeView : networkView.getEdgeViews()) {
+            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+        }
+        for (var nodeView : networkView.getNodeViews()) {
+            networkView.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
     }
 

@@ -42,6 +42,7 @@ public class TraceGraph {
         this.nodeTable.createListColumn(Columns.NODE_SOURCE_ROWS, Integer.class, false);
 
         this.edgeTable.createColumn(Columns.EDGE_TRAVERSALS, Integer.class, false, 1);
+        this.edgeTable.createListColumn(Columns.EDGE_SOURCE_ROWS, Integer.class, false);
 
         CyTable networkTable = this.network.getDefaultNetworkTable();
         networkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
@@ -88,13 +89,18 @@ public class TraceGraph {
                     Integer.class));
             if (prevNode != null && prevNode != currentNode) {
                 CyEdge edge;
+                CyRow edgeRow;
                 if ((edge = getEdge(prevNode, currentNode)) == null) {
-                    network.addEdge(prevNode, currentNode, true);
+                    edge = network.addEdge(prevNode, currentNode, true);
+                    edgeRow = this.edgeTable.getRow(edge.getSUID());
+                    edgeRow.set(Columns.EDGE_SOURCE_ROWS, new ArrayList<>());
                 } else {
-                    CyRow edgeTableRow = this.edgeTable.getRow(edge.getSUID());
-                    edgeTableRow.set(Columns.EDGE_TRAVERSALS, edgeTableRow.get(Columns.EDGE_TRAVERSALS,
-                            Integer.class) + 1);
+                    edgeRow = this.edgeTable.getRow(edge.getSUID());
+                    edgeRow.set(Columns.EDGE_TRAVERSALS, edgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class) + 1);
                 }
+                edgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
+                        Integer.class) - 1);
+
             }
             prevNode = currentNode;
         }
