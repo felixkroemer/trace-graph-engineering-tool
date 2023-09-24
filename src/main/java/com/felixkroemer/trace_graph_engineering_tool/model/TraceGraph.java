@@ -56,7 +56,11 @@ public class TraceGraph {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
-                state[i] = findBucket((Double) values.get(param.getName()), param);
+                if (param.isEnabled()) {
+                    state[i] = findBucket((Double) values.get(param.getName()), param);
+                } else {
+                    state[i] = 0;
+                }
                 i++;
             }
             long hash = Arrays.hashCode(state);
@@ -124,7 +128,11 @@ public class TraceGraph {
         int[] state = new int[this.pdm.getParameterCount()];
         int i = 0;
         for (Parameter param : pdm.getParameters()) {
-            state[i] = findBucket((Double) values.get(param.getName()), param);
+            if (param.isEnabled()) {
+                state[i] = findBucket((Double) values.get(param.getName()), param);
+            } else {
+                state[i] = 0;
+            }
             i++;
         }
         long hash = Arrays.hashCode(state);

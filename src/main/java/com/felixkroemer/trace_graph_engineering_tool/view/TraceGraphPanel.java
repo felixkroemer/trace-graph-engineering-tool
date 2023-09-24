@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayManager;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
@@ -63,11 +62,11 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
         return "TraceGraphPanel";
     }
 
-    public void registerCallbacks(TraceGraph tg) {
-        this.pdmPanel.registerCallbacks(tg.getPDM());
+    public void registerCallbacks(TraceGraphController controller) {
+        this.pdmPanel.registerCallbacks(controller.getTraceGraph().getPDM(), controller);
     }
 
-    public void showTracesPanel(TracesDisplayManager tracesDisplayManager) {
+    public void showTracesPanel() {
         this.tabs.addTab(TRACES_TITLE, this.tracesPanel);
     }
 

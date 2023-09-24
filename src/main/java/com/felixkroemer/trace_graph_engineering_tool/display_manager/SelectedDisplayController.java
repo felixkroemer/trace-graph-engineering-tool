@@ -13,11 +13,11 @@ import java.util.List;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class SelectedDisplayManager extends AbstractDisplayManager {
+public class SelectedDisplayController extends AbstractDisplayController {
 
     private CyNode previousNode;
 
-    public SelectedDisplayManager(CyNetworkView view, TraceGraph traceGraph) {
+    public SelectedDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
     }
 

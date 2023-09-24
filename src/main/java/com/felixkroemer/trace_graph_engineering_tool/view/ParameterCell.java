@@ -4,10 +4,10 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphContro
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
-import org.cytoscape.work.TaskManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -19,12 +19,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     private JCheckBox checkBox;
     private JLabel label;
     private JButton editButton;
-    private TaskManager manager;
 
-    public ParameterCell(Parameter parameter, CyServiceRegistrar reg) {
+    public ParameterCell(CyServiceRegistrar reg, Parameter parameter, TraceGraphController controller) {
         IconManager iconManager = reg.getService(IconManager.class);
-        TaskManager<?, ?> manager = reg.getService(TaskManager.class);
-
 
         setLayout(new BorderLayout());
         this.checkBox = new JCheckBox();
@@ -37,14 +34,20 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.editButton.setFont(iconManager.getIconFont(14.0f));
         this.editButton.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
-                var controller = reg.getService(TraceGraphController.class);
-                var sourceTable = controller.getActiveTraceGraph().getSourceTable();
+                var sourceTable = controller.getTraceGraph().getSourceTable();
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
                 d.setContentPane(new SelectBinsPanel(parameter, sourceTable));
                 d.setModalityType(APPLICATION_MODAL);
                 d.showDialog();
             });
+        });
+        this.checkBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                parameter.enable();
+            } else {
+                parameter.disable();
+            }
         });
         this.add(this.editButton, BorderLayout.EAST);
 
@@ -71,6 +74,4 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 break;
         }
     }
-
-
 }

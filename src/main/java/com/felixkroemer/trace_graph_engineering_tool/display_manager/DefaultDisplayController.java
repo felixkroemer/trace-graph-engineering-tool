@@ -4,9 +4,9 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.view.model.CyNetworkView;
 
-public class DefaultDisplayManager extends AbstractDisplayManager {
+public class DefaultDisplayController extends AbstractDisplayController {
 
-    public DefaultDisplayManager(CyNetworkView view, TraceGraph traceGraph) {
+    public DefaultDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
     }
 

@@ -19,7 +19,7 @@ import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TracesDisplayManager extends AbstractDisplayManager {
+public class TracesDisplayController extends AbstractDisplayController {
 
     private static Color[] colors = generateColorList();
 
@@ -32,7 +32,7 @@ public class TracesDisplayManager extends AbstractDisplayManager {
     private HashMap<CyEdge, Integer> edgeVisits;
     private PropertyChangeSupport pcs;
 
-    public TracesDisplayManager(CyNetworkView view, TraceGraph traceGraph, int length) {
+    public TracesDisplayController(CyNetworkView view, TraceGraph traceGraph, int length) {
         super(view, traceGraph);
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;

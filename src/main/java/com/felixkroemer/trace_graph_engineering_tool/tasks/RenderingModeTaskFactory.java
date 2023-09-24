@@ -18,6 +18,6 @@ public class RenderingModeTaskFactory extends AbstractNetworkViewTaskFactory {
 
     @Override
     public TaskIterator createTaskIterator(CyNetworkView networkView) {
-        return new TaskIterator(new RenderingModeTask(this.reg, this.mode));
+        return new TaskIterator(new RenderingModeTask(this.reg, this.mode, networkView));
     }
 }

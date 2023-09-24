@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -32,13 +32,13 @@ public class LoadNetworkTask extends AbstractTask {
 
     private final Logger logger;
 
-    private final TraceGraphController controller;
+    private final TraceGraphManager manager;
     private final CyTableFactory tableFactory;
     private final CyNetworkFactory networkFactory;
 
     public LoadNetworkTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
-        this.controller = reg.getService(TraceGraphController.class);
+        this.manager = reg.getService(TraceGraphManager.class);
         this.tableFactory = reg.getService(CyTableFactory.class);
         this.networkFactory = reg.getService(CyNetworkFactory.class);
     }
@@ -58,7 +58,7 @@ public class LoadNetworkTask extends AbstractTask {
         ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto, minMaxValues);
         CyNetwork network = networkFactory.createNetwork();
         TraceGraph traceGraph = new TraceGraph(network, pdm, table);
-        controller.registerTraceGraph(traceGraph);
+        manager.registerTraceGraph(traceGraph);
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {

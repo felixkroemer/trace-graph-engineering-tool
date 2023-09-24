@@ -1,18 +1,14 @@
 package com.felixkroemer.trace_graph_engineering_tool;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingMode;
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.LoadNetworkTaskFactory;
-import com.felixkroemer.trace_graph_engineering_tool.tasks.ManualTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.RenderingModeTaskFactory;
-import com.felixkroemer.trace_graph_engineering_tool.tasks.ResetTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
-import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.NetworkViewTaskFactory;
@@ -26,7 +22,7 @@ import java.util.Properties;
 import static org.cytoscape.work.ServiceProperties.*;
 
 
-public class CyActivator extends AbstractCyActivator implements SetCurrentNetworkListener {
+public class CyActivator extends AbstractCyActivator {
 
     public CyActivator() {
         super();
@@ -37,26 +33,16 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
         TraceGraphPanel panel = new TraceGraphPanel(reg);
-        TraceGraphController controller = new TraceGraphController(reg, panel);
+        TraceGraphManager manager = new TraceGraphManager(reg, panel);
 
-        registerService(bundleContext, controller, TraceGraphController.class, new Properties());
-        registerService(bundleContext, controller, NetworkAboutToBeDestroyedListener.class, new Properties());
-        registerService(bundleContext, controller, SetCurrentNetworkListener.class, new Properties());
-        registerService(bundleContext, controller, SelectedNodesAndEdgesListener.class, new Properties());
+        registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
+        registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
+        registerService(bundleContext, manager, SetCurrentNetworkListener.class, new Properties());
 
         LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
         registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace Graph",
                         INSERT_SEPARATOR_BEFORE, "true")));
-
-
-        ResetTaskFactory resetTaskFactory = new ResetTaskFactory(reg);
-        registerService(bundleContext, resetTaskFactory, TaskFactory.class, Util.genProperties(Map.of(TITLE, "RESET",
-                IN_TOOL_BAR, "true", MENU_GRAVITY, "4.10", LARGE_ICON_ID, "cy::IMPORT_NET")));
-
-        ManualTaskFactory manualTaskFactory = new ManualTaskFactory(reg);
-        registerService(bundleContext, manualTaskFactory, TaskFactory.class, Util.genProperties(Map.of(TITLE, "MANUAL"
-                , IN_TOOL_BAR, "true", MENU_GRAVITY, "4.11", LARGE_ICON_ID, "cy::IMPORT_NET")));
 
         TooltipMappingFactory tooltipMappingFactory = new TooltipMappingFactory(reg);
         registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,
@@ -75,20 +61,16 @@ public class CyActivator extends AbstractCyActivator implements SetCurrentNetwor
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
 
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
-                , TraceGraphController.class);
+                , TraceGraphManager.class);
 
     }
 
-    public void handleControllerDeregistration(TraceGraphController controller, Map<Object, Object> serviceProps) {
-        controller.clearTraceGraphs();
+    public void handleControllerDeregistration(TraceGraphManager manager, Map<Object, Object> serviceProps) {
+        manager.clearTraceGraphs();
     }
 
-    public void handleControllerRegistration(TraceGraphController controller, Map<Object, Object> serviceProps) {
+    public void handleControllerRegistration(TraceGraphManager manager, Map<Object, Object> serviceProps) {
     }
 
-    @Override
-    public void handleEvent(SetCurrentNetworkEvent e) {
-
-    }
 }
 

@@ -7,13 +7,13 @@ import org.cytoscape.view.model.CyNetworkView;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 
-public abstract class AbstractDisplayManager {
+public abstract class AbstractDisplayController {
 
     protected CyNetworkView networkView;
     protected TraceGraph traceGraph;
 
     // assumes the network has the default style applied (besides EDGE_VISIBLE / NODE_VISIBLE)
-    public AbstractDisplayManager(CyNetworkView view, TraceGraph traceGraph) {
+    public AbstractDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         this.networkView = view;
         this.traceGraph = traceGraph;
         this.enable();
