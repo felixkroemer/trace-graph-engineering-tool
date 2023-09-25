@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.display_manager.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
@@ -117,8 +118,9 @@ public class TraceGraphController implements PropertyChangeListener {
         this.traceDetailsController.showTraces(traces);
     }
 
-    public void showNetworkView(CyNode targetNode) {
-
+    public void showDefaultView(CyNode targetNode) {
+        var manager = this.registrar.getService(CyApplicationManager.class);
+        manager.setCurrentNetwork(this.traceGraph.getNetwork());
     }
 
     public boolean containsNetwork(CyNetwork network) {

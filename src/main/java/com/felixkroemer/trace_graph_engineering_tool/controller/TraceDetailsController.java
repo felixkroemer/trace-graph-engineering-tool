@@ -47,6 +47,7 @@ public class TraceDetailsController {
             // view is set automatically as current network view
             this.createNetwork();
         } else {
+            this.network.removeNodes(this.network.getNodeList());
             var manager = this.registrar.getService(CyApplicationManager.class);
             manager.setCurrentNetworkView(this.networkView);
         }
