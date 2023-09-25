@@ -43,4 +43,8 @@ public class Trace {
         }
         return sb.toString();
     }
+
+    public CyNode getNode() {
+        return this.node;
+    }
 }

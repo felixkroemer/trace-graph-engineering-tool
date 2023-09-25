@@ -1,10 +1,11 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.display_manager.Trace;
+import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.CyColumn;
-import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -31,12 +32,14 @@ public class TraceGraphController implements PropertyChangeListener {
     private final CyServiceRegistrar registrar;
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;
+    private final TraceDetailsController traceDetailsController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = registrar;
         this.traceGraph = traceGraph;
         this.renderingController = new RenderingController(registrar, traceGraph);
+        this.traceDetailsController = new TraceDetailsController(registrar);
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
     }
 
@@ -96,10 +99,6 @@ public class TraceGraphController implements PropertyChangeListener {
         }
     }
 
-    public RenderingController getRenderingController() {
-        return this.renderingController;
-    }
-
     public void setMode(RenderingMode mode) {
         renderingController.setMode(mode);
     }
@@ -110,5 +109,40 @@ public class TraceGraphController implements PropertyChangeListener {
 
     public void unregister() {
         registrar.unregisterService(renderingController, SelectedNodesAndEdgesListener.class);
+    }
+
+    public void showTraceDetails(CyIdentifiable identifiable) {
+        boolean isEdge = identifiable instanceof CyEdge;
+        Set<Trace> traces = TracesDisplayController.getTraces(identifiable, this.traceGraph, 2, isEdge);
+        this.traceDetailsController.showTraces(traces);
+    }
+
+    public void showNetworkView(CyNode targetNode) {
+
+    }
+
+    public boolean containsNetwork(CyNetwork network) {
+        if (this.traceGraph.getNetwork() == network || this.traceDetailsController.getNetwork() == network) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public NetworkType getNetworkType(CyNetwork network) {
+        if (network == this.traceGraph.getNetwork()) {
+            return NetworkType.DEFAULT;
+        } else if (network == this.traceDetailsController.getNetwork()) {
+            return NetworkType.TRACE_DETAILS;
+        } else {
+            throw new IllegalArgumentException("Network does not belong to this trace graph");
+        }
+    }
+
+    public void destroy() {
+        //network destroyed handler will delete it from this.traceGraphs
+        var networkManager = registrar.getService(CyNetworkManager.class);
+        networkManager.destroyNetwork(this.traceGraph.getNetwork());
+        networkManager.destroyNetwork(this.traceDetailsController.getNetwork());
     }
 }

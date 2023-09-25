@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
@@ -33,6 +32,7 @@ public class TracesDisplayController extends AbstractDisplayController {
     private HashMap<CyEdge, Integer> edgeVisits;
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
+    private boolean enableVisitWidth;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                    int length) {
@@ -42,6 +42,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.length = length;
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
+        this.enableVisitWidth = false;
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -54,15 +55,17 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     private void colorEdge(CyEdge e, Color color) {
         networkView.getEdgeView(e).batch(v -> {
-            Integer visits;
-            if ((visits = this.edgeVisits.get(e)) != null) {
-                visits = visits + 1;
-            } else {
-                visits = 1;
+            if (enableVisitWidth) {
+                Integer visits;
+                if ((visits = this.edgeVisits.get(e)) != null) {
+                    visits = visits + 1;
+                } else {
+                    visits = 1;
+                }
+                this.edgeVisits.put(e, visits);
+                // crashes if Integer is passed
+                v.setVisualProperty(EDGE_WIDTH, visits * 1.5);
             }
-            this.edgeVisits.put(e, visits);
-            // crashes if Integer is passed
-            v.setVisualProperty(EDGE_WIDTH, visits * 1.5);
             v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_VISIBLE, true);
@@ -73,7 +76,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         pcs.addPropertyChangeListener("traces", l);
     }
 
-    public void findNextNodes(int index, Trace trace, boolean up) {
+    public static void findNextNodes(int index, Trace trace, TraceGraph traceGraph, int length, boolean up) {
         CyNode node = traceGraph.findNode(index);
         CyNode nextNode;
         int found = 0;
@@ -99,23 +102,22 @@ public class TracesDisplayController extends AbstractDisplayController {
         }
     }
 
-    private Set<Trace> getTraces(CyIdentifiable identifiable, boolean isEdge) {
+    public static Set<Trace> getTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length, boolean isEdge) {
         Set<Trace> traces = new HashSet<>();
         Set<Integer> sourceRows;
         Set<Integer> foundIndices = new HashSet<>();
         CyNode startNode;
         if (isEdge) {
-            var table = this.traceGraph.getNetwork().getDefaultEdgeTable();
+            var table = traceGraph.getNetwork().getDefaultEdgeTable();
             sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.EDGE_SOURCE_ROWS,
                     Integer.class));
             startNode = ((CyEdge) identifiable).getSource();
         } else {
-            var table = this.traceGraph.getNetwork().getDefaultNodeTable();
+            var table = traceGraph.getNetwork().getDefaultNodeTable();
             sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.NODE_SOURCE_ROWS,
                     Integer.class));
             startNode = ((CyNode) identifiable);
         }
-        this.edgeVisits.clear();
         var iterator = sourceRows.iterator();
         while (iterator.hasNext()) {
             int sourceIndex = iterator.next();
@@ -125,8 +127,10 @@ public class TracesDisplayController extends AbstractDisplayController {
             }
             Trace trace = new Trace(startNode, sourceIndex);
             traces.add(trace);
-            findNextNodes(sourceIndex, trace, true);
-            findNextNodes(sourceIndex, trace, false);
+            findNextNodes(sourceIndex, trace, traceGraph, length, true);
+            findNextNodes(sourceIndex, trace, traceGraph, length, false);
+            //TODO: add case where the node in question is also in other places but the middle of the trace
+            // (loop in trace)
             for (var node : trace.getSequence()) {
                 foundIndices.add(node.getValue1());
             }
@@ -139,22 +143,14 @@ public class TracesDisplayController extends AbstractDisplayController {
             this.hideAllEdges();
         }
         Set<Trace> traces = new HashSet<>();
+        this.edgeVisits.clear();
         if (event.getSelectedNodes().size() == 1) {
-            traces.addAll(this.getTraces(event.getSelectedNodes().iterator().next(), false));
+            traces.addAll(getTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false));
         }
         if (event.getSelectedEdges().size() == 1) {
-            traces.addAll(this.getTraces(event.getSelectedEdges().iterator().next(), true));
+            traces.addAll(getTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true));
         }
-
         drawTraces(traces);
-
-        var manager = registrar.getService(TraceGraphManager.class);
-        var factory = manager.getShowTraceDetailsTaskFactory();
-        if (!traces.isEmpty()) {
-            factory.setTraces(traces);
-        } else {
-            factory.setTraces(null);
-        }
     }
 
     public void drawTraces(Set<Trace> traces) {

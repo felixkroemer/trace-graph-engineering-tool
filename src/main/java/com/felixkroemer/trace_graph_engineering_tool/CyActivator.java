@@ -5,13 +5,17 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.LoadNetworkTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.RenderingModeTaskFactory;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceDetailsEdgeTaskFactory;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceDetailsNodeTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.task.EdgeViewTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
+import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
@@ -59,6 +63,14 @@ public class CyActivator extends AbstractCyActivator {
         RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RenderingMode.TRACES);
         registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
+
+        var showTraceDetailsNodeTaskFactory = new ShowTraceDetailsNodeTaskFactory(reg);
+        registerService(bundleContext, showTraceDetailsNodeTaskFactory, NodeViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Tasks", TITLE, "Show Trace Details")));
+
+        var showTraceDetailsEdgeTaskFactory = new ShowTraceDetailsEdgeTaskFactory(reg);
+        registerService(bundleContext, showTraceDetailsEdgeTaskFactory, EdgeViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Tasks", TITLE, "Show Trace Details")));
 
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
                 , TraceGraphManager.class);

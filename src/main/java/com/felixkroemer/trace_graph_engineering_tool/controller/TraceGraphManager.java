@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceDetailsTaskFactory;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
@@ -10,33 +9,23 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.task.NetworkViewTaskFactory;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-
-import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
-import static org.cytoscape.work.ServiceProperties.TITLE;
 
 public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener {
 
     private CyServiceRegistrar registrar;
     private Set<TraceGraphController> controllers;
     private final TraceGraphPanel panel;
-    private final ShowTraceDetailsTaskFactory showTraceDetailsTaskFactory;
 
     public TraceGraphManager(CyServiceRegistrar registrar, TraceGraphPanel panel) {
         this.registrar = registrar;
         this.panel = panel;
         this.controllers = new HashSet<>();
-        this.showTraceDetailsTaskFactory = new ShowTraceDetailsTaskFactory(registrar);
-        this.registrar.registerService(showTraceDetailsTaskFactory, NetworkViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Tasks", TITLE, "Show Trace Details")));
     }
 
     public void registerTraceGraph(TraceGraph traceGraph) {
@@ -72,7 +61,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
 
     public TraceGraphController findControllerForNetwork(CyNetwork network) {
         for (var controller : this.controllers) {
-            if (controller.getTraceGraph().getNetwork() == network) {
+            if (controller.containsNetwork(network)) {
                 return controller;
             }
         }
@@ -91,14 +80,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
 
     public void clearTraceGraphs() {
         for (var controller : this.controllers) {
-            //network destroyed handler will delete it from this.traceGraphs
-            var networkManager = registrar.getService(CyNetworkManager.class);
-            networkManager.destroyNetwork(controller.getTraceGraph().getNetwork());
+            controller.destroy();
         }
-    }
-
-    public ShowTraceDetailsTaskFactory getShowTraceDetailsTaskFactory() {
-        return this.showTraceDetailsTaskFactory;
     }
 
 }

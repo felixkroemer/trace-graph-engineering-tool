@@ -1,58 +1,36 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.Trace;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.View;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 public class ShowTraceDetailsTask extends AbstractTask {
-    private CyServiceRegistrar reg;
+    private CyServiceRegistrar registrar;
     private Logger logger;
+    private View<? extends CyIdentifiable> view;
+    private CyNetworkView networkView;
 
-    private Set<Trace> traces;
-
-    public ShowTraceDetailsTask(CyServiceRegistrar reg, Set<Trace> traceSet) {
+    public ShowTraceDetailsTask(CyServiceRegistrar reg, View<? extends CyIdentifiable> nodeView,
+                                CyNetworkView networkView) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
-        this.reg = reg;
-        this.traces = traceSet;
+        this.registrar = reg;
+        this.view = nodeView;
+        this.networkView = networkView;
     }
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        CyNetworkFactory networkFactory = reg.getService(CyNetworkFactory.class);
-        var network = networkFactory.createNetwork();
-        CyNetworkManager networkManager = reg.getService(CyNetworkManager.class);
-        networkManager.addNetwork(network);
-        CyNetworkViewFactory networkViewFactory = reg.getService(CyNetworkViewFactory.class);
-        var view = networkViewFactory.createNetworkView(network);
-        CyNetworkViewManager networkViewManager = reg.getService(CyNetworkViewManager.class);
-        networkViewManager.addNetworkView(view);
-
-        for (var trace : traces) {
-            CyNode prevTraceNode = null;
-            CyNode prevNode = null;
-            for (var node : trace.getSequence()) {
-                if (prevNode == null || node.getValue0() != prevNode) {
-                    var traceNode = network.addNode();
-                    if (prevTraceNode != null) {
-                        network.addEdge(prevTraceNode, traceNode, true);
-                    }
-                    prevTraceNode = traceNode;
-                }
-                prevNode = node.getValue0();
-            }
-        }
-
+        var network = networkView.getModel();
+        var manager = this.registrar.getService(TraceGraphManager.class);
+        var controller = manager.findControllerForNetwork(network);
+        controller.showTraceDetails(view.getModel());
     }
 
 }
