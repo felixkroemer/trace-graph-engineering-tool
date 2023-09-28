@@ -69,9 +69,13 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, showTraceDetailsEdgeTaskFactory, EdgeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace Details")));
 
-        var viewDefaultViewTaskFactory = new ViewDefaultViewTaskFactory(reg);
-        registerService(bundleContext, viewDefaultViewTaskFactory, NetworkViewTaskFactory.class,
+        var viewDefaultViewNetworkTaskFactory = new ViewDefaultViewNetworkTaskFactory(reg);
+        registerService(bundleContext, viewDefaultViewNetworkTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Return to default network view")));
+
+        var viewDefaultViewNodeTaskFactory = new ViewDefaultViewNodeTaskFactory(reg);
+        registerService(bundleContext, viewDefaultViewNodeTaskFactory, NodeViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Return to selected node")));
 
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
                 , TraceGraphManager.class);

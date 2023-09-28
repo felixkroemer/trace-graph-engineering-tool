@@ -16,6 +16,8 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
@@ -25,9 +27,11 @@ public class TraceDetailsController {
     private CyServiceRegistrar registrar;
     private CyNetwork network;
     private CyNetworkView networkView;
+    private Map<CyNode, CyNode> nodeMapping;
 
     public TraceDetailsController(CyServiceRegistrar registrar) {
         this.registrar = registrar;
+        this.nodeMapping = new HashMap<>();
     }
 
     public void createNetwork() {
@@ -42,7 +46,7 @@ public class TraceDetailsController {
     }
 
     public void showTraces(Set<Trace> traces) {
-
+        this.nodeMapping.clear();
         if (this.network == null) {
             // view is set automatically as current network view
             this.createNetwork();
@@ -65,6 +69,7 @@ public class TraceDetailsController {
                 }
                 var traceNode = network.addNode();
                 eventHelper.flushPayloadEvents();
+                this.nodeMapping.put(traceNode, node.getValue0());
                 var nodeView = networkView.getNodeView(traceNode);
                 nodeView.setLockedValue(NODE_LABEL, startIndex != node.getValue1() ?
                         startIndex + " - " + node.getValue1() : "" + node.getValue1());
@@ -94,5 +99,9 @@ public class TraceDetailsController {
 
     public CyNetwork getNetwork() {
         return this.network;
+    }
+
+    public CyNode findCorrespondingNode(CyNode node) {
+        return this.nodeMapping.get(node);
     }
 }

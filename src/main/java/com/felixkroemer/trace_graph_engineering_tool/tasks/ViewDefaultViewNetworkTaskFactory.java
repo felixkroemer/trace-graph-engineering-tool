@@ -7,11 +7,11 @@ import org.cytoscape.task.AbstractNetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskIterator;
 
-public class ViewDefaultViewTaskFactory extends AbstractNetworkViewTaskFactory {
+public class ViewDefaultViewNetworkTaskFactory extends AbstractNetworkViewTaskFactory {
 
     private CyServiceRegistrar reg;
 
-    public ViewDefaultViewTaskFactory(CyServiceRegistrar reg) {
+    public ViewDefaultViewNetworkTaskFactory(CyServiceRegistrar reg) {
         this.reg = reg;
     }
 
@@ -19,15 +19,11 @@ public class ViewDefaultViewTaskFactory extends AbstractNetworkViewTaskFactory {
     public boolean isReady(CyNetworkView networkView) {
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networkView.getModel());
-        if (controller.getNetworkType(networkView.getModel()) == NetworkType.TRACE_DETAILS) {
-            return true;
-        } else {
-            return false;
-        }
+        return controller.getNetworkType(networkView.getModel()) == NetworkType.TRACE_DETAILS;
     }
 
     @Override
     public TaskIterator createTaskIterator(CyNetworkView networkView) {
-        return new TaskIterator(new ViewDefaultViewTask(reg, networkView));
+        return new TaskIterator(new ViewDefaultViewTask(reg, networkView, null));
     }
 }

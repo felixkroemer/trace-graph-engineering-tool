@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
@@ -118,9 +119,13 @@ public class TraceGraphController implements PropertyChangeListener {
         this.traceDetailsController.showTraces(traces);
     }
 
-    public void showDefaultView(CyNode targetNode) {
+    public void showDefaultView(CyNode node) {
         var manager = this.registrar.getService(CyApplicationManager.class);
         manager.setCurrentNetwork(this.traceGraph.getNetwork());
+        if (node != null) {
+            var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
+            this.renderingController.focusNode(defaultNetworkNode);
+        }
     }
 
     public boolean containsNetwork(CyNetwork network) {
@@ -146,5 +151,9 @@ public class TraceGraphController implements PropertyChangeListener {
         var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.destroyNetwork(this.traceGraph.getNetwork());
         networkManager.destroyNetwork(this.traceDetailsController.getNetwork());
+    }
+
+    public void highlightTrace(List<CyNode> sequence) {
+
     }
 }

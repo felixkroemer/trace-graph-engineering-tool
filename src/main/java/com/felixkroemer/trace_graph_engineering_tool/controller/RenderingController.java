@@ -6,6 +6,7 @@ import com.felixkroemer.trace_graph_engineering_tool.display_manager.SelectedDis
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -19,7 +20,7 @@ import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
 
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class RenderingController implements SelectedNodesAndEdgesListener {
 
@@ -120,6 +121,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener {
         if (event.getNetwork() == this.traceGraph.getNetwork()) {
             this.displayManager.handleNodesSelected(event);
         }
+    }
+
+    public void focusNode(CyNode node) {
+        view.setVisualProperty(NETWORK_CENTER_X_LOCATION, view.getNodeView(node).getVisualProperty(NODE_X_LOCATION));
+        view.setVisualProperty(NETWORK_CENTER_Y_LOCATION, view.getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
     }
 
 }
