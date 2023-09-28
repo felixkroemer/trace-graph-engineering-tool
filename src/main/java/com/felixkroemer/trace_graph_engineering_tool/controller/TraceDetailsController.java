@@ -71,12 +71,12 @@ public class TraceDetailsController {
                 eventHelper.flushPayloadEvents();
                 this.nodeMapping.put(traceNode, node.getValue0());
                 var nodeView = networkView.getNodeView(traceNode);
-                nodeView.setLockedValue(NODE_LABEL, startIndex != node.getValue1() ?
+                nodeView.setVisualProperty(NODE_LABEL, startIndex != node.getValue1() ?
                         startIndex + " - " + node.getValue1() : "" + node.getValue1());
-                nodeView.setLockedValue(NODE_FILL_COLOR, Color.WHITE);
-                nodeView.setLockedValue(NODE_WIDTH, 100.0);
+                nodeView.setVisualProperty(NODE_FILL_COLOR, Color.WHITE);
+                nodeView.setVisualProperty(NODE_WIDTH, 100.0);
                 if (trace.getNode() == node.getValue0()) {
-                    nodeView.setLockedValue(NODE_BORDER_PAINT, Color.MAGENTA);
+                    nodeView.setVisualProperty(NODE_BORDER_PAINT, Color.MAGENTA);
                 }
                 if (prevTraceNode != null) {
                     network.addEdge(prevTraceNode, traceNode, true);

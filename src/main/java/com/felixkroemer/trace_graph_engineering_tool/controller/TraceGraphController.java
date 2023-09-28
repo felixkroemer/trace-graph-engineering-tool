@@ -2,7 +2,6 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
@@ -12,22 +11,16 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.SynchronousTaskManager;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController implements PropertyChangeListener {
+public class TraceGraphController {
 
     private final Logger logger;
 
@@ -50,7 +43,7 @@ public class TraceGraphController implements PropertyChangeListener {
         networkManager.addNetwork(traceGraph.getNetwork());
         var networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(renderingController.getView());
-        this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
+        this.traceGraph.getPDM().forEach(p -> p.addObserver(this.renderingController));
         this.hideUnneededColumns();
         renderingController.applyWorkingLayout();
     }
@@ -64,39 +57,6 @@ public class TraceGraphController implements PropertyChangeListener {
         for (View<CyColumn> columnView : columnViews) {
             if (!parameterNames.contains(columnView.getModel().getName())) {
                 columnView.setVisualProperty(COLUMN_VISIBLE, false);
-            }
-        }
-    }
-
-    private void updateTraceGraph() {
-        TaskIterator iterator = new TaskIterator(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) {
-                traceGraph.clearNetwork();
-                traceGraph.reinitNetwork();
-            }
-        });
-        // throws weird error if run asynchronously
-        // runs on awt event thread
-        // TODO: check if running async is possible
-        var taskManager = registrar.getService(SynchronousTaskManager.class);
-        taskManager.execute(iterator);
-        renderingController.applyWorkingLayout();
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case "enabled" -> {
-                var tableViewManager = registrar.getService(CyTableViewManager.class);
-                var nodeTableView = tableViewManager.getTableView(traceGraph.getNetwork().getDefaultNodeTable());
-                Parameter param = (Parameter) evt.getSource();
-                var columnView = nodeTableView.getColumnView(param.getName());
-                columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
-                updateTraceGraph();
-            }
-            case "bins" -> {
-                updateTraceGraph();
             }
         }
     }
@@ -129,11 +89,7 @@ public class TraceGraphController implements PropertyChangeListener {
     }
 
     public boolean containsNetwork(CyNetwork network) {
-        if (this.traceGraph.getNetwork() == network || this.traceDetailsController.getNetwork() == network) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.traceGraph.getNetwork() == network || this.traceDetailsController.getNetwork() == network;
     }
 
     public NetworkType getNetworkType(CyNetwork network) {
@@ -150,7 +106,10 @@ public class TraceGraphController implements PropertyChangeListener {
         //network destroyed handler will delete it from this.traceGraphs
         var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.destroyNetwork(this.traceGraph.getNetwork());
-        networkManager.destroyNetwork(this.traceDetailsController.getNetwork());
+        var traceDetailsNetwork = this.traceDetailsController.getNetwork();
+        if (traceDetailsNetwork != null) {
+            networkManager.destroyNetwork(traceDetailsNetwork);
+        }
     }
 
     public void highlightTrace(List<CyNode> sequence) {

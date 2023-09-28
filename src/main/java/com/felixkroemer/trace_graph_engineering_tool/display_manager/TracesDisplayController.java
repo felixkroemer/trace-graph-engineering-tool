@@ -171,6 +171,7 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     @Override
     public void enable() {
+        this.deselectAll();
         this.hideAllEdges();
     }
 

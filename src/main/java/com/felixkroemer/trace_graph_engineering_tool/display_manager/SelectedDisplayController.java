@@ -42,9 +42,7 @@ public class SelectedDisplayController extends AbstractDisplayController {
 
     @Override
     public void enable() {
-        for (var nodeView : networkView.getNodeViews()) {
-            networkView.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
-        }
+        this.deselectAll();
         showEdgesOfHighlightedNodes();
     }
 

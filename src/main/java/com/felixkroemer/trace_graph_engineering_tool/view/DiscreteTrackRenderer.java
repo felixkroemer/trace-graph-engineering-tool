@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 // based on org/cytoscape/view/vizmap/gui/internal/view/editor/mappingeditor/DiscreteTrackRenderer.java
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import org.cytoscape.model.CyTable;
 import org.jdesktop.swingx.JXMultiThumbSlider;
 import org.jdesktop.swingx.multislider.Thumb;
@@ -26,27 +26,48 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     private float minValue;
     private float maxValue;
+    private String name;
     private CyTable sourceTable;
-    private Parameter param;
     private BufferedImage heatMap;
+
+    private boolean highlight;
+    // thumb indexed
+    private int highlightFrom;
+    private int highlightTo;
+    private Color highlightColor;
 
     private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue, CyTable sourceTable, Parameter param) {
+    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable,
+                                 HighlightRange range) {
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.name = name;
         this.sourceTable = sourceTable;
-        this.param = param;
+
+        this.highlightColor = new Color(0, 255, 0, 127);
+        if (range != null) {
+            this.highlight = true;
+            this.highlightFrom = range.getLowerBound() - 1;
+            this.highlightTo = range.getUpperBound();
+        } else {
+            this.highlight = false;
+            this.highlightFrom = 0;
+            this.highlightTo = 0;
+        }
+
+        this.initHeatMap();
+    }
+
+    public void initHeatMap() {
         var allRows = sourceTable.getAllRows();
         double[][] array = new double[1000][1];
-        var min = param.getMinimum();
-        var max = param.getMaximum();
         for (int i = 0; i < allRows.size(); i++) {
-            double value = allRows.get(i).get(param.getName(), Double.class);
-            int bucket = (int) (999 * (value - min) / (max - min));
+            double value = allRows.get(i).get(this.name, Double.class);
+            int bucket = (int) (999 * (value - this.minValue) / (this.maxValue - this.minValue));
             array[bucket][0]++;
         }
-        Color[] palette = new Color[]{new Color(235, 231, 108), new Color(240, 184, 110), new Color(237, 123, 123),
+        Color[] palette = new Color[]{new Color(255, 255, 255), new Color(240, 184, 110), new Color(237, 123, 123),
                 new Color(131, 96, 150)};
         Color[] gradient = HeatMap.createMultiGradient(palette, 100);
         this.heatMap = new HeatMap(array, gradient).drawData();
@@ -61,7 +82,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     private int[] getDistribution(List<Double> bins) {
         int[] dist = new int[bins.size() + 1];
         this.sourceTable.getAllRows().forEach(row -> {
-            double value = row.get(param.getName(), Double.class);
+            double value = row.get(this.name, Double.class);
             int i = 0;
             for (double d : bins) {
                 if (value <= d) {
@@ -132,7 +153,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
         var positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
         var newDist =
-                getDistribution(positions.stream().map(f -> f * (param.getMaximum() - param.getMinimum()) + param.getMinimum()).toList());
+                getDistribution(positions.stream().map(f -> f * (this.maxValue * 1.0 - this.minValue) + this.minValue).toList());
 
         String frequency = "" + newDist[0];
         var width = g.getFontMetrics().stringWidth(frequency);
@@ -201,6 +222,23 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
             g.fillOval(x - 3, arrowBarYPosition - 3, 6, 6);
         }
 
+        if (highlight) {
+            int from;
+            if (this.highlightFrom == -1 || stops.isEmpty()) {
+                from = 0;
+            } else {
+                from = (int) (trackWidth * stops.get(this.highlightFrom).getPosition());
+            }
+            int to;
+            if (this.highlightTo == stops.size() || stops.isEmpty()) {
+                to = trackWidth;
+            } else {
+                to = (int) (trackWidth * stops.get(this.highlightTo).getPosition());
+            }
+            g.setColor(this.highlightColor);
+            g.fillRect(from, 5, to - from, trackHeight);
+        }
+
         g.setColor(BORDER_COLOR);
         g.setStroke(new BasicStroke(1.5f));
         g.drawRect(0, 5, trackWidth, trackHeight);
@@ -212,6 +250,16 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     public JComponent getRendererComponent(JXMultiThumbSlider slider) {
         this.slider = slider;
         return this;
+    }
+
+    public void highlight(int from, int to) {
+        this.highlightFrom = from;
+        this.highlightTo = to;
+        this.highlight = true;
+    }
+
+    public void disableHighlight() {
+        this.highlight = false;
     }
 
 }
