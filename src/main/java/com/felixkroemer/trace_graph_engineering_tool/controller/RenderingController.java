@@ -8,6 +8,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
@@ -16,16 +17,19 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
-import org.cytoscape.view.vizmap.*;
+import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualStyle;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.*;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +48,21 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         this.registrar = registrar;
         this.defaultStyle = createInitialVisualStyle();
-        var networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
+        // NetworkViewRenderer gets added to manager on registration, mapped to id
+        // reg.getService(CyNetworkViewFactory.class, "(id=foobar)") does not work,
+        // CyNetworkViewFactory is never registered by Ding
+        // instead, DefaultNetworkViewFactory is retrieved, which
+        // retrieves the CyNetworkViewFactory of the default NetworkViewRenderer (which is ding)
+        var manager = this.registrar.getService(CyApplicationManager.class);
+        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("foobar");
+        var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
+        try {
+            Field rendererId = this.view.getClass().getDeclaredField("rendererId");
+            rendererId.setAccessible(true);
+            rendererId.set(this.view, "foobar");
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+        }
         this.traceGraph = traceGraph;
         this.displayManager = new SelectedDisplayController(view, this.traceGraph);
         this.highlightRanges = new HashMap<>();
@@ -53,7 +70,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void init() {
-        var visualMappingManager = registrar.getService(VisualMappingManager.class);
         this.defaultStyle.apply(view);
     }
 
