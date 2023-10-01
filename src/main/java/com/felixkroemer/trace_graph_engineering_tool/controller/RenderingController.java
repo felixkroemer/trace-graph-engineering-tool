@@ -22,11 +22,7 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
-import org.cytoscape.view.vizmap.VisualMappingFunction;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
-import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.view.vizmap.*;
 import org.cytoscape.work.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +69,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             rendererId.set(this.view, "foobar");
         } catch (NoSuchFieldException | IllegalAccessException e) {
         }
-        init();
+
+        var mapper = registrar.getService(VisualMappingManager.class);
+        mapper.setVisualStyle(this.defaultStyle, this.view);
     }
 
-    public void init() {
-        this.defaultStyle.apply(view);
-    }
 
     public VisualStyle createInitialVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
@@ -138,7 +133,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void highlightRanges() {
         if (highlightRanges.isEmpty()) {
-            return;
+            for (var nodeView : this.view.getNodeViews()) {
+                nodeView.setVisualProperty(NODE_VISIBLE, true);
+            }
         }
         var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
         for (var node : traceGraph.getNetwork().getNodeList()) {
@@ -149,14 +146,16 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             });
             var nodeView = view.getNodeView(node);
             if (match) {
-                //TODO: check how vp dependencies work
+/*                //TODO: check how vp dependencies work
                 //nodeView.setVisualProperty(NODE_SIZE, 30.0);
                 nodeView.setVisualProperty(NODE_BORDER_PAINT, Color.MAGENTA);
                 nodeView.setVisualProperty(NODE_BORDER_WIDTH, 3.0);
-                nodeView.setVisualProperty(NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);
+                nodeView.setVisualProperty(NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);*/
+                nodeView.setVisualProperty(NODE_VISIBLE, true);
             } else {
-                nodeView.setVisualProperty(NODE_TRANSPARENCY, 128);
-                nodeView.setVisualProperty(NODE_BORDER_TRANSPARENCY, 128);
+/*                nodeView.setVisualProperty(NODE_TRANSPARENCY, 128);
+                nodeView.setVisualProperty(NODE_BORDER_TRANSPARENCY, 128);*/
+                nodeView.setVisualProperty(NODE_VISIBLE, false);
             }
         }
     }
