@@ -1,10 +1,10 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful;
 
-import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.EdgeAnchors;
-import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.DiscreteProgressMonitor;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.internal.util.MurmurHash3;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.EdgeAnchors;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.*;
@@ -36,24 +36,6 @@ import static com.felixkroemer.trace_graph_engineering_tool.renderer.graph.rende
  */
 public final class GraphRenderer {
 
-    static Point2D getLineIntersection(Line2D.Float pLine1, Line2D.Float pLine2) {
-        Point result = null;
-
-        double s1_x = pLine1.x2 - pLine1.x1, s1_y = pLine1.y2 - pLine1.y1,
-
-                s2_x = pLine2.x2 - pLine2.x1, s2_y = pLine2.y2 - pLine2.y1,
-
-                s = (-s1_y * (pLine1.x1 - pLine2.x1) + s1_x * (pLine1.y1 - pLine2.y1)) / (-s2_x * s1_y + s1_x * s2_y)
-                , t = (s2_x * (pLine1.y1 - pLine2.y1) - s2_y * (pLine1.x1 - pLine2.x1)) / (-s2_x * s1_y + s1_x * s2_y);
-
-        if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-            // Collision detected
-            result = new Point((int) (pLine1.x1 + (t * s1_x)), (int) (pLine1.y1 + (t * s1_y)));
-        }   // end if
-
-        return result;
-    }
-
     public static void renderEdges(ProgressMonitor pm, GraphGraphics grafx, CyNetworkViewSnapshot netView,
                                    RenderDetailFlags flags, NodeDetails nodeDetails, EdgeDetails edgeDetails,
                                    LabelInfoProvider labelInfoProvider) {
@@ -83,7 +65,6 @@ public final class GraphRenderer {
         } else {
             edgeHits = netView.getSpacialIndex2D().queryAllEdges(pm::isCancelled);
         }
-
 
         if (edgeHits == null) // cancelled
             return;
@@ -150,6 +131,8 @@ public final class GraphRenderer {
                     continue;
                 }
 
+                Point2D center = null;
+                Point2D innerPoint = null;
                 Point2D firstIntersection = null;
                 Point2D secondIntersection = null;
 
@@ -157,20 +140,32 @@ public final class GraphRenderer {
                 float y1;
                 float x2;
                 float y2;
+                // if there is one intersection, mark the node that is inside the view area
                 for (int i = 0; i < 4; i++) {
-                    x1 = area.x + i == 3 ? area.width : 0;
-                    x2 = area.x + i != 2 ? area.width : 0;
-                    y1 = area.y + i == 1 ? area.height : 0;
-                    y2 = area.y + i != 0 ? area.height : 0;
+                    x1 = area.x + (i == 3 ? area.width : 0);
+                    x2 = area.x + (i != 2 ? area.width : 0);
+                    y1 = area.y + (i == 1 ? area.height : 0);
+                    y2 = area.y + (i != 0 ? area.height : 0);
                     var intersection = getLineIntersection(line, new Line2D.Float(x1, y1, x2, y2));
                     if (intersection != null) {
                         if (firstIntersection == null) {
                             firstIntersection = intersection;
+                            if (area.contains(line.x1, line.y1)) {
+                                innerPoint = new Point2D.Float(line.x1, line.y1);
+                            } else if (area.contains(line.x2, line.y2)) {
+                                innerPoint = new Point2D.Float(line.x2, line.y2);
+                            }
                         } else {
                             secondIntersection = intersection;
+                            center = new Point2D.Double((firstIntersection.getX() + secondIntersection.getX()) / 2,
+                                    (firstIntersection.getY() + secondIntersection.getY()) / 2);
                             break;
                         }
                     }
+                }
+                if (innerPoint != null && secondIntersection == null) {
+                    center = new Point2D.Double((firstIntersection.getX() + innerPoint.getX()) / 2,
+                            (firstIntersection.getY() + innerPoint.getY()) / 2);
                 }
 
                 SnapshotEdgeInfo edgeInfo = netView.getEdgeInfo(edge);
@@ -282,9 +277,9 @@ public final class GraphRenderer {
 
                         double textXCenter;
                         double textYCenter;
-                        if (firstIntersection != null && secondIntersection != null) {
-                            textXCenter = (firstIntersection.getX() + secondIntersection.getX()) / 2.0;
-                            textYCenter = (firstIntersection.getY() + secondIntersection.getY()) / 2.0;
+                        if (center != null) {
+                            textXCenter = center.getX();
+                            textYCenter = center.getY();
                         } else {
                             textXCenter = doubleBuff1[0];
                             textYCenter = doubleBuff1[1];
@@ -303,6 +298,21 @@ public final class GraphRenderer {
                 shapeDpm.increment();
                 labelDpm.increment();
             }
+        }
+    }
+
+    static Point2D getLineIntersection(Line2D.Float line1, Line2D.Float line2) {
+        double s1_x = line1.x2 - line1.x1;
+        double s1_y = line1.y2 - line1.y1;
+        double s2_x = line2.x2 - line2.x1;
+        double s2_y = line2.y2 - line2.y1;
+        double s = (-s1_y * (line1.x1 - line2.x1) + s1_x * (line1.y1 - line2.y1)) / (-s2_x * s1_y + s1_x * s2_y);
+        double t = (s2_x * (line1.y1 - line2.y1) - s2_y * (line1.x1 - line2.x1)) / (-s2_x * s1_y + s1_x * s2_y);
+
+        if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+            return new Point((int) (line1.x1 + (t * s1_x)), (int) (line1.y1 + (t * s1_y)));
+        } else {
+            return null;
         }
     }
 
