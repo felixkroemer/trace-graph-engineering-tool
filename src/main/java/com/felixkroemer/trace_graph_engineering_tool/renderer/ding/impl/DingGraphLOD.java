@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
 
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.property.PropertyUpdatedEvent;
@@ -53,11 +53,11 @@ public class DingGraphLOD implements GraphLOD, PropertyUpdatedListener {
 
 
     protected int coarseDetailThreshold; // If nodes+edges is less than this amount, then the network is rendered in
-	// high detail (and the other thresholds are ignored)
+    // high detail (and the other thresholds are ignored)
     protected int nodeBorderThreshold; // If nodes is less than this amount, then borders are rendered
     protected int nodeLabelThreshold;  // If nodes is less than this amount, then labels are rendered
     protected int edgeArrowThreshold;  // Thresholds for if edge arrows and labels should be rendrered, but also
-	// determines if edges should be rendered at all
+    // determines if edges should be rendered at all
     protected int edgeLabelThreshold;
 
     protected boolean edgeBufferPan;
@@ -79,7 +79,7 @@ public class DingGraphLOD implements GraphLOD, PropertyUpdatedListener {
 
     private void readProps() {
         coarseDetailThreshold = parseInt(props.getProperty("render.coarseDetailThreshold"),
-				coarseDetailThreshold_default);
+                coarseDetailThreshold_default);
         nodeBorderThreshold = parseInt(props.getProperty("render.nodeBorderThreshold"), nodeBorderThreshold_default);
         nodeLabelThreshold = parseInt(props.getProperty("render.nodeLabelThreshold"), nodeLabelThreshold_default);
         edgeArrowThreshold = parseInt(props.getProperty("render.edgeArrowThreshold"), edgeArrowThreshold_default);
@@ -278,7 +278,7 @@ public class DingGraphLOD implements GraphLOD, PropertyUpdatedListener {
         if (totalEdgeCount >= Math.min(edgeArrowThreshold, edgeLabelThreshold)) {
             // Since we don't know the visible edge count, use visible node count as a proxy
             // System.out.println("DingGraphLOD: renderEdges("+visibleNodeCount+","+totalNodeCount+",
-			// "+totalEdgeCount+")");
+            // "+totalEdgeCount+")");
             // System.out.println("DingGraphLOD: drawEdges = "+drawEdges);
             if (drawEdges || visibleNodeCount <= Math.max(edgeArrowThreshold, edgeLabelThreshold) / 2) {
                 return RenderEdges.TOUCHING_VISIBLE_NODES;

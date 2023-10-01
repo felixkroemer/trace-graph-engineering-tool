@@ -24,7 +24,7 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding;
  * #L%
  */
 
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.GraphGraphics;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
 import org.cytoscape.view.presentation.property.LabelBackgroundShapeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.LabelBackgroundShape;
@@ -40,25 +40,25 @@ import java.util.Map;
 public class DNodeShape implements NodeShape {
 
     private static final DNodeShape RECTANGLE = new DNodeShape(GraphGraphics.SHAPE_RECTANGLE,
-			NodeShapeVisualProperty.RECTANGLE.getDisplayName(),
-			NodeShapeVisualProperty.RECTANGLE.getSerializableString());
+            NodeShapeVisualProperty.RECTANGLE.getDisplayName(),
+            NodeShapeVisualProperty.RECTANGLE.getSerializableString());
     private static final DNodeShape ROUND_RECTANGLE = new DNodeShape(GraphGraphics.SHAPE_ROUNDED_RECTANGLE,
-			NodeShapeVisualProperty.ROUND_RECTANGLE.getDisplayName(),
-			NodeShapeVisualProperty.ROUND_RECTANGLE.getSerializableString());
+            NodeShapeVisualProperty.ROUND_RECTANGLE.getDisplayName(),
+            NodeShapeVisualProperty.ROUND_RECTANGLE.getSerializableString());
     private static final DNodeShape TRIANGLE = new DNodeShape(GraphGraphics.SHAPE_TRIANGLE,
-			NodeShapeVisualProperty.TRIANGLE.getDisplayName(),
-			NodeShapeVisualProperty.TRIANGLE.getSerializableString());
+            NodeShapeVisualProperty.TRIANGLE.getDisplayName(),
+            NodeShapeVisualProperty.TRIANGLE.getSerializableString());
     private static final DNodeShape PARALLELOGRAM = new DNodeShape(GraphGraphics.SHAPE_PARALLELOGRAM,
-			NodeShapeVisualProperty.PARALLELOGRAM.getDisplayName(),
-			NodeShapeVisualProperty.PARALLELOGRAM.getSerializableString());
+            NodeShapeVisualProperty.PARALLELOGRAM.getDisplayName(),
+            NodeShapeVisualProperty.PARALLELOGRAM.getSerializableString());
     private static final DNodeShape DIAMOND = new DNodeShape(GraphGraphics.SHAPE_DIAMOND,
-			NodeShapeVisualProperty.DIAMOND.getDisplayName(), NodeShapeVisualProperty.DIAMOND.getSerializableString());
+            NodeShapeVisualProperty.DIAMOND.getDisplayName(), NodeShapeVisualProperty.DIAMOND.getSerializableString());
     private static final DNodeShape ELLIPSE = new DNodeShape(GraphGraphics.SHAPE_ELLIPSE,
-			NodeShapeVisualProperty.ELLIPSE.getDisplayName(), NodeShapeVisualProperty.ELLIPSE.getSerializableString());
+            NodeShapeVisualProperty.ELLIPSE.getDisplayName(), NodeShapeVisualProperty.ELLIPSE.getSerializableString());
     private static final DNodeShape HEXAGON = new DNodeShape(GraphGraphics.SHAPE_HEXAGON,
-			NodeShapeVisualProperty.HEXAGON.getDisplayName(), NodeShapeVisualProperty.HEXAGON.getSerializableString());
+            NodeShapeVisualProperty.HEXAGON.getDisplayName(), NodeShapeVisualProperty.HEXAGON.getSerializableString());
     private static final DNodeShape OCTAGON = new DNodeShape(GraphGraphics.SHAPE_OCTAGON,
-			NodeShapeVisualProperty.OCTAGON.getDisplayName(), NodeShapeVisualProperty.OCTAGON.getSerializableString());
+            NodeShapeVisualProperty.OCTAGON.getDisplayName(), NodeShapeVisualProperty.OCTAGON.getSerializableString());
 
     // Ding specific node shapes.
     public static final DNodeShape VEE = new DNodeShape(GraphGraphics.SHAPE_VEE, "V", "VEE");

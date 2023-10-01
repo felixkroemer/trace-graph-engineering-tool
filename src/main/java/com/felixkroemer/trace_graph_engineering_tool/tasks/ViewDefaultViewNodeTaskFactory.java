@@ -21,7 +21,11 @@ public class ViewDefaultViewNodeTaskFactory extends AbstractNodeViewTaskFactory 
     public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networkView.getModel());
-        return controller.getNetworkType(networkView.getModel()) == NetworkType.TRACE_DETAILS;
+        if (controller != null) {
+            return controller.getNetworkType(networkView.getModel()) == NetworkType.TRACE_DETAILS;
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -2,9 +2,9 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.DNodeShape;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.DVisualLexicon;
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.GraphGraphics;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.CustomGraphicsInfo;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.NodeDetails;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.CustomGraphicsInfo;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.NodeDetails;
 import org.cytoscape.cg.model.NullCustomGraphics;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -45,9 +45,9 @@ public class DNodeDetails implements NodeDetails {
         // Initialize image icons for nested networks
         try {
             DEFAULT_NESTED_NETWORK_IMAGE = ImageIO.read(DNodeDetails.class.getClassLoader().getResource("images" +
-					"/default_network.png"));
+                    "/default_network.png"));
             RECURSIVE_NESTED_NETWORK_IMAGE = ImageIO.read(DNodeDetails.class.getClassLoader().getResource("images" +
-					"/recursive_network.png"));
+                    "/recursive_network.png"));
         } catch (IOException e) {
             e.printStackTrace();
             DEFAULT_NESTED_NETWORK_IMAGE = null;
@@ -361,7 +361,7 @@ public class DNodeDetails implements NodeDetails {
                 if (RECURSIVE_NESTED_NETWORK_IMAGE == null) return null;
 
                 final Rectangle2D rect = new Rectangle2D.Double(-IMAGE_WIDTH / 2, -IMAGE_HEIGHT / 2, IMAGE_WIDTH,
-						IMAGE_HEIGHT);
+                        IMAGE_HEIGHT);
                 return new TexturePaint(RECURSIVE_NESTED_NETWORK_IMAGE, rect);
             }
 
@@ -380,7 +380,7 @@ public class DNodeDetails implements NodeDetails {
                     return null;
 
                 Rectangle2D rect = new Rectangle2D.Double(-IMAGE_WIDTH / 2, -IMAGE_HEIGHT / 2, IMAGE_WIDTH,
-						IMAGE_HEIGHT);
+                        IMAGE_HEIGHT);
                 return new TexturePaint(DEFAULT_NESTED_NETWORK_IMAGE, rect);
             }
         } finally {

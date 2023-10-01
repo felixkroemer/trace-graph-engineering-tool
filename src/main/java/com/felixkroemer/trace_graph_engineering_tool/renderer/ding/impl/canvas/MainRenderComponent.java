@@ -5,7 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderi
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine.UpdateType;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DingGraphLOD;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 
 import java.awt.*;

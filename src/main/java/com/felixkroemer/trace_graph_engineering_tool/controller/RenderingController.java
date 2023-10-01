@@ -4,13 +4,16 @@ import com.felixkroemer.trace_graph_engineering_tool.display_manager.AbstractDis
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.DefaultDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.SelectedDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.CyUserLog;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -25,6 +28,8 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.cytoscape.work.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -38,6 +43,7 @@ import static org.cytoscape.view.presentation.property.table.BasicTableVisualLex
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener {
 
+    private Logger logger;
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
@@ -46,7 +52,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private Map<Parameter, HighlightRange> highlightRanges;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
+        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = registrar;
+        this.traceGraph = traceGraph;
+        this.highlightRanges = new HashMap<>();
         this.defaultStyle = createInitialVisualStyle();
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=foobar)") does not work,
@@ -57,15 +66,13 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("foobar");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
+        this.displayManager = new SelectedDisplayController(this.view, this.traceGraph);
         try {
             Field rendererId = this.view.getClass().getDeclaredField("rendererId");
             rendererId.setAccessible(true);
             rendererId.set(this.view, "foobar");
         } catch (NoSuchFieldException | IllegalAccessException e) {
         }
-        this.traceGraph = traceGraph;
-        this.displayManager = new SelectedDisplayController(view, this.traceGraph);
-        this.highlightRanges = new HashMap<>();
         init();
     }
 
@@ -77,27 +84,23 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default");
 
-        // Ensure we get org.cytoscape.view.vizmap.internal.mappings.PassthroughMappingFactory, then cast to
-        // PassthroughMapping
         VisualMappingFunctionFactory visualMappingFunctionFactory =
                 registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
-/*        TooltipMappingFactory tooltipMappingFunctionFactory =
-                (TooltipMappingFactory) registrar.getService(VisualMappingFunctionFactory.class, "(mapping" + ".type" +
-                        "=tooltip)");
-        tooltipMappingFunctionFactory.setTraceGraphController(this.controller);*/
+        TooltipMappingFactory tooltipMappingFunctionFactory =
+                (TooltipMappingFactory) registrar.getService(VisualMappingFunctionFactory.class,
+                        "(mapping" + ".type" + "=tooltip)");
+        tooltipMappingFunctionFactory.setTraceGraph(this.traceGraph);
 
         VisualMappingFunction<Integer, Double> sizeMapping = Mappings.createSizeMapping(1, 2000,
                 visualMappingFunctionFactory);
         VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, 1600,
                 visualMappingFunctionFactory);
-/*
         VisualMappingFunction<CyRow, String> tooltipMapping =
                 Mappings.createTooltipMapping(tooltipMappingFunctionFactory);
-*/
 
         style.addVisualMappingFunction(sizeMapping);
         style.addVisualMappingFunction(colorMapping);
-        //style.addVisualMappingFunction(tooltipMapping);
+        style.addVisualMappingFunction(tooltipMapping);
 
 
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);

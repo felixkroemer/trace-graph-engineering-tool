@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.debug;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.CompositeImageCanvas;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +23,7 @@ public class DebugRootProgressMonitor implements DebugProgressMonitor {
     private CompositeImageCanvas.PaintParameters paintParams;
 
     public DebugRootProgressMonitor(DebugFrameType type, ProgressMonitor delegate,
-									DebugProgressMonitorCallback callback) {
+                                    DebugProgressMonitorCallback callback) {
         this.type = type;
         this.delegate = ProgressMonitor.notNull(delegate);
         this.callback = callback;

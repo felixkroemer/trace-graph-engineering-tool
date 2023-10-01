@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.debug;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.CompositeImageCanvas;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,8 +21,8 @@ public class DebugRootFrameInfo extends DebugFrameInfo {
 
 
     private DebugRootFrameInfo(String task, long start, long end, DebugFrameType type, boolean cancelled,
-							   RenderDetailFlags flags, CompositeImageCanvas.PaintParameters paintParams,
-							   List<DebugFrameInfo> subFrames) {
+                               RenderDetailFlags flags, CompositeImageCanvas.PaintParameters paintParams,
+                               List<DebugFrameInfo> subFrames) {
         super(task, end - start, subFrames);
         this.type = type;
         this.cancelled = cancelled;

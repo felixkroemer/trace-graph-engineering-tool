@@ -8,9 +8,9 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.Transfor
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.CompositeImageCanvas.PaintParameters;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.NetworkTransform.Snapshot;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD.RenderEdges;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD.RenderEdges;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 import javax.swing.*;
 import java.awt.*;

@@ -28,8 +28,8 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.DVisualLexico
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.strokes.DAnimatedStroke;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.intr.LongEnumerator;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.intr.MinLongHeap;
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.EdgeAnchors;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.EdgeDetails;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.EdgeAnchors;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.EdgeDetails;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewSnapshot;
@@ -259,7 +259,7 @@ public final class DEdgeDetails implements EdgeDetails {
 
         if (getStacking(edgeView) == EdgeStackingVisualProperty.AUTO_BEND) {
             // Multiply by 2 so the default of 0.5 results in a modifier of 1.0 which has no effect and maintains
-			// backwards compatibility.
+            // backwards compatibility.
             density *= 2.0f;
         }
         return density;
@@ -422,12 +422,12 @@ public final class DEdgeDetails implements EdgeDetails {
 
 
     public static List<View<CyEdge>> getConnectingEdgeList(CyNetworkViewSnapshot netView, View<CyNode> source,
-														   View<CyNode> target) {
+                                                           View<CyNode> target) {
         return getConnectingEdgeList(netView, source.getSUID(), target.getSUID());
     }
 
     public static List<View<CyEdge>> getConnectingEdgeList(CyNetworkViewSnapshot netView, long sourceSuid,
-														   long targetSuid) {
+                                                           long targetSuid) {
         // MKTODO this may need to be optimized
         List<View<CyEdge>> connectingEdges = new ArrayList<>();
         var adjacentEdgeIterable = netView.getAdjacentEdgeIterable(sourceSuid);

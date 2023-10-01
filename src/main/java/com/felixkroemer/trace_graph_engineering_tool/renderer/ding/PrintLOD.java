@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DingGraphLODAll;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
 
 
 /**
@@ -28,7 +28,7 @@ public class PrintLOD implements GraphLOD {
 
     /**
      * Always render in high detail, but things like labels can still be disabled based on number of visible
-	 * nodes/edges.
+     * nodes/edges.
      */
     @Override
     public boolean detail(int renderNodeCount, int renderEdgeCount) {

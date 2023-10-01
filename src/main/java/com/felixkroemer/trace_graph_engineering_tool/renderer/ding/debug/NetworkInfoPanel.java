@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.debug;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.NetworkTransform;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 import org.cytoscape.util.swing.BasicCollapsiblePanel;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 

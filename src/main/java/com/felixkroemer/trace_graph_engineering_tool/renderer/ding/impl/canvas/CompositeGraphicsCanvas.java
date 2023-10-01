@@ -2,8 +2,8 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.NoOutputProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 import org.cytoscape.view.model.CyNetworkViewSnapshot;
 import org.cytoscape.view.presentation.annotations.Annotation;
 
@@ -13,7 +13,7 @@ import java.util.*;
 
 import static com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.annotations.DingAnnotation.CanvasID.BACKGROUND;
 import static com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.annotations.DingAnnotation.CanvasID.FOREGROUND;
-import static com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags.OPT_PDF_FONT_HACK;
+import static com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags.OPT_PDF_FONT_HACK;
 
 /**
  * A single use graphics canvas meant for drawing vector graphics for image and PDF export.
@@ -21,7 +21,7 @@ import static com.felixkroemer.trace_graph_engineering_tool.render.stateful.Rend
 public class CompositeGraphicsCanvas {
 
     public static void paint(Graphics2D graphics, Color bgPaint, GraphLOD lod, NetworkTransform transform,
-							 DRenderingEngine re, boolean pdfFontHack) {
+                             DRenderingEngine re, boolean pdfFontHack) {
         var g = new SimpleGraphicsProvider(transform, graphics);
         var snapshot = re.getViewModelSnapshot();
         var pm = new NoOutputProgressMonitor();
@@ -32,7 +32,7 @@ public class CompositeGraphicsCanvas {
         }
 
         var canvasList = Arrays.asList(new AnnotationCanvas<>(g, re, FOREGROUND, false), new NodeCanvas<>(g, re),
-				new EdgeCanvas<>(g, re), new AnnotationCanvas<>(g, re, BACKGROUND, false));
+                new EdgeCanvas<>(g, re), new AnnotationCanvas<>(g, re, BACKGROUND, false));
         Collections.reverse(canvasList);
 
         g.fill(bgPaint);
@@ -43,7 +43,7 @@ public class CompositeGraphicsCanvas {
 
 
     public static void paintThumbnail(Graphics2D graphics, Color bgPaint, GraphLOD lod, NetworkTransform transform,
-									  CyNetworkViewSnapshot snapshot, Collection<Annotation> annotations) {
+                                      CyNetworkViewSnapshot snapshot, Collection<Annotation> annotations) {
         var g = new SimpleGraphicsProvider(transform, graphics);
         var flags = RenderDetailFlags.create(snapshot, transform, lod, null);
         var pm = new NoOutputProgressMonitor();
@@ -59,7 +59,7 @@ public class CompositeGraphicsCanvas {
         }
 
         var canvasList = Arrays.asList(new AnnotationThumbnailCanvas<>(g, foreground), new NodeThumbnailCanvas<>(g,
-				snapshot), new EdgeThumbnailCanvas<>(g, snapshot), new AnnotationThumbnailCanvas<>(g, background));
+                snapshot), new EdgeThumbnailCanvas<>(g, snapshot), new AnnotationThumbnailCanvas<>(g, background));
         Collections.reverse(canvasList);
 
         g.fill(bgPaint);

@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 import java.awt.*;
 import java.util.Objects;
@@ -16,7 +16,7 @@ public class ImageFuture {
 
 
     public ImageFuture(CompletableFuture<Image> future, RenderDetailFlags lastRenderDetail,
-					   ProgressMonitor progressMonitor) {
+                       ProgressMonitor progressMonitor) {
         this.future = Objects.requireNonNull(future);
         this.lastRenderDetail = Objects.requireNonNull(lastRenderDetail);
         this.progressMonitor = ProgressMonitor.notNull(progressMonitor);

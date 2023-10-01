@@ -5,7 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderi
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine.UpdateType;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.NoOutputProgressMonitor;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
 
 import javax.swing.*;
 import java.awt.*;

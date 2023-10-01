@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
 
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
 
 /**
  * Level of Details object for Ding.

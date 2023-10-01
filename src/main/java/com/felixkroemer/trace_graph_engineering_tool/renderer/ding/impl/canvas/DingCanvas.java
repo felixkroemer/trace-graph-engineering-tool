@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 /*
  * #%L

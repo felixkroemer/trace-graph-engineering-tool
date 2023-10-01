@@ -5,8 +5,8 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderi
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine.UpdateType;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.annotations.DingAnnotation.CanvasID;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 
 import java.awt.*;
 import java.util.concurrent.CompletableFuture;
@@ -82,7 +82,7 @@ public class CompositeImageCanvas {
 
     private void updateAnnotationAndSelectionCanvasBuffers() {
         // This is a memory optimization, don't allocate buffers for the annotation canvases if there are no
-		// annotations to render.
+        // annotations to render.
         var cyAnnotator = re.getCyAnnotator();
         boolean hasFG = cyAnnotator.hasAnnotations(CanvasID.FOREGROUND);
         boolean hasBG = cyAnnotator.hasAnnotations(CanvasID.BACKGROUND);
@@ -163,7 +163,7 @@ public class CompositeImageCanvas {
         private final String panCanvasName;
 
         private PaintParameters(UpdateType updateType, boolean isPan, int panDx, int panDy,
-								CompositeImageCanvas slowCanvas, String panCanvasName) {
+                                CompositeImageCanvas slowCanvas, String panCanvasName) {
             this.update = updateType;
             this.isPan = isPan;
             this.panDx = panDx;

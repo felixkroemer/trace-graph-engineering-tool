@@ -3,10 +3,10 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DEdgeDetails;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DNodeDetails;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.work.ProgressMonitor;
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.GraphGraphics;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphRenderer;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.LabelInfoProvider;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphRenderer;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.LabelInfoProvider;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags;
 import org.cytoscape.view.model.CyNetworkViewSnapshot;
 
 public class EdgeThumbnailCanvas<GP extends GraphicsProvider> extends DingCanvas<GP> {

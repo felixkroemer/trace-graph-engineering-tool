@@ -1,9 +1,9 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
 
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.annotations.DingAnnotation;
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.EdgeAnchors;
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.GraphGraphics;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.*;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.EdgeAnchors;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.*;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewSnapshot;
@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-import static com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags.*;
+import static com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags.*;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_LABEL_POSITION;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_LABEL_POSITION;
 
@@ -105,7 +105,7 @@ public class NetworkPicker {
      * 3) Calculate modpoint between the source and target nodes -- that becomes x and y
      */
     public LabelSelection getEdgeLabelShape(View<CyEdge> edge, LabelInfoProvider labelProvider, float[] floatBuff1,
-											float[] floatBuff2, View<CyNode>[] nodes) {
+                                            float[] floatBuff2, View<CyNode>[] nodes) {
 
         final String text = edgeDetails.getLabelText(edge);
         if (text == null || text.length() == 0) return null;
@@ -150,13 +150,13 @@ public class NetworkPicker {
 
         // Compute the anchors to use when rendering edge.
         final EdgeAnchors anchors = renderDetailFlags.not(LOD_EDGE_ANCHORS) ? null : edgeDetails.getAnchors(snapshot,
-				edge);
+                edge);
 
         if (stacking == EdgeStackingVisualProperty.HAYSTACK) {
             return null;
         } else /* auto bend */ {
             GraphRenderer.computeEdgeEndpoints(floatBuff1, srcShape, srcArrow, srcArrowSize, anchors, floatBuff2,
-					trgShape, trgArrow, trgArrowSize, floatBuff3, floatBuff4);
+                    trgShape, trgArrow, trgArrowSize, floatBuff3, floatBuff4);
         }
 
         final double degrees = edgeDetails.getLabelRotation(edge);
@@ -174,7 +174,7 @@ public class NetworkPicker {
         LabelInfo labelInfo = labelProvider.getLabelInfo(text, font, edgeLabelWidth, frc);
 
         GraphRenderer.getEdgeLabelPosition(edge, edgeDetails, renderDetailFlags, labelInfo, floatBuff3, floatBuff4,
-				anchors, offsetBuff, doubleBuff1);
+                anchors, offsetBuff, doubleBuff1);
 
         final ObjectPosition originalPosition = edge.getVisualProperty(EDGE_LABEL_POSITION);
         double h = labelInfo.getTotalHeight();  // actual label text box height
@@ -198,7 +198,7 @@ public class NetworkPicker {
         }
 
         // System.out.println("LabelSelection: originalPosition="+originalPosition+", shape="+shape+",
-		// labelAnchor="+labelAnchorX+","+labelAnchorY);
+        // labelAnchor="+labelAnchorX+","+labelAnchorY);
 
 
         return new LabelSelection(edge, shape, originalPosition, labelAnchorX, labelAnchorY, degrees, slope, lineAngle);
@@ -279,10 +279,10 @@ public class NetworkPicker {
 
         Rectangle2D.Float area = re.getTransform().getNetworkVisibleAreaNodeCoords();
         SpacialIndex2DEnumerator<Long> nodeHits = snapshot.getSpacialIndex2D().queryOverlap(area.x, area.y,
-				area.x + area.width, area.y + area.height);
+                area.x + area.width, area.y + area.height);
 
         LabelInfoProvider labelProvider = re.getGraphLOD().isLabelCacheEnabled() ? re.getLabelCache() :
-				LabelInfoProvider.NO_CACHE;
+                LabelInfoProvider.NO_CACHE;
 
         while (nodeHits.hasNext()) {
             Long suid = nodeHits.next();
@@ -303,10 +303,10 @@ public class NetworkPicker {
 
         Rectangle2D.Float area = re.getTransform().getNetworkVisibleAreaNodeCoords();
         EdgeSpacialIndex2DEnumerator edgeHits = snapshot.getSpacialIndex2D().queryOverlapEdges(area.x, area.y,
-				area.x + area.width, area.y + area.height, null);
+                area.x + area.width, area.y + area.height, null);
 
         LabelInfoProvider labelProvider = re.getGraphLOD().isLabelCacheEnabled() ? re.getLabelCache() :
-				LabelInfoProvider.NO_CACHE;
+                LabelInfoProvider.NO_CACHE;
 
         float[] sourceExtents = new float[4];
         float[] targetExtents = new float[4];
@@ -355,7 +355,7 @@ public class NetworkPicker {
 
         Rectangle2D.Float area = re.getTransform().getNetworkVisibleAreaNodeCoords();
         EdgeSpacialIndex2DEnumerator edgeHits = snapshot.getSpacialIndex2D().queryOverlapEdges(area.x, area.y,
-				area.x + area.width, area.y + area.height, null);
+                area.x + area.width, area.y + area.height, null);
 
         while (edgeHits.hasNext()) {
             View<CyEdge> edge = edgeHits.nextEdge();
@@ -370,7 +370,7 @@ public class NetworkPicker {
 
 
     private void getHandles(CyNetworkViewSnapshot snapshot, View<CyEdge> edge, Rectangle2D selectionAreaNode,
-							List<HandleInfo> resultHandles) {
+                            List<HandleInfo> resultHandles) {
         if (edgeDetails.isSelected(edge)) {
             Bend bend = edgeDetails.getBend(edge);
             if (bend != null) {
@@ -440,7 +440,7 @@ public class NetworkPicker {
         CyNetworkViewSnapshot snapshot = re.getViewModelSnapshot();
         Rectangle2D.Float area = re.getTransform().getNetworkVisibleAreaNodeCoords();
         EdgeSpacialIndex2DEnumerator edgeHits = snapshot.getSpacialIndex2D().queryOverlapEdges(area.x, area.y,
-				area.x + area.width, area.y + area.height, null);
+                area.x + area.width, area.y + area.height, null);
 
         List<Long> resultEdges = new ArrayList<>();
 
@@ -497,9 +497,9 @@ public class NetworkPicker {
                     srcArrow = edgeDetails.getSourceArrowShape(edge);
                     trgArrow = edgeDetails.getTargetArrowShape(edge);
                     srcArrowSize = ((srcArrow == ArrowShapeVisualProperty.NONE) ? 0.0f :
-							edgeDetails.getSourceArrowSize(edge));
+                            edgeDetails.getSourceArrowSize(edge));
                     trgArrowSize = ((trgArrow == ArrowShapeVisualProperty.NONE) ? 0.0f :
-							edgeDetails.getTargetArrowSize(edge));
+                            edgeDetails.getTargetArrowSize(edge));
                 }
 
                 EdgeAnchors anchors = getFlags().not(LOD_EDGE_ANCHORS) ? null : edgeDetails.getAnchors(snapshot, edge);
@@ -507,21 +507,21 @@ public class NetworkPicker {
                 if (stacking == EdgeStackingVisualProperty.HAYSTACK) {
                     float radiusModifier = edgeDetails.getStackingDensity(edge);
                     GraphRenderer.computeEdgeEndpointsHaystack(srcExtents, trgExtents, srcSuid, trgSuid, edgeSuid,
-							radiusModifier, stacking, floatBuff1, floatBuff2, haystackDataBuff);
+                            radiusModifier, stacking, floatBuff1, floatBuff2, haystackDataBuff);
                 } else {
                     GraphRenderer.computeEdgeEndpoints(srcExtents, srcShape, srcArrow, srcArrowSize, anchors,
-							trgExtents, trgShape, trgArrow, trgArrowSize, floatBuff1, floatBuff2);
+                            trgExtents, trgShape, trgArrow, trgArrowSize, floatBuff1, floatBuff2);
                 }
 
                 GeneralPath path = new GeneralPath();
                 GeneralPath path2 = new GeneralPath();
 
                 GraphGraphics.getEdgePath(srcArrow, srcArrowSize, trgArrow, trgArrowSize, floatBuff1[0],
-						floatBuff1[1], anchors, floatBuff2[0], floatBuff2[1], path);
+                        floatBuff1[1], anchors, floatBuff2[0], floatBuff2[1], path);
                 GraphRenderer.computeClosedPath(path.getPathIterator(null), path2);
 
                 if (path2.intersects(xMin - segThicknessDiv2, yMin - segThicknessDiv2,
-						(xMax - xMin) + (segThicknessDiv2 * 2), (yMax - yMin) + (segThicknessDiv2 * 2)))
+                        (xMax - xMin) + (segThicknessDiv2 * 2), (yMax - yMin) + (segThicknessDiv2 * 2)))
                     resultEdges.add(edge.getSUID());
             }
         }
@@ -547,7 +547,7 @@ public class NetworkPicker {
 
 
     public List<Long> getNodesIntersectingRectangle(double xMinimum, double yMinimum, double xMaximum,
-													double yMaximum) {
+                                                    double yMaximum) {
         CyNetworkViewSnapshot snapshot = re.getViewModelSnapshot();
         final float xMin = (float) xMinimum;
         final float yMin = (float) yMinimum;
@@ -580,7 +580,7 @@ public class NetworkPicker {
 
                     GeneralPath path = new GeneralPath();
                     GraphGraphics.getNodeShape(nodeDetails.getShape(cyNode), extentsBuff[0], extentsBuff[1],
-							extentsBuff[2], extentsBuff[3], path);
+                            extentsBuff[2], extentsBuff[3], path);
 
                     if ((w > 0) && (h > 0)) {
                         if (path.intersects(x, y, w, h)) returnVal.add(suid);
@@ -606,7 +606,7 @@ public class NetworkPicker {
         CyNetworkViewSnapshot snapshot = re.getViewModelSnapshot();
         Rectangle2D mbr = path.getBounds2D();
         SpacialIndex2DEnumerator<Long> under = snapshot.getSpacialIndex2D().queryOverlap((float) mbr.getMinX(),
-				(float) mbr.getMinY(), (float) mbr.getMaxX(), (float) mbr.getMaxY());
+                (float) mbr.getMinY(), (float) mbr.getMaxX(), (float) mbr.getMaxY());
         if (!under.hasNext()) return Collections.emptyList();
 
         List<Long> result = new ArrayList<>(under.size());
@@ -629,7 +629,7 @@ public class NetworkPicker {
                 View<CyNode> nodeView = snapshot.getNodeView(suid);
                 GeneralPath nodeShape = new GeneralPath();
                 GraphGraphics.getNodeShape(nodeDetails.getShape(nodeView), extents[0], extents[1], extents[2],
-						extents[3], nodeShape);
+                        extents[3], nodeShape);
                 Area pathArea = new Area(path);
                 Area nodeArea = new Area(nodeShape);
                 pathArea.intersect(nodeArea);

@@ -12,8 +12,8 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.canvas.N
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.AnnotationFactoryManager;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.cyannotator.CyAnnotator;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.strokes.DAnimatedStroke;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.*;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD.RenderEdges;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.*;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD.RenderEdges;
 import org.cytoscape.cg.event.CustomGraphicsLibraryUpdatedListener;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.event.DebounceTimer;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import static com.felixkroemer.trace_graph_engineering_tool.render.stateful.RenderDetailFlags.*;
+import static com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.RenderDetailFlags.*;
 
 /*
  * #%L
@@ -143,7 +143,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
 
 
     public DRenderingEngine(CyNetworkView view, DVisualLexicon dingLexicon, AnnotationFactoryManager annMgr,
-							DingGraphLOD dingGraphLOD, HandleFactory handleFactory, CyServiceRegistrar registrar) {
+                            DingGraphLOD dingGraphLOD, HandleFactory handleFactory, CyServiceRegistrar registrar) {
         this.serviceRegistrar = registrar;
         this.eventHelper = registrar.getService(CyEventHelper.class);
         this.viewModel = view;
@@ -177,7 +177,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
         viewModelSnapshot = viewModel.createSnapshot();
 
         labelInfoCache = new LabelInfoCache(1000, DingDebugMediator.showDebugPanel(registrar)); // MKTODO should
-		// maxSize be hardcoded?
+        // maxSize be hardcoded?
 
         eventFireTimer = new DebounceTimer(240);
 
@@ -281,7 +281,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
     private void updateAnimationState() { // call only when model is dirty
         if (viewModelSnapshot == null) return;
         Collection<View<CyEdge>> animatedEdges =
-				viewModelSnapshot.getTrackedEdges(DingNetworkViewFactory.ANIMATED_EDGES);
+                viewModelSnapshot.getTrackedEdges(DingNetworkViewFactory.ANIMATED_EDGES);
         edgeDetails.updateAnimatedEdges(animatedEdges);
         this.animateEdges = !animatedEdges.isEmpty();
     }
@@ -452,7 +452,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
     }
 
     private void computeNodeBounds(CyNetworkViewSnapshot netViewSnapshot, Collection<View<CyNode>> nodes,
-								   double[] buff) {
+                                   double[] buff) {
         SpacialIndex2D<Long> spacial = netViewSnapshot.getSpacialIndex2D();
 
         float[] extents = new float[4];
@@ -518,7 +518,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
                 NetworkPicker picker = getPicker();
 
                 Iterable<View<CyNode>> nodeIterable = justSelectedNodes ? selectedNodes :
-						netViewSnapshot.getNodeViewsIterable();
+                        netViewSnapshot.getNodeViewsIterable();
 
                 for (View<CyNode> node : nodeIterable) {
                     var label = picker.getNodeLabelShape(node, labelCache);
@@ -535,17 +535,17 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
             netViewSnapshot.getMutableNetworkView().batch(netView -> {
                 if (!netView.isValueLocked(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION))
                     netView.setVisualProperty(BasicVisualLexicon.NETWORK_CENTER_X_LOCATION,
-							(extents[0] + extents[2]) / 2.0d);
+                            (extents[0] + extents[2]) / 2.0d);
 
                 if (!netView.isValueLocked(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION))
                     netView.setVisualProperty(BasicVisualLexicon.NETWORK_CENTER_Y_LOCATION,
-							(extents[1] + extents[3]) / 2.0d);
+                            (extents[1] + extents[3]) / 2.0d);
 
                 if (!netView.isValueLocked(BasicVisualLexicon.NETWORK_SCALE_FACTOR)) {
                     // Apply a factor 0.98 to zoom, so that it leaves a small border around the network and any
-					// annotations.
+                    // annotations.
                     final double zoom = Math.min(((double) transform.getWidth()) / (extents[2] - extents[0]),
-							((double) transform.getHeight()) / (extents[3] - extents[1])) * 0.98;
+                            ((double) transform.getHeight()) / (extents[3] - extents[1])) * 0.98;
                     // Update view model.  Zoom Level should be modified.
                     netView.setVisualProperty(BasicVisualLexicon.NETWORK_SCALE_FACTOR, zoom);
                 }
@@ -680,7 +680,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
         transform.setDPIScaleFactor(1.0);
 
         double image_scale = Math.min(pageFormat.getImageableWidth() / transform.getWidth(),
-				pageFormat.getImageableHeight() / transform.getHeight());
+                pageFormat.getImageableHeight() / transform.getHeight());
 
         if (image_scale < 1.0d) {
             ((Graphics2D) g).scale(image_scale, image_scale);
@@ -752,7 +752,7 @@ public class DRenderingEngine implements RenderingEngine<CyNetwork>, Printable, 
             double xCenter = (extents[0] + extents[2]) / 2.0d;
             double yCenter = (extents[1] + extents[3]) / 2.0d;
             double zoom = Math.min(((double) width) / (extents[2] - extents[0]),
-					((double) height) / (extents[3] - extents[1])) * 0.98;
+                    ((double) height) / (extents[3] - extents[1])) * 0.98;
 
             NetworkTransform transform = new NetworkTransform(width, height, xCenter, yCenter, zoom);
             NetworkImageBuffer buffer = new NetworkImageBuffer(transform);

@@ -21,8 +21,8 @@ public class ShowTraceDetailsEdgeTaskFactory extends AbstractEdgeViewTaskFactory
     public boolean isReady(View<CyEdge> nodeView, CyNetworkView networkView) {
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networkView.getModel());
-        if (controller.getNetworkType(networkView.getModel()) == NetworkType.DEFAULT) {
-            return true;
+        if (controller != null) {
+            return controller.getNetworkType(networkView.getModel()) == NetworkType.DEFAULT;
         } else {
             return false;
         }

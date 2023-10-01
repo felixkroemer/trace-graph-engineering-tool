@@ -4,7 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.DVisualLexico
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DRenderingEngine.UpdateType;
 import com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl.DingNetworkViewFactory;
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.NodeDetails;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.NodeDetails;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.CyNetworkViewSnapshot;

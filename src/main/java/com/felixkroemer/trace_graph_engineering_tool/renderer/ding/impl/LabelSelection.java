@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
 
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphRenderer;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphRenderer;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.model.View;
@@ -31,7 +31,7 @@ public class LabelSelection {
 
 
     public LabelSelection(View<CyEdge> edge, Shape shape, ObjectPosition originalPosition, double labelAnchorX,
-						  double labelAnchorY, double angleDegrees, double edgeSlope, double edgeAngle) {
+                          double labelAnchorY, double angleDegrees, double edgeSlope, double edgeAngle) {
         this.node = null;
         this.edge = edge;
         this.shape = shape; // may be rotated
@@ -48,7 +48,7 @@ public class LabelSelection {
 
 
     public LabelSelection(View<CyNode> node, Shape shape, ObjectPosition originalPosition, double labelAnchorX,
-						  double labelAnchorY, double angleDegrees) {
+                          double labelAnchorY, double angleDegrees) {
         this.node = node;
         this.edge = null;
         this.shape = shape; // may be rotated

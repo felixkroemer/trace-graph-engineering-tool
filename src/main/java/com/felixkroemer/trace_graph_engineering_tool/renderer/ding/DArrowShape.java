@@ -25,7 +25,7 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding;
  */
 
 
-import com.felixkroemer.trace_graph_engineering_tool.render.immed.GraphGraphics;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.immed.GraphGraphics;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.ArrowShape;
 
@@ -40,24 +40,24 @@ import java.util.Map;
  */
 public enum DArrowShape {
     NONE("None", "NONE", ArrowShapeVisualProperty.NONE), DIAMOND("Diamond", "DIAMOND",
-			ArrowShapeVisualProperty.DIAMOND), OPEN_DIAMOND("Open Diamond", "OPEN_DIAMOND",
-			ArrowShapeVisualProperty.OPEN_DIAMOND), DELTA("Delta", "DELTA", ArrowShapeVisualProperty.DELTA),
-	OPEN_DELTA("Open Delta", "OPEN_DELTA", ArrowShapeVisualProperty.OPEN_DELTA), CROSS_DELTA("Cross Delta",
-			"CROSS_DELTA", ArrowShapeVisualProperty.CROSS_DELTA), CROSS_OPEN_DELTA("Cross Open Delta",
-			"CROSS_OPEN_DELTA", ArrowShapeVisualProperty.CROSS_OPEN_DELTA), ARROW("Arrow", "ARROW",
-			ArrowShapeVisualProperty.ARROW), T("T", "T", ArrowShapeVisualProperty.T), CIRCLE("Circle", "CIRCLE",
-			ArrowShapeVisualProperty.CIRCLE), OPEN_CIRCLE("Open Circle", "OPEN_CIRCLE",
-			ArrowShapeVisualProperty.OPEN_CIRCLE), HALF_CIRCLE("Half Circle", "HALF_CIRCLE",
-			ArrowShapeVisualProperty.HALF_CIRCLE), OPEN_HALF_CIRCLE("Open Half Circle", "OPEN_HALF_CIRCLE",
-			ArrowShapeVisualProperty.OPEN_HALF_CIRCLE), SQUARE("Square", "SQUARE", ArrowShapeVisualProperty.SQUARE),
-	OPEN_SQUARE("Open Square", "OPEN_SQUARE", ArrowShapeVisualProperty.OPEN_SQUARE), HALF_TOP("Half Top", "HALF_TOP",
-			ArrowShapeVisualProperty.HALF_TOP), HALF_BOTTOM("Half Top", "HALF_BOTTOM",
-			ArrowShapeVisualProperty.HALF_BOTTOM), DELTA_SHORT_1("Delta Short 1", "DELTA_SHORT_1",
-			ArrowShapeVisualProperty.DELTA_SHORT_1), DELTA_SHORT_2("Delta Short 2", "DELTA_SHORT_2",
-			ArrowShapeVisualProperty.DELTA_SHORT_2), ARROW_SHORT("Arrow Short", "ARROW_SHORT",
-			ArrowShapeVisualProperty.ARROW_SHORT), DIAMOND_SHORT_1("Diamond Short 1", "DIAMOND_SHORT_1",
-			ArrowShapeVisualProperty.DIAMOND_SHORT_1), DIAMOND_SHORT_2("Diamond Short 2", "DIAMOND_SHORT_2",
-			ArrowShapeVisualProperty.DIAMOND_SHORT_2);
+            ArrowShapeVisualProperty.DIAMOND), OPEN_DIAMOND("Open Diamond", "OPEN_DIAMOND",
+            ArrowShapeVisualProperty.OPEN_DIAMOND), DELTA("Delta", "DELTA", ArrowShapeVisualProperty.DELTA),
+    OPEN_DELTA("Open Delta", "OPEN_DELTA", ArrowShapeVisualProperty.OPEN_DELTA), CROSS_DELTA("Cross Delta",
+            "CROSS_DELTA", ArrowShapeVisualProperty.CROSS_DELTA), CROSS_OPEN_DELTA("Cross Open Delta",
+            "CROSS_OPEN_DELTA", ArrowShapeVisualProperty.CROSS_OPEN_DELTA), ARROW("Arrow", "ARROW",
+            ArrowShapeVisualProperty.ARROW), T("T", "T", ArrowShapeVisualProperty.T), CIRCLE("Circle", "CIRCLE",
+            ArrowShapeVisualProperty.CIRCLE), OPEN_CIRCLE("Open Circle", "OPEN_CIRCLE",
+            ArrowShapeVisualProperty.OPEN_CIRCLE), HALF_CIRCLE("Half Circle", "HALF_CIRCLE",
+            ArrowShapeVisualProperty.HALF_CIRCLE), OPEN_HALF_CIRCLE("Open Half Circle", "OPEN_HALF_CIRCLE",
+            ArrowShapeVisualProperty.OPEN_HALF_CIRCLE), SQUARE("Square", "SQUARE", ArrowShapeVisualProperty.SQUARE),
+    OPEN_SQUARE("Open Square", "OPEN_SQUARE", ArrowShapeVisualProperty.OPEN_SQUARE), HALF_TOP("Half Top", "HALF_TOP",
+            ArrowShapeVisualProperty.HALF_TOP), HALF_BOTTOM("Half Top", "HALF_BOTTOM",
+            ArrowShapeVisualProperty.HALF_BOTTOM), DELTA_SHORT_1("Delta Short 1", "DELTA_SHORT_1",
+            ArrowShapeVisualProperty.DELTA_SHORT_1), DELTA_SHORT_2("Delta Short 2", "DELTA_SHORT_2",
+            ArrowShapeVisualProperty.DELTA_SHORT_2), ARROW_SHORT("Arrow Short", "ARROW_SHORT",
+            ArrowShapeVisualProperty.ARROW_SHORT), DIAMOND_SHORT_1("Diamond Short 1", "DIAMOND_SHORT_1",
+            ArrowShapeVisualProperty.DIAMOND_SHORT_1), DIAMOND_SHORT_2("Diamond Short 2", "DIAMOND_SHORT_2",
+            ArrowShapeVisualProperty.DIAMOND_SHORT_2);
 
 
     private final String displayName;

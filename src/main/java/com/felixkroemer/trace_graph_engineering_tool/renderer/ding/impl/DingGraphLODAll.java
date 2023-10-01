@@ -24,7 +24,7 @@ package com.felixkroemer.trace_graph_engineering_tool.renderer.ding.impl;
  * #L%
  */
 
-import com.felixkroemer.trace_graph_engineering_tool.render.stateful.GraphLOD;
+import com.felixkroemer.trace_graph_engineering_tool.renderer.graph.render.stateful.GraphLOD;
 
 public class DingGraphLODAll implements GraphLOD {
 
