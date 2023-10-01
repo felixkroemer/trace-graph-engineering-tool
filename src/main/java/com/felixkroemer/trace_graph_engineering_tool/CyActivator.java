@@ -80,6 +80,8 @@ public class CyActivator extends AbstractCyActivator {
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
                 , TraceGraphManager.class);
 
+        new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
+
     }
 
     public void handleControllerDeregistration(TraceGraphManager manager, Map<Object, Object> serviceProps) {
