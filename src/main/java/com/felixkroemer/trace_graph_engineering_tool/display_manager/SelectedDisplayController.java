@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -7,9 +8,6 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.view.model.CyNetworkView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -49,12 +47,23 @@ public class SelectedDisplayController extends AbstractDisplayController {
     private void showEdgesOfHighlightedNodes() {
         this.hideAllEdges();
         CyNetwork network = networkView.getModel();
-        List<CyEdge> adjacentEdges = new ArrayList<>();
-        CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true).forEach(n -> adjacentEdges.addAll(network.getAdjacentEdgeList(n, CyEdge.Type.DIRECTED)));
-        adjacentEdges.forEach(e -> {
-            //TODO: if a node is selected, the adjacent edges will still be drawn at 1.0 width
-            networkView.getEdgeView(e).setVisualProperty(EDGE_WIDTH, 5.0);
-            networkView.getEdgeView(e).setVisualProperty(EDGE_VISIBLE, true);
-        });
+        var selectedNodes = CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true);
+        for (var node : selectedNodes) {
+            var adjacentEdges = network.getAdjacentEdgeList(node, CyEdge.Type.DIRECTED);
+            for (var edge : adjacentEdges) {
+                StringBuilder sb = new StringBuilder();
+                var nodeTable = this.networkView.getModel().getDefaultNodeTable();
+                for (Parameter p : this.traceGraph.getPDM().getParameters()) {
+                    var sourceValue = nodeTable.getRow(edge.getSource().getSUID()).get(p.getName(), Integer.class);
+                    var targetValue = nodeTable.getRow(edge.getTarget().getSUID()).get(p.getName(), Integer.class);
+                    if (sourceValue != targetValue) {
+                        sb.append(p.getName()).append(" : ").append(sourceValue - targetValue).append("\n");
+                    }
+                }
+                networkView.getEdgeView(edge).setVisualProperty(EDGE_WIDTH, 5.0);
+                networkView.getEdgeView(edge).setVisualProperty(EDGE_VISIBLE, true);
+                networkView.getEdgeView(edge).setVisualProperty(EDGE_LABEL, sb.toString());
+            }
+        }
     }
 }
