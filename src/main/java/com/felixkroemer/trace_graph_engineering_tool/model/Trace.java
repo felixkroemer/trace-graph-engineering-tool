@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.display_manager;
+package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import org.cytoscape.model.CyNode;
 import org.javatuples.Pair;

@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,10 +70,6 @@ public class TracesDisplayController extends AbstractDisplayController {
             v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_VISIBLE, true);
         });
-    }
-
-    public void addObserver(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener("traces", l);
     }
 
     public static void findNextNodes(int index, Trace trace, TraceGraph traceGraph, int length, boolean up) {
@@ -171,7 +167,6 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     @Override
     public void enable() {
-        this.deselectAll();
         this.hideAllEdges();
     }
 

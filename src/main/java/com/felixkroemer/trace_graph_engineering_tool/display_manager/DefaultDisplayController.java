@@ -16,7 +16,6 @@ public class DefaultDisplayController extends AbstractDisplayController {
 
     @Override
     public void enable() {
-        this.deselectAll();
         this.showALlEdges();
     }
 }

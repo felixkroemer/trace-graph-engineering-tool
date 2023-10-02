@@ -8,6 +8,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.presentation.property.LabelBackgroundShapeVisualProperty;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -40,7 +41,6 @@ public class SelectedDisplayController extends AbstractDisplayController {
 
     @Override
     public void enable() {
-        this.deselectAll();
         showEdgesOfHighlightedNodes();
     }
 
@@ -53,16 +53,24 @@ public class SelectedDisplayController extends AbstractDisplayController {
             for (var edge : adjacentEdges) {
                 StringBuilder sb = new StringBuilder();
                 var nodeTable = this.networkView.getModel().getDefaultNodeTable();
-                for (Parameter p : this.traceGraph.getPDM().getParameters()) {
-                    var sourceValue = nodeTable.getRow(edge.getSource().getSUID()).get(p.getName(), Integer.class);
-                    var targetValue = nodeTable.getRow(edge.getTarget().getSUID()).get(p.getName(), Integer.class);
+                for (int i = 0; i < this.traceGraph.getPDM().getParameterCount(); i++) {
+                    Parameter param = this.traceGraph.getPDM().getParameters().get(i);
+                    var sourceValue = nodeTable.getRow(edge.getSource().getSUID()).get(param.getName(), Integer.class);
+                    var targetValue = nodeTable.getRow(edge.getTarget().getSUID()).get(param.getName(), Integer.class);
                     if (sourceValue != targetValue) {
-                        sb.append(p.getName()).append(" : ").append(sourceValue - targetValue).append("\n");
+                        sb.append(param.getName()).append(" : ").append(sourceValue - targetValue).append(", ");
                     }
                 }
-                networkView.getEdgeView(edge).setVisualProperty(EDGE_WIDTH, 5.0);
-                networkView.getEdgeView(edge).setVisualProperty(EDGE_VISIBLE, true);
-                networkView.getEdgeView(edge).setVisualProperty(EDGE_LABEL, sb.toString());
+                /*                sb.deleteCharAt(sb.length() - 1);*/
+                var edgeView = networkView.getEdgeView(edge);
+                edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
+                edgeView.setVisualProperty(EDGE_VISIBLE, true);
+                edgeView.setVisualProperty(EDGE_LABEL, sb.toString());
+                edgeView.setVisualProperty(EDGE_LABEL_BACKGROUND_SHAPE,
+                        LabelBackgroundShapeVisualProperty.ROUND_RECTANGLE);
+                edgeView.setVisualProperty(EDGE_LABEL_BACKGROUND_TRANSPARENCY, 127);
+                edgeView.setVisualProperty(EDGE_LABEL_AUTOROTATE, true);
+                edgeView.setVisualProperty(EDGE_LABEL_FONT_SIZE, 5.0);
             }
         }
     }

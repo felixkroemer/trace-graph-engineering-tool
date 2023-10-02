@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
+import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
@@ -15,12 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController {
+
+    public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
+    public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
 
     private final Logger logger;
 
@@ -61,7 +63,7 @@ public class TraceGraphController {
         }
     }
 
-    public void setMode(RenderingMode mode) {
+    public void setMode(String mode) {
         renderingController.setMode(mode);
     }
 
@@ -92,27 +94,22 @@ public class TraceGraphController {
         return this.traceGraph.getNetwork() == network || this.traceDetailsController.getNetwork() == network;
     }
 
-    public NetworkType getNetworkType(CyNetwork network) {
+    public String getNetworkType(CyNetwork network) {
         if (network == this.traceGraph.getNetwork()) {
-            return NetworkType.DEFAULT;
+            return NETWORK_TYPE_DEFAULT;
         } else if (network == this.traceDetailsController.getNetwork()) {
-            return NetworkType.TRACE_DETAILS;
+            return NETWORK_TYPE_TRACE_DETAILS;
         } else {
             throw new IllegalArgumentException("Network does not belong to this trace graph");
         }
     }
 
     public void destroy() {
-        //network destroyed handler will delete it from this.traceGraphs
         var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.destroyNetwork(this.traceGraph.getNetwork());
         var traceDetailsNetwork = this.traceDetailsController.getNetwork();
         if (traceDetailsNetwork != null) {
             networkManager.destroyNetwork(traceDetailsNetwork);
         }
-    }
-
-    public void highlightTrace(List<CyNode> sequence) {
-
     }
 }

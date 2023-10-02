@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.view.model.CyNetworkView;
 
@@ -32,15 +31,6 @@ public abstract class AbstractDisplayController {
     protected void hideAllEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
             edgeView.setVisualProperty(EDGE_VISIBLE, false);
-        }
-    }
-
-    protected void deselectAll() {
-        for (var edgeView : networkView.getEdgeViews()) {
-            networkView.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
-        }
-        for (var nodeView : networkView.getNodeViews()) {
-            networkView.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
     }
 

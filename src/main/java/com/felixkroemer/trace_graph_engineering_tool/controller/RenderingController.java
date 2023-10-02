@@ -10,8 +10,8 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
@@ -23,9 +23,10 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
-import org.cytoscape.work.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskMonitor;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -39,7 +40,10 @@ import static org.cytoscape.view.presentation.property.table.BasicTableVisualLex
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener {
 
-    private Logger logger;
+    public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
+    public static final String RENDERING_MODE_SELECTED = "RENDERING_MODE_SELECTED";
+    public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
+
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
@@ -48,25 +52,24 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private Map<Parameter, HighlightRange> highlightRanges;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = registrar;
         this.traceGraph = traceGraph;
         this.highlightRanges = new HashMap<>();
-        this.defaultStyle = createInitialVisualStyle();
+        this.defaultStyle = createDefaultVisualStyle();
         // NetworkViewRenderer gets added to manager on registration, mapped to id
-        // reg.getService(CyNetworkViewFactory.class, "(id=foobar)") does not work,
+        // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
         // CyNetworkViewFactory is never registered by Ding
         // instead, DefaultNetworkViewFactory is retrieved, which
         // retrieves the CyNetworkViewFactory of the default NetworkViewRenderer (which is ding)
         var manager = this.registrar.getService(CyApplicationManager.class);
-        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("foobar");
+        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.displayManager = new SelectedDisplayController(this.view, this.traceGraph);
         try {
             Field rendererId = this.view.getClass().getDeclaredField("rendererId");
             rendererId.setAccessible(true);
-            rendererId.set(this.view, "foobar");
+            rendererId.set(this.view, "org.cytoscape.ding-extension");
         } catch (NoSuchFieldException | IllegalAccessException e) {
         }
 
@@ -75,7 +78,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
 
-    public VisualStyle createInitialVisualStyle() {
+    public VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default");
 
@@ -97,7 +100,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         style.addVisualMappingFunction(colorMapping);
         style.addVisualMappingFunction(tooltipMapping);
 
-
+        style.setDefaultValue(EDGE_VISIBLE, false);
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
 
         return style;
@@ -125,13 +128,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 } else {
                     this.highlightRanges.remove(parameter);
                 }
-                this.resetStyle();
-                this.highlightRanges();
+                this.hideUnhighlightedNodes();
             }
         }
     }
 
-    public void highlightRanges() {
+    public void hideUnhighlightedNodes() {
         if (highlightRanges.isEmpty()) {
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);
@@ -144,19 +146,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 var value = row.get(entry.getKey().getName(), Integer.class);
                 return value >= entry.getValue().getLowerBound() && value <= entry.getValue().getUpperBound();
             });
-            var nodeView = view.getNodeView(node);
-            if (match) {
-/*                //TODO: check how vp dependencies work
-                //nodeView.setVisualProperty(NODE_SIZE, 30.0);
-                nodeView.setVisualProperty(NODE_BORDER_PAINT, Color.MAGENTA);
-                nodeView.setVisualProperty(NODE_BORDER_WIDTH, 3.0);
-                nodeView.setVisualProperty(NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);*/
-                nodeView.setVisualProperty(NODE_VISIBLE, true);
-            } else {
-/*                nodeView.setVisualProperty(NODE_TRANSPARENCY, 128);
-                nodeView.setVisualProperty(NODE_BORDER_TRANSPARENCY, 128);*/
-                nodeView.setVisualProperty(NODE_VISIBLE, false);
-            }
+            view.getNodeView(node).setVisualProperty(NODE_VISIBLE, match);
         }
     }
 
@@ -164,17 +154,21 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         TaskIterator iterator = new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) {
+                taskMonitor.setProgress(0);
                 traceGraph.clearNetwork();
+                taskMonitor.setStatusMessage("Recreating network");
                 traceGraph.reinitNetwork();
+                taskMonitor.setProgress(0.5);
+                taskMonitor.setStatusMessage("Applying style");
+                defaultStyle.apply(view);
+                taskMonitor.setProgress(0.75);
+                taskMonitor.setStatusMessage("Applying layout");
+                applyWorkingLayout();
             }
         });
-        // throws weird error if run asynchronously
-        // runs on awt event thread
-        // TODO: check if running async is possible
-        var taskManager = registrar.getService(SynchronousTaskManager.class);
+        //TODO: dialog does not display anything
+        var taskManager = registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
-        this.applyStyle(defaultStyle);
-        this.applyWorkingLayout();
         var eventHelper = registrar.getService(CyEventHelper.class);
         eventHelper.flushPayloadEvents();
     }
@@ -193,27 +187,31 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         manager.execute(taskIterator);
     }
 
-    private void applyStyle(VisualStyle style) {
-        style.apply(view);
-    }
-
-    public void resetStyle() {
-        this.applyStyle(this.defaultStyle);
-    }
-
-    public void setMode(RenderingMode mode) {
-        this.resetStyle();
-        this.highlightRanges();
+    public void setMode(String mode) {
+        this.deselectAll();
+        this.view.getEdgeViews().forEach(edge -> {
+            this.defaultStyle.apply(this.view.getModel().getDefaultNodeTable().getRow(edge.getSUID()), edge);
+        });
+        /*        this.defaultStyle.apply(view);*/
         switch (mode) {
-            case FULL -> {
+            case RENDERING_MODE_FULL -> {
                 this.displayManager = new DefaultDisplayController(view, this.traceGraph);
             }
-            case SELECTED -> {
+            case RENDERING_MODE_SELECTED -> {
                 this.displayManager = new SelectedDisplayController(view, this.traceGraph);
             }
-            case TRACES -> {
+            case RENDERING_MODE_TRACES -> {
                 this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
             }
+        }
+    }
+
+    private void deselectAll() {
+        for (var edgeView : this.view.getEdgeViews()) {
+            this.view.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+        }
+        for (var nodeView : this.view.getNodeViews()) {
+            this.view.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
     }
 

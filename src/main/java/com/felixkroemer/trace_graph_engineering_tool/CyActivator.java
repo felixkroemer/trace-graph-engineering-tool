@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingMode;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
@@ -20,6 +19,7 @@ import org.osgi.framework.BundleContext;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController.*;
 import static org.cytoscape.work.ServiceProperties.*;
 
 
@@ -49,15 +49,15 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,
                 Util.genProperties(Map.of("service.type", "factory", "mapping.type", "tooltip")));
 
-        RenderingModeTaskFactory selectedModeTaskFactory = new RenderingModeTaskFactory(reg, RenderingMode.SELECTED);
+        RenderingModeTaskFactory selectedModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_SELECTED);
         registerService(bundleContext, selectedModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Selected Mode")));
 
-        RenderingModeTaskFactory fullModeTaskFactory = new RenderingModeTaskFactory(reg, RenderingMode.FULL);
+        RenderingModeTaskFactory fullModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FULL);
         registerService(bundleContext, fullModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Full Mode")));
 
-        RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RenderingMode.TRACES);
+        RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_TRACES);
         registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
 
