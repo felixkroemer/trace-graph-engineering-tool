@@ -17,7 +17,6 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
         this.pdm = pdm;
         this.maxLength = 0;
         pdm.forEach(p -> maxLength = Math.max(p.getName().length(), maxLength));
-
     }
 
     @Override

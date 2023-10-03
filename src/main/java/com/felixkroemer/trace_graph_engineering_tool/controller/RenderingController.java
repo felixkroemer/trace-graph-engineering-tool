@@ -115,10 +115,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 Parameter param = (Parameter) evt.getSource();
                 var columnView = nodeTableView.getColumnView(param.getName());
                 columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
-                this.updateTraceGraph();
+                this.updateTraceGraph(param);
             }
             case "bins" -> {
-                this.updateTraceGraph();
+                this.updateTraceGraph((Parameter) evt.getSource());
             }
             case "highlightRange" -> {
                 var parameter = (Parameter) evt.getSource();
@@ -138,6 +138,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);
             }
+            return;
         }
         var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
         for (var node : traceGraph.getNetwork().getNodeList()) {
@@ -150,14 +151,17 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    private void updateTraceGraph() {
+    private void updateTraceGraph(Parameter changedParam) {
         TaskIterator iterator = new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) {
                 taskMonitor.setProgress(0);
-                traceGraph.clearNetwork();
+                //traceGraph.clearNetwork();
                 taskMonitor.setStatusMessage("Recreating network");
-                traceGraph.reinitNetwork();
+                traceGraph.reinitNetwork(changedParam, taskMonitor);
+                //traceGraph.initNetwork();
+                var eventHelper = registrar.getService(CyEventHelper.class);
+                eventHelper.flushPayloadEvents();
                 taskMonitor.setProgress(0.5);
                 taskMonitor.setStatusMessage("Applying style");
                 defaultStyle.apply(view);
@@ -167,10 +171,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
         });
         //TODO: dialog does not display anything
+        //var taskManager = registrar.getService(SynchronousTaskManager.class);
         var taskManager = registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
-        var eventHelper = registrar.getService(CyEventHelper.class);
-        eventHelper.flushPayloadEvents();
+        //var eventHelper = registrar.getService(CyEventHelper.class);
+        //eventHelper.flushPayloadEvents();
     }
 
     public CyNetworkView getView() {

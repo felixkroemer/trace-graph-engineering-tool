@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFact
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.AbstractCyActivator;
@@ -15,6 +16,8 @@ import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
@@ -25,11 +28,15 @@ import static org.cytoscape.work.ServiceProperties.*;
 
 public class CyActivator extends AbstractCyActivator {
 
+    private Logger logger;
+
     public CyActivator() {
         super();
     }
 
     public void start(BundleContext bundleContext) {
+
+        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
 
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
