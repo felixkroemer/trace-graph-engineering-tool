@@ -1,16 +1,12 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.AbstractDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.DefaultDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.SelectedDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
+import com.felixkroemer.trace_graph_engineering_tool.display_manager.*;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -156,12 +152,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             @Override
             public void run(TaskMonitor taskMonitor) {
                 taskMonitor.setProgress(0);
-                //traceGraph.clearNetwork();
+                taskMonitor.setStatusMessage("Clearing network");
+                traceGraph.clearNetwork();
                 taskMonitor.setStatusMessage("Recreating network");
-                traceGraph.reinitNetwork(changedParam, taskMonitor);
-                //traceGraph.initNetwork();
-                var eventHelper = registrar.getService(CyEventHelper.class);
-                eventHelper.flushPayloadEvents();
+                //traceGraph.reinitNetwork(changedParam, taskMonitor);
+                traceGraph.initNetwork();
                 taskMonitor.setProgress(0.5);
                 taskMonitor.setStatusMessage("Applying style");
                 defaultStyle.apply(view);
@@ -171,11 +166,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
         });
         //TODO: dialog does not display anything
-        //var taskManager = registrar.getService(SynchronousTaskManager.class);
         var taskManager = registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
-        //var eventHelper = registrar.getService(CyEventHelper.class);
-        //eventHelper.flushPayloadEvents();
     }
 
     public CyNetworkView getView() {
@@ -197,7 +189,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.view.getEdgeViews().forEach(edge -> {
             this.defaultStyle.apply(this.view.getModel().getDefaultNodeTable().getRow(edge.getSUID()), edge);
         });
-        /*        this.defaultStyle.apply(view);*/
+        if (this.displayManager instanceof TracesDisplayController) {
+            this.registrar.unregisterService(this.displayManager, TracesProvider.class);
+        }
         switch (mode) {
             case RENDERING_MODE_FULL -> {
                 this.displayManager = new DefaultDisplayController(view, this.traceGraph);
@@ -207,6 +201,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
             case RENDERING_MODE_TRACES -> {
                 this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
+                this.registrar.registerService(this.displayManager, TracesProvider.class);
             }
         }
     }

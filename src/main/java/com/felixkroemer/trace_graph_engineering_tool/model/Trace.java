@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 import org.cytoscape.model.CyNode;
 import org.javatuples.Pair;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,11 +12,13 @@ public class Trace {
 
     private final LinkedList<Pair<CyNode, Integer>> sequence;
     private final CyNode node;
+    private Color color;
 
-    public Trace(CyNode node, int sourceIndex) {
+    public Trace(CyNode node, int sourceIndex, Color color) {
         this.sequence = new LinkedList<>();
         this.node = node;
         this.sequence.add(new Pair<>(node, sourceIndex));
+        this.color = color;
     }
 
     public void addBefore(CyNode node, int sourceIndex) {
@@ -28,6 +31,10 @@ public class Trace {
 
     public List<Pair<CyNode, Integer>> getSequence() {
         return this.sequence;
+    }
+
+    public Color getColor() {
+        return this.color;
     }
 
     @Override

@@ -73,7 +73,7 @@ public class TraceDetailsController {
                 var nodeView = networkView.getNodeView(traceNode);
                 nodeView.setVisualProperty(NODE_LABEL, startIndex != node.getValue1() ?
                         startIndex + " - " + node.getValue1() : "" + node.getValue1());
-                nodeView.setVisualProperty(NODE_FILL_COLOR, Color.WHITE);
+                nodeView.setVisualProperty(NODE_FILL_COLOR, trace.getColor());
                 nodeView.setVisualProperty(NODE_WIDTH, 100.0);
                 if (trace.getNode() == node.getValue0()) {
                     nodeView.setVisualProperty(NODE_BORDER_PAINT, Color.MAGENTA);

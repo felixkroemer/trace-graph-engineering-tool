@@ -131,6 +131,7 @@ public class InputHandlerGlassPane extends JComponent implements CyDisposable {
     @Override
     public JToolTip createToolTip() {
         TextWrapToolTip tip = new TextWrapToolTip();
+        tip.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
         tip.setMaximumSize(new Dimension(480, 320));
         tip.setComponent(this);
         return tip;
@@ -902,6 +903,7 @@ public class InputHandlerGlassPane extends JComponent implements CyDisposable {
             String text = getNodeOrEdgeTooltipText(e);
 
             ViewUtil.invokeOnEDT(() -> {
+                setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
                 setToolTipText(text);
                 ToolTipManager.sharedInstance().mouseMoved(e);
             });

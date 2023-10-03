@@ -21,18 +21,19 @@ import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TracesDisplayController extends AbstractDisplayController {
+public class TracesDisplayController extends AbstractDisplayController implements TracesProvider {
 
     private static Color[] colors = generateColorList();
 
     private Logger logger;
 
     private int length;
-    private int colorIndex = 0;
+    private static int colorIndex = 0;
     private HashMap<CyEdge, Integer> edgeVisits;
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
     private boolean enableVisitWidth;
+    private Set<Trace> traces;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                    int length) {
@@ -43,6 +44,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
         this.enableVisitWidth = false;
+        this.traces = new HashSet<>();
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -98,7 +100,17 @@ public class TracesDisplayController extends AbstractDisplayController {
         }
     }
 
-    public static Set<Trace> getTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length, boolean isEdge) {
+    @Override
+    public long getNetworkSUID() {
+        return this.networkView.getModel().getSUID();
+    }
+
+    public Set<Trace> getTraces() {
+        return new HashSet<>(this.traces);
+    }
+
+    public static Set<Trace> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
+                                             boolean isEdge) {
         Set<Trace> traces = new HashSet<>();
         Set<Integer> sourceRows;
         Set<Integer> foundIndices = new HashSet<>();
@@ -121,7 +133,7 @@ public class TracesDisplayController extends AbstractDisplayController {
             if (foundIndices.contains(sourceIndex)) {
                 continue;
             }
-            Trace trace = new Trace(startNode, sourceIndex);
+            Trace trace = new Trace(startNode, sourceIndex, getNextColor());
             traces.add(trace);
             findNextNodes(sourceIndex, trace, traceGraph, length, true);
             findNextNodes(sourceIndex, trace, traceGraph, length, false);
@@ -137,29 +149,28 @@ public class TracesDisplayController extends AbstractDisplayController {
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         if (event.nodesChanged() || event.edgesChanged()) {
             this.hideAllEdges();
+            this.traces.clear();
         }
-        Set<Trace> traces = new HashSet<>();
         this.edgeVisits.clear();
         if (event.getSelectedNodes().size() == 1) {
-            traces.addAll(getTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false));
+            this.traces.addAll(calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false));
         }
         if (event.getSelectedEdges().size() == 1) {
-            traces.addAll(getTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true));
+            this.traces.addAll(calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true));
         }
-        drawTraces(traces);
+        drawTraces();
     }
 
-    public void drawTraces(Set<Trace> traces) {
+    public void drawTraces() {
         colorIndex = 0;
-        for (var trace : traces) {
-            Color color = getNextColor();
+        for (var trace : this.traces) {
             logger.info(trace.toString());
             for (int i = 0; i < trace.getSequence().size() - 1; i++) {
                 CyEdge edge;
                 // is null if the edge is a self edge
                 if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
                         trace.getSequence().get(i + 1).getValue0())) != null) {
-                    this.colorEdge(edge, color);
+                    this.colorEdge(edge, trace.getColor());
                 }
             }
         }
@@ -170,7 +181,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.hideAllEdges();
     }
 
-    private Color getNextColor() {
+    private static Color getNextColor() {
         if (colorIndex == colors.length) {
             colorIndex = 0;
         }

@@ -1,11 +1,13 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -75,9 +77,7 @@ public class TraceGraphController {
         registrar.unregisterService(renderingController, SelectedNodesAndEdgesListener.class);
     }
 
-    public void showTraceDetails(CyIdentifiable identifiable) {
-        boolean isEdge = identifiable instanceof CyEdge;
-        Set<Trace> traces = TracesDisplayController.getTraces(identifiable, this.traceGraph, 2, isEdge);
+    public void showTraceDetails(Set<Trace> traces) {
         this.traceDetailsController.showTraces(traces);
     }
 

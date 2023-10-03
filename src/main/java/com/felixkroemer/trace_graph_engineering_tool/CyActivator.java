@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesProvider;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
@@ -72,9 +73,15 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, showTraceDetailsNodeTaskFactory, NodeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace Details")));
 
+        registerServiceListener(bundleContext, showTraceDetailsNodeTaskFactory, "handleTracesProviderRegistration",
+                "handleTracesProviderDeregistration", TracesProvider.class);
+
         var showTraceDetailsEdgeTaskFactory = new ShowTraceDetailsEdgeTaskFactory(reg);
         registerService(bundleContext, showTraceDetailsEdgeTaskFactory, EdgeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace Details")));
+
+        registerServiceListener(bundleContext, showTraceDetailsEdgeTaskFactory, "handleTracesProviderRegistration",
+                "handleTracesProviderDeregistration", TracesProvider.class);
 
         var viewDefaultViewNetworkTaskFactory = new ViewDefaultViewNetworkTaskFactory(reg);
         registerService(bundleContext, viewDefaultViewNetworkTaskFactory, NetworkViewTaskFactory.class,
