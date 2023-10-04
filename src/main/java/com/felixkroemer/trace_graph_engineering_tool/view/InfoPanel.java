@@ -1,31 +1,78 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.util.swing.LookAndFeelUtil;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class InfoPanel extends JPanel {
 
     private CyServiceRegistrar reg;
-    private JLabel text;
+    private JPanel nodeInfoPanel;
+    private JScrollPane nodeInfoScrollPane;
+    private JTable nodeInfoTable;
+    private DefaultTableModel nodeInfoTableModel;
     private CyNode node;
+
 
     public InfoPanel(CyServiceRegistrar reg) {
         this.reg = reg;
         this.node = null;
-        this.text = new JLabel("abc");
+        this.nodeInfoPanel = new JPanel();
+        this.nodeInfoTableModel = new TableModel(0, 2);
+        this.nodeInfoTable = new JTable(this.nodeInfoTableModel);
+        this.nodeInfoScrollPane = new JScrollPane(this.nodeInfoTable);
         this.init();
     }
 
     private void init() {
         setLayout(new BorderLayout());
-        this.add(text, BorderLayout.CENTER);
+
+        this.nodeInfoTable.getTableHeader().setUI(null);
+        this.nodeInfoTable.setRowSelectionAllowed(false);
+        this.nodeInfoTable.setColumnSelectionAllowed(false);
+        this.nodeInfoTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        this.nodeInfoTable.setBackground(UIManager.getColor("Panel.background"));
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.nodeInfoTable.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
+
+        this.nodeInfoPanel.setBorder(LookAndFeelUtil.createTitledBorder("Node Information"));
+        this.nodeInfoPanel.setLayout(new BorderLayout());
+        this.nodeInfoPanel.add(nodeInfoTable, BorderLayout.CENTER);
+
+        this.add(nodeInfoPanel, BorderLayout.NORTH);
     }
 
-    public void setNode(CyNode node) {
-        this.text.setText(node.getSUID().toString());
+    public void setNode(CyNetwork network, CyNode node) {
+        this.nodeInfoTableModel.setRowCount(0);
+        this.nodeInfoTableModel.addRow(new String[]{"SUID", node.getSUID().toString()});
+        var edges = network.getAdjacentEdgeList(node, CyEdge.Type.DIRECTED);
+        var incoming = edges.stream().filter(edge -> edge.getSource() == node).count();
+        this.nodeInfoTableModel.addRow(new String[]{"Incoming Edges", "" + incoming});
+        this.nodeInfoTableModel.addRow(new String[]{"Outgoing Edges", "" + (edges.size() - incoming)});
+        var visits = network.getRow(node).get(Columns.NODE_VISITS, Integer.class);
+        var frequency = network.getRow(node).get(Columns.NODE_FREQUENCY, Integer.class);
+        this.nodeInfoTableModel.addRow(new String[]{"Visits", "" + visits});
+        this.nodeInfoTableModel.addRow(new String[]{"Frequency", "" + frequency});
     }
 
+}
+
+class TableModel extends DefaultTableModel {
+    public TableModel(int rows, int cols) {
+        super(rows, cols);
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 }

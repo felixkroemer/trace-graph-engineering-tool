@@ -4,7 +4,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphContro
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -76,12 +75,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.tabs.addTab(TRACES_TITLE, this.tracesPanel);
     }
 
-    public void showInfoPanel(CyNode node) {
-        this.infoPanel.setNode(node);
-        this.tabs.addTab(INFO_TITLE, this.infoPanel);
-        this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
-    }
-
     private int getPanelIndex(String title) {
         for (int i = 0; i < this.tabs.getTabCount(); i++) {
             if (this.tabs.getTitleAt(i).equals(title)) {
@@ -105,7 +98,9 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getSelectedNodes().size() == 1) {
-            this.showInfoPanel(event.getSelectedNodes().iterator().next());
+            this.infoPanel.setNode(event.getNetwork(), event.getSelectedNodes().iterator().next());
+            this.tabs.addTab(INFO_TITLE, this.infoPanel);
+            this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
         } else {
             this.hidePanel(INFO_TITLE);
         }
