@@ -23,7 +23,7 @@ public class ShowTraceDetailsNodeTaskFactory extends AbstractNodeViewTaskFactory
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networkView.getModel());
         if (controller != null) {
-            return controller.getNetworkType(networkView.getModel()).equals(NETWORK_TYPE_DEFAULT);
+            return controller.getNetworkType(networkView.getModel()).equals(NETWORK_TYPE_DEFAULT) && controller.getUiState().getTraceSet() != null;
         } else {
             return false;
         }

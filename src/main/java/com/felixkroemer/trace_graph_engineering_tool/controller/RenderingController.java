@@ -177,7 +177,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void applyWorkingLayout() {
         CyNetworkView view = this.displayManager.getNetworkView();
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
-        CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("grid");
+        CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         Object context = layoutFactory.getDefaultLayoutContext();
         var taskIterator = layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
         TaskManager<?, ?> manager = registrar.getService(TaskManager.class);

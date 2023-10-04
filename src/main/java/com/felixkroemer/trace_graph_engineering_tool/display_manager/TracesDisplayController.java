@@ -46,7 +46,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.pcs = new PropertyChangeSupport(this);
         this.enableVisitWidth = false;
         this.uiState = uiState;
-        
+
         this.hideAllEdges();
     }
 
@@ -158,6 +158,7 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
+        this.uiState.setTraceSet(null);
     }
 
     public void drawTraces() {

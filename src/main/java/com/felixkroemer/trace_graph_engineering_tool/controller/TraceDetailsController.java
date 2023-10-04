@@ -35,12 +35,14 @@ public class TraceDetailsController implements PropertyChangeListener {
     private Map<CyNode, CyNode> nodeMapping;
     private TraceGraph traceGraph;
     private UIState uiState;
+    private boolean liveUpdate;
 
     public TraceDetailsController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         this.registrar = registrar;
         this.nodeMapping = new HashMap<>();
         this.traceGraph = traceGraph;
         this.uiState = uiState;
+        this.liveUpdate = false;
 
         this.uiState.addObserver(this);
         this.createNetwork();
@@ -57,6 +59,10 @@ public class TraceDetailsController implements PropertyChangeListener {
         networkViewManager.addNetworkView(networkView, false);
         CyApplicationManager manager = registrar.getService(CyApplicationManager.class);
         manager.setSelectedNetworks(List.of(traceGraph.getNetwork(), this.network));
+    }
+
+    public void update() {
+        this.updateTraces(this.uiState.getTraceSet());
     }
 
     public void updateTraces(Set<TraceExtension> traces) {
@@ -119,7 +125,9 @@ public class TraceDetailsController implements PropertyChangeListener {
 
             //UIState
             case "traceSet" -> {
-                this.updateTraces((Set<TraceExtension>) evt.getNewValue());
+                if (this.liveUpdate) {
+                    this.updateTraces((Set<TraceExtension>) evt.getNewValue());
+                }
             }
         }
     }

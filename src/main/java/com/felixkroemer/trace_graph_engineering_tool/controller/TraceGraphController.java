@@ -86,6 +86,7 @@ public class TraceGraphController {
     public void showTraceDetails() {
         var manager = this.registrar.getService(CyApplicationManager.class);
         manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
+        this.traceDetailsController.update();
     }
 
     public void showDefaultView(CyNode node) {
