@@ -16,12 +16,11 @@ public abstract class AbstractDisplayController {
     public AbstractDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         this.networkView = view;
         this.traceGraph = traceGraph;
-        this.enable();
     }
 
     public abstract void handleNodesSelected(SelectedNodesAndEdgesEvent event);
 
-    public abstract void enable();
+    public abstract void disable();
 
     protected void showALlEdges() {
         for (var edgeView : networkView.getEdgeViews()) {

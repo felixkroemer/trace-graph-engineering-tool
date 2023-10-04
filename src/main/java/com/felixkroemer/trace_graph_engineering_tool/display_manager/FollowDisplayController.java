@@ -18,6 +18,7 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     public FollowDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
+        showEdgesOfHighlightedNodes();
     }
 
     @Override
@@ -40,8 +41,7 @@ public class FollowDisplayController extends AbstractDisplayController {
     }
 
     @Override
-    public void enable() {
-        showEdgesOfHighlightedNodes();
+    public void disable() {
     }
 
     private void showEdgesOfHighlightedNodes() {

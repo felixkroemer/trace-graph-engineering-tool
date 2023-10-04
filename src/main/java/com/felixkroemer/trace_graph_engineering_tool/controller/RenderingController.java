@@ -4,11 +4,10 @@ import com.felixkroemer.trace_graph_engineering_tool.display_manager.*;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -48,12 +47,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private CyNetworkView view;
     private AbstractDisplayController displayManager;
     private TraceGraph traceGraph;
-    private Map<Parameter, HighlightRange> highlightRanges;
+    private UIState uiState;
 
-    public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
+    public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         this.registrar = registrar;
         this.traceGraph = traceGraph;
-        this.highlightRanges = new HashMap<>();
+        this.uiState = uiState;
         this.defaultStyle = createDefaultVisualStyle();
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
@@ -65,6 +64,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
+
+        this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
+        this.uiState.addObserver(this);
+
         try {
             Field rendererId = this.view.getClass().getDeclaredField("rendererId");
             rendererId.setAccessible(true);
@@ -120,19 +123,21 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.updateTraceGraph((Parameter) evt.getSource());
             }
             case "highlightRange" -> {
-                var parameter = (Parameter) evt.getSource();
-                var range = (HighlightRange) evt.getNewValue();
-                if (range != null) {
-                    this.highlightRanges.put(parameter, range);
-                } else {
-                    this.highlightRanges.remove(parameter);
-                }
                 this.hideUnhighlightedNodes();
+            }
+
+            //UIState
+            case "trace" -> {
+                this.setMode(RENDERING_MODE_SHORTEST_TRACE);
             }
         }
     }
 
     public void hideUnhighlightedNodes() {
+        Map<Parameter, HighlightRange> highlightRanges = new HashMap<>();
+        for (Parameter param : this.traceGraph.getPDM().getParameters()) {
+            highlightRanges.put(param, param.getHighlightRange());
+        }
         if (highlightRanges.isEmpty()) {
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);
@@ -141,7 +146,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
         for (var node : traceGraph.getNetwork().getNodeList()) {
-            boolean match = this.highlightRanges.entrySet().stream().allMatch(entry -> {
+            boolean match = highlightRanges.entrySet().stream().allMatch(entry -> {
                 var row = nodeTable.getRow(node.getSUID());
                 var value = row.get(entry.getKey().getName(), Integer.class);
                 return value >= entry.getValue().getLowerBound() && value <= entry.getValue().getUpperBound();
@@ -191,8 +196,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.view.getEdgeViews().forEach(edge -> {
             this.defaultStyle.apply(this.view.getModel().getDefaultNodeTable().getRow(edge.getSUID()), edge);
         });
-        if (this.displayManager instanceof TracesDisplayController) {
-            this.registrar.unregisterService(this.displayManager, TracesProvider.class);
+
+        if (this.displayManager != null) {
+            this.displayManager.disable();
         }
 
         switch (mode) {
@@ -204,10 +210,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
             case RENDERING_MODE_TRACES -> {
                 this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
-                this.registrar.registerService(this.displayManager, TracesProvider.class);
             }
             case RENDERING_MODE_SHORTEST_TRACE -> {
-                this.displayManager = new ShortestTraceDisplayController(view, this.traceGraph);
+                this.displayManager = new ShortestTraceDisplayController(view, this.traceGraph, this.uiState);
             }
         }
     }
@@ -231,23 +236,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void focusNode(CyNode node) {
         view.setVisualProperty(NETWORK_CENTER_X_LOCATION, view.getNodeView(node).getVisualProperty(NODE_X_LOCATION));
         view.setVisualProperty(NETWORK_CENTER_Y_LOCATION, view.getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
-    }
-
-    public void showTrace(Trace trace) {
-        this.setMode(RENDERING_MODE_SHORTEST_TRACE);
-        for (int i = 0; i < trace.getSequence().size() - 1; i++) {
-            CyEdge edge;
-            // is null if the edge is a self edge
-            if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
-                    trace.getSequence().get(i + 1).getValue0())) != null) {
-                this.view.getEdgeView(edge).batch(v -> {
-                    v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, Color.BLACK);
-                    v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, Color.BLACK);
-                    v.setVisualProperty(EDGE_VISIBLE, true);
-                });
-            }
-        }
-
     }
 
 }

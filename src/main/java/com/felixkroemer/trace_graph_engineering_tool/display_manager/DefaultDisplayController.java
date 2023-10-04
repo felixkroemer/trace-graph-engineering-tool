@@ -8,6 +8,7 @@ public class DefaultDisplayController extends AbstractDisplayController {
 
     public DefaultDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
+        this.showALlEdges();
     }
 
     @Override
@@ -15,7 +16,6 @@ public class DefaultDisplayController extends AbstractDisplayController {
     }
 
     @Override
-    public void enable() {
-        this.showALlEdges();
+    public void disable() {
     }
 }

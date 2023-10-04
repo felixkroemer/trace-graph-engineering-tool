@@ -1,8 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyColumn;
@@ -32,6 +32,7 @@ public class TraceGraphController {
 
     private final CyServiceRegistrar registrar;
     private final TraceGraph traceGraph;
+    private final UIState uiState;
     private final RenderingController renderingController;
     private final TraceDetailsController traceDetailsController;
 
@@ -39,7 +40,8 @@ public class TraceGraphController {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = registrar;
         this.traceGraph = traceGraph;
-        this.renderingController = new RenderingController(registrar, traceGraph);
+        this.uiState = new UIState();
+        this.renderingController = new RenderingController(registrar, traceGraph, uiState);
         this.traceDetailsController = new TraceDetailsController(registrar);
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
     }
@@ -49,7 +51,6 @@ public class TraceGraphController {
         networkManager.addNetwork(traceGraph.getNetwork());
         var networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(renderingController.getView());
-        this.traceGraph.getPDM().forEach(p -> p.addObserver(this.renderingController));
         this.hideUnneededColumns();
         renderingController.applyWorkingLayout();
     }
@@ -73,6 +74,10 @@ public class TraceGraphController {
 
     public TraceGraph getTraceGraph() {
         return this.traceGraph;
+    }
+
+    public UIState getUiState() {
+        return this.uiState;
     }
 
     public void unregister() {
@@ -116,9 +121,5 @@ public class TraceGraphController {
     }
 
     public void showTrace(List<CyNode> nodes) {
-        Trace trace = this.traceGraph.findTrace(nodes);
-        if (trace != null) { //TODO: handle
-            this.renderingController.showTrace(trace);
-        }
     }
 }

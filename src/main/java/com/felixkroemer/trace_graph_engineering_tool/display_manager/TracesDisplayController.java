@@ -45,6 +45,9 @@ public class TracesDisplayController extends AbstractDisplayController implement
         this.pcs = new PropertyChangeSupport(this);
         this.enableVisitWidth = false;
         this.traces = new HashSet<>();
+
+        this.registrar.registerService(this, TracesProvider.class);
+        this.hideAllEdges();
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -176,17 +179,16 @@ public class TracesDisplayController extends AbstractDisplayController implement
         }
     }
 
-    @Override
-    public void enable() {
-        this.hideAllEdges();
-    }
-
     private static Color getNextColor() {
         if (colorIndex == colors.length) {
             colorIndex = 0;
         }
         colorIndex++;
         return colors[colorIndex - 1];
+    }
+
+    public void disable() {
+        this.registrar.unregisterService(this, TracesProvider.class);
     }
 }
 

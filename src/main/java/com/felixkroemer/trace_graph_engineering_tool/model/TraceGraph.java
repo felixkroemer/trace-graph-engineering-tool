@@ -317,6 +317,7 @@ public class TraceGraph {
                 }
             }
         }
+
         for (int i = window.getValue0(); i <= window.getValue1(); i++) {
             trace.addAfter(findNode(i), i);
         }
