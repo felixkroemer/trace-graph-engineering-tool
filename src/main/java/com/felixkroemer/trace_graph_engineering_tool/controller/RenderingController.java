@@ -4,9 +4,11 @@ import com.felixkroemer.trace_graph_engineering_tool.display_manager.*;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -37,8 +39,9 @@ import static org.cytoscape.view.presentation.property.table.BasicTableVisualLex
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener {
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
-    public static final String RENDERING_MODE_SELECTED = "RENDERING_MODE_SELECTED";
+    public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
+    public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
 
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
@@ -61,7 +64,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
-        this.displayManager = new SelectedDisplayController(this.view, this.traceGraph);
+        this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
         try {
             Field rendererId = this.view.getClass().getDeclaredField("rendererId");
             rendererId.setAccessible(true);
@@ -151,7 +154,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         TaskIterator iterator = new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) {
-                taskMonitor.setProgress(0);
                 taskMonitor.setStatusMessage("Clearing network");
                 traceGraph.clearNetwork();
                 taskMonitor.setStatusMessage("Recreating network");
@@ -192,16 +194,20 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (this.displayManager instanceof TracesDisplayController) {
             this.registrar.unregisterService(this.displayManager, TracesProvider.class);
         }
+
         switch (mode) {
             case RENDERING_MODE_FULL -> {
                 this.displayManager = new DefaultDisplayController(view, this.traceGraph);
             }
-            case RENDERING_MODE_SELECTED -> {
-                this.displayManager = new SelectedDisplayController(view, this.traceGraph);
+            case RENDERING_MODE_FOLLOW -> {
+                this.displayManager = new FollowDisplayController(view, this.traceGraph);
             }
             case RENDERING_MODE_TRACES -> {
                 this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
                 this.registrar.registerService(this.displayManager, TracesProvider.class);
+            }
+            case RENDERING_MODE_SHORTEST_TRACE -> {
+                this.displayManager = new ShortestTraceDisplayController(view, this.traceGraph);
             }
         }
     }
@@ -225,6 +231,23 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void focusNode(CyNode node) {
         view.setVisualProperty(NETWORK_CENTER_X_LOCATION, view.getNodeView(node).getVisualProperty(NODE_X_LOCATION));
         view.setVisualProperty(NETWORK_CENTER_Y_LOCATION, view.getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
+    }
+
+    public void showTrace(Trace trace) {
+        this.setMode(RENDERING_MODE_SHORTEST_TRACE);
+        for (int i = 0; i < trace.getSequence().size() - 1; i++) {
+            CyEdge edge;
+            // is null if the edge is a self edge
+            if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
+                    trace.getSequence().get(i + 1).getValue0())) != null) {
+                this.view.getEdgeView(edge).batch(v -> {
+                    v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, Color.BLACK);
+                    v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, Color.BLACK);
+                    v.setVisualProperty(EDGE_VISIBLE, true);
+                });
+            }
+        }
+
     }
 
 }

@@ -12,11 +12,11 @@ import org.cytoscape.view.presentation.property.LabelBackgroundShapeVisualProper
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class SelectedDisplayController extends AbstractDisplayController {
+public class FollowDisplayController extends AbstractDisplayController {
 
     private CyNode previousNode;
 
-    public SelectedDisplayController(CyNetworkView view, TraceGraph traceGraph) {
+    public FollowDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
     }
 

@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
@@ -45,7 +45,7 @@ public class TraceDetailsController {
         networkViewManager.addNetworkView(networkView);
     }
 
-    public void showTraces(Set<Trace> traces) {
+    public void showTraces(Set<TraceExtension> traces) {
         this.nodeMapping.clear();
         if (this.network == null) {
             // view is set automatically as current network view

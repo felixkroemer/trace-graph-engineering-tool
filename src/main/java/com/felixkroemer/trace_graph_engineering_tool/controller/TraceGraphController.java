@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
@@ -77,7 +79,7 @@ public class TraceGraphController {
         registrar.unregisterService(renderingController, SelectedNodesAndEdgesListener.class);
     }
 
-    public void showTraceDetails(Set<Trace> traces) {
+    public void showTraceDetails(Set<TraceExtension> traces) {
         this.traceDetailsController.showTraces(traces);
     }
 
@@ -110,6 +112,13 @@ public class TraceGraphController {
         var traceDetailsNetwork = this.traceDetailsController.getNetwork();
         if (traceDetailsNetwork != null) {
             networkManager.destroyNetwork(traceDetailsNetwork);
+        }
+    }
+
+    public void showTrace(List<CyNode> nodes) {
+        Trace trace = this.traceGraph.findTrace(nodes);
+        if (trace != null) { //TODO: handle
+            this.renderingController.showTrace(trace);
         }
     }
 }

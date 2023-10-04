@@ -35,12 +35,16 @@ public class LoadNetworkTask extends AbstractTask {
     private final TraceGraphManager manager;
     private final CyTableFactory tableFactory;
     private final CyNetworkFactory networkFactory;
+    private final CyNetworkTableManager networkTableManager;
+    private final CyTableManager tableManager;
 
     public LoadNetworkTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.manager = reg.getService(TraceGraphManager.class);
         this.tableFactory = reg.getService(CyTableFactory.class);
         this.networkFactory = reg.getService(CyNetworkFactory.class);
+        this.networkTableManager = reg.getService(CyNetworkTableManager.class);
+        this.tableManager = reg.getService(CyTableManager.class);
     }
 
     @Override
@@ -57,6 +61,10 @@ public class LoadNetworkTask extends AbstractTask {
         });
         ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto, minMaxValues);
         CyNetwork network = networkFactory.createNetwork();
+
+        this.tableManager.addTable(table);
+        this.networkTableManager.setTable(network, CyNode.class, "com.felixkroemer", table);
+
         TraceGraph traceGraph = new TraceGraph(network, pdm, table);
         manager.registerTraceGraph(traceGraph);
     }
@@ -70,7 +78,7 @@ public class LoadNetworkTask extends AbstractTask {
     }
 
     private CyTable parseCSV(ParameterDiscretizationModelDTO dto) throws Exception {
-        CyTable table = tableFactory.createTable("data", Columns.SOURCE_ID, Integer.class, true, true);
+        CyTable table = tableFactory.createTable("Source", Columns.SOURCE_ID, Integer.class, true, true);
         for (ParameterDTO param : dto.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }

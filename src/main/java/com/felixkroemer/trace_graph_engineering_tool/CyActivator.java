@@ -9,6 +9,7 @@ import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.EdgeViewTaskFactory;
@@ -48,6 +49,8 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
         registerService(bundleContext, manager, SetCurrentNetworkListener.class, new Properties());
 
+        registerService(bundleContext, panel, SelectedNodesAndEdgesListener.class, new Properties());
+
         LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
         registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace Graph",
@@ -57,9 +60,9 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,
                 Util.genProperties(Map.of("service.type", "factory", "mapping.type", "tooltip")));
 
-        RenderingModeTaskFactory selectedModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_SELECTED);
-        registerService(bundleContext, selectedModeTaskFactory, NetworkViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Selected Mode")));
+        RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
+        registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Follow Mode")));
 
         RenderingModeTaskFactory fullModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FULL);
         registerService(bundleContext, fullModeTaskFactory, NetworkViewTaskFactory.class,
@@ -93,6 +96,10 @@ public class CyActivator extends AbstractCyActivator {
 
         registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
                 , TraceGraphManager.class);
+
+        var showTraceNodeTaskFactory = new ShowTraceNodeTaskFactory(reg);
+        registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));
 
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
 

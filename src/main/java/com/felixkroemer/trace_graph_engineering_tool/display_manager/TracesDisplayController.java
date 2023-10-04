@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
-import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
@@ -33,7 +33,7 @@ public class TracesDisplayController extends AbstractDisplayController implement
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
     private boolean enableVisitWidth;
-    private Set<Trace> traces;
+    private Set<TraceExtension> traces;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                    int length) {
@@ -74,7 +74,7 @@ public class TracesDisplayController extends AbstractDisplayController implement
         });
     }
 
-    public static void findNextNodes(int index, Trace trace, TraceGraph traceGraph, int length, boolean up) {
+    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, int length, boolean up) {
         CyNode node = traceGraph.findNode(index);
         CyNode nextNode;
         int found = 0;
@@ -105,13 +105,13 @@ public class TracesDisplayController extends AbstractDisplayController implement
         return this.networkView.getModel().getSUID();
     }
 
-    public Set<Trace> getTraces() {
+    public Set<TraceExtension> getTraces() {
         return new HashSet<>(this.traces);
     }
 
-    public static Set<Trace> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
-                                             boolean isEdge) {
-        Set<Trace> traces = new HashSet<>();
+    public static Set<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
+                                                      boolean isEdge) {
+        Set<TraceExtension> traces = new HashSet<>();
         Set<Integer> sourceRows;
         Set<Integer> foundIndices = new HashSet<>();
         CyNode startNode;
@@ -133,7 +133,7 @@ public class TracesDisplayController extends AbstractDisplayController implement
             if (foundIndices.contains(sourceIndex)) {
                 continue;
             }
-            Trace trace = new Trace(startNode, sourceIndex, getNextColor());
+            TraceExtension trace = new TraceExtension(startNode, sourceIndex, getNextColor());
             traces.add(trace);
             findNextNodes(sourceIndex, trace, traceGraph, length, true);
             findNextNodes(sourceIndex, trace, traceGraph, length, false);

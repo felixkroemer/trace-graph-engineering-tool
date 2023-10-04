@@ -4,6 +4,9 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphContro
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
+import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,16 +14,18 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 
-public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
+public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener {
 
     private Logger logger;
     private JTabbedPane tabs;
     private PDMPanel pdmPanel;
     private TracesPanel tracesPanel;
+    private InfoPanel infoPanel;
     private CyServiceRegistrar reg;
 
     private static String TRACES_TITLE = "traces";
     private static String PDM_TITLE = "PDM";
+    private static String INFO_TITLE = "Info";
 
     public TraceGraphPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
@@ -28,6 +33,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
         this.tabs = new JTabbedPane(JTabbedPane.BOTTOM);
         this.pdmPanel = new PDMPanel(reg);
         this.tracesPanel = new TracesPanel(reg);
+        this.infoPanel = new InfoPanel(reg);
         this.reg = reg;
         init();
     }
@@ -70,15 +76,38 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2 {
         this.tabs.addTab(TRACES_TITLE, this.tracesPanel);
     }
 
-    public void hideTracesPanel() {
+    public void showInfoPanel(CyNode node) {
+        this.infoPanel.setNode(node);
+        this.tabs.addTab(INFO_TITLE, this.infoPanel);
+        this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
+    }
+
+    private int getPanelIndex(String title) {
         for (int i = 0; i < this.tabs.getTabCount(); i++) {
-            if (this.tabs.getTitleAt(i).equals(TRACES_TITLE)) {
-                this.tabs.removeTabAt(i);
+            if (this.tabs.getTitleAt(i).equals(title)) {
+                return i;
             }
+        }
+        return -1;
+    }
+
+    public void hidePanel(String title) {
+        var index = getPanelIndex(title);
+        if (index != -1) {
+            this.tabs.removeTabAt(index);
         }
     }
 
     public void clear() {
         this.pdmPanel.clear();
+    }
+
+    @Override
+    public void handleEvent(SelectedNodesAndEdgesEvent event) {
+        if (event.getSelectedNodes().size() == 1) {
+            this.showInfoPanel(event.getSelectedNodes().iterator().next());
+        } else {
+            this.hidePanel(INFO_TITLE);
+        }
     }
 }

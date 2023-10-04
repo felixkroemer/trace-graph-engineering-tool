@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
 import org.cytoscape.work.TaskMonitor;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +23,10 @@ public class TraceGraph {
     private Map<Integer, CyNode> nodeMapping;
     private PropertyChangeSupport pcs;
 
-    public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm, CyTable rawData) {
+    public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm, CyTable sourceTable) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.pdm = pdm;
-        this.sourceTable = rawData;
+        this.sourceTable = sourceTable;
         this.network = network;
 
         this.network.getRow(network).set(CyNetwork.NAME, pdm.getName());
@@ -289,4 +290,36 @@ public class TraceGraph {
 
     }
 
+    public Trace findTrace(List<CyNode> nodes) {
+        if (nodes.size() != 2) {
+            return null;
+        }
+        var nodeA = nodes.get(0);
+        var nodeB = nodes.get(1);
+
+        var sourcesA = this.nodeTable.getRow(nodeA.getSUID()).getList(Columns.NODE_SOURCE_ROWS, Integer.class);
+        var sourcesB = this.nodeTable.getRow(nodeB.getSUID()).getList(Columns.NODE_SOURCE_ROWS, Integer.class);
+
+        Pair<Integer, Integer> window = null;
+        Trace trace = new Trace();
+        for (var x : sourcesA) {
+            for (var y : sourcesB) {
+                if (window == null) {
+                    var lowerBound = x < y ? x : y;
+                    var upperBound = lowerBound == x ? y : x;
+                    window = new Pair<>(lowerBound, upperBound);
+                } else {
+                    if (Math.abs(x - y) < window.getValue1() - window.getValue0()) {
+                        var lowerBound = x < y ? x : y;
+                        var upperBound = lowerBound == x ? y : x;
+                        window = new Pair<>(lowerBound, upperBound);
+                    }
+                }
+            }
+        }
+        for (int i = window.getValue0(); i <= window.getValue1(); i++) {
+            trace.addAfter(findNode(i), i);
+        }
+        return trace;
+    }
 }
