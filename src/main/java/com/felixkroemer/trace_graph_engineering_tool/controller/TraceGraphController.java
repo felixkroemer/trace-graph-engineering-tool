@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
@@ -42,7 +41,7 @@ public class TraceGraphController {
         this.traceGraph = traceGraph;
         this.uiState = new UIState();
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
-        this.traceDetailsController = new TraceDetailsController(registrar);
+        this.traceDetailsController = new TraceDetailsController(registrar, this.traceGraph, this.uiState);
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
     }
 
@@ -84,8 +83,9 @@ public class TraceGraphController {
         registrar.unregisterService(renderingController, SelectedNodesAndEdgesListener.class);
     }
 
-    public void showTraceDetails(Set<TraceExtension> traces) {
-        this.traceDetailsController.showTraces(traces);
+    public void showTraceDetails() {
+        var manager = this.registrar.getService(CyApplicationManager.class);
+        manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
     }
 
     public void showDefaultView(CyNode node) {

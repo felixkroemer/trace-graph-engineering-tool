@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
@@ -21,7 +22,7 @@ import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TracesDisplayController extends AbstractDisplayController implements TracesProvider {
+public class TracesDisplayController extends AbstractDisplayController {
 
     private static Color[] colors = generateColorList();
 
@@ -33,10 +34,10 @@ public class TracesDisplayController extends AbstractDisplayController implement
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
     private boolean enableVisitWidth;
-    private Set<TraceExtension> traces;
+    private UIState uiState;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                   int length) {
+                                   int length, UIState uiState) {
         super(view, traceGraph);
         this.registrar = registrar;
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -44,9 +45,8 @@ public class TracesDisplayController extends AbstractDisplayController implement
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
         this.enableVisitWidth = false;
-        this.traces = new HashSet<>();
-
-        this.registrar.registerService(this, TracesProvider.class);
+        this.uiState = uiState;
+        
         this.hideAllEdges();
     }
 
@@ -103,15 +103,6 @@ public class TracesDisplayController extends AbstractDisplayController implement
         }
     }
 
-    @Override
-    public long getNetworkSUID() {
-        return this.networkView.getModel().getSUID();
-    }
-
-    public Set<TraceExtension> getTraces() {
-        return new HashSet<>(this.traces);
-    }
-
     public static Set<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
                                                       boolean isEdge) {
         Set<TraceExtension> traces = new HashSet<>();
@@ -152,21 +143,26 @@ public class TracesDisplayController extends AbstractDisplayController implement
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         if (event.nodesChanged() || event.edgesChanged()) {
             this.hideAllEdges();
-            this.traces.clear();
         }
         this.edgeVisits.clear();
         if (event.getSelectedNodes().size() == 1) {
-            this.traces.addAll(calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false));
+            this.uiState.setTraceSet(calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length,
+                    false));
         }
         if (event.getSelectedEdges().size() == 1) {
-            this.traces.addAll(calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true));
+            this.uiState.setTraceSet(calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length,
+                    true));
         }
         drawTraces();
     }
 
+    @Override
+    public void disable() {
+    }
+
     public void drawTraces() {
         colorIndex = 0;
-        for (var trace : this.traces) {
+        for (var trace : this.uiState.getTraceSet()) {
             logger.info(trace.toString());
             for (int i = 0; i < trace.getSequence().size() - 1; i++) {
                 CyEdge edge;
@@ -187,8 +183,5 @@ public class TracesDisplayController extends AbstractDisplayController implement
         return colors[colorIndex - 1];
     }
 
-    public void disable() {
-        this.registrar.unregisterService(this, TracesProvider.class);
-    }
 }
 

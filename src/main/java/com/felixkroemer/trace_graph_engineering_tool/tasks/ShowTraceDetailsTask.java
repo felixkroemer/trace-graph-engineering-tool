@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesProvider;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -17,15 +16,13 @@ public class ShowTraceDetailsTask extends AbstractTask {
     private Logger logger;
     private View<? extends CyIdentifiable> view;
     private CyNetworkView networkView;
-    private TracesProvider tracesProvider;
 
     public ShowTraceDetailsTask(CyServiceRegistrar reg, View<? extends CyIdentifiable> nodeView,
-                                CyNetworkView networkView, TracesProvider provider) {
+                                CyNetworkView networkView) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = reg;
         this.view = nodeView;
         this.networkView = networkView;
-        this.tracesProvider = provider;
     }
 
     @Override
@@ -33,7 +30,7 @@ public class ShowTraceDetailsTask extends AbstractTask {
         var network = networkView.getModel();
         var manager = this.registrar.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(network);
-        controller.showTraceDetails(this.tracesProvider.getTraces());
+        controller.showTraceDetails();
     }
 
 }

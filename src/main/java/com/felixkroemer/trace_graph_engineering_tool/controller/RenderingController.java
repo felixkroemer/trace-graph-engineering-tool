@@ -28,7 +28,6 @@ import org.cytoscape.work.TaskMonitor;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,6 +53,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.traceGraph = traceGraph;
         this.uiState = uiState;
         this.defaultStyle = createDefaultVisualStyle();
+
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
         // CyNetworkViewFactory is never registered by Ding
@@ -67,13 +67,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
         this.uiState.addObserver(this);
-
-        try {
-            Field rendererId = this.view.getClass().getDeclaredField("rendererId");
-            rendererId.setAccessible(true);
-            rendererId.set(this.view, "org.cytoscape.ding-extension");
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-        }
 
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
@@ -209,7 +202,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.displayManager = new FollowDisplayController(view, this.traceGraph);
             }
             case RENDERING_MODE_TRACES -> {
-                this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2);
+                this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2,
+                        this.uiState);
             }
             case RENDERING_MODE_SHORTEST_TRACE -> {
                 this.displayManager = new ShortestTraceDisplayController(view, this.traceGraph, this.uiState);

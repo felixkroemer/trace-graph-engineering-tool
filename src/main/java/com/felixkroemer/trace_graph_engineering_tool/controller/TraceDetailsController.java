@@ -1,6 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
@@ -16,22 +18,32 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TraceDetailsController {
+public class TraceDetailsController implements PropertyChangeListener {
 
     private CyServiceRegistrar registrar;
     private CyNetwork network;
     private CyNetworkView networkView;
     private Map<CyNode, CyNode> nodeMapping;
+    private TraceGraph traceGraph;
+    private UIState uiState;
 
-    public TraceDetailsController(CyServiceRegistrar registrar) {
+    public TraceDetailsController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         this.registrar = registrar;
         this.nodeMapping = new HashMap<>();
+        this.traceGraph = traceGraph;
+        this.uiState = uiState;
+
+        this.uiState.addObserver(this);
+        this.createNetwork();
     }
 
     public void createNetwork() {
@@ -42,19 +54,14 @@ public class TraceDetailsController {
         CyNetworkViewFactory networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkView = networkViewFactory.createNetworkView(network);
         CyNetworkViewManager networkViewManager = registrar.getService(CyNetworkViewManager.class);
-        networkViewManager.addNetworkView(networkView);
+        networkViewManager.addNetworkView(networkView, false);
+        CyApplicationManager manager = registrar.getService(CyApplicationManager.class);
+        manager.setSelectedNetworks(List.of(traceGraph.getNetwork(), this.network));
     }
 
-    public void showTraces(Set<TraceExtension> traces) {
+    public void updateTraces(Set<TraceExtension> traces) {
         this.nodeMapping.clear();
-        if (this.network == null) {
-            // view is set automatically as current network view
-            this.createNetwork();
-        } else {
-            this.network.removeNodes(this.network.getNodeList());
-            var manager = this.registrar.getService(CyApplicationManager.class);
-            manager.setCurrentNetworkView(this.networkView);
-        }
+        this.network.removeNodes(this.network.getNodeList());
 
         var eventHelper = registrar.getService(CyEventHelper.class);
 
@@ -103,5 +110,17 @@ public class TraceDetailsController {
 
     public CyNode findCorrespondingNode(CyNode node) {
         return this.nodeMapping.get(node);
+    }
+
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+
+            //UIState
+            case "traceSet" -> {
+                this.updateTraces((Set<TraceExtension>) evt.getNewValue());
+            }
+        }
     }
 }
