@@ -31,9 +31,9 @@ public class SelectBinsPanel extends JPanel {
     private JPanel buttonPanel;
     private JButton confirmButton;
     private JButton cancelButton;
-    private List<Double> bins;
-    private double minimum;
-    private double maximum;
+    private List<Float> bins;
+    private float minimum;
+    private float maximum;
     private DiscreteTrackRenderer trackRenderer;
     private final CyTable sourceTable;
 
@@ -55,10 +55,9 @@ public class SelectBinsPanel extends JPanel {
         this.highlightTo = -1;
         this.buttonPanel = new JPanel();
 
-        this.bins = new ArrayList<Double>(param.getBins().size());
-        param.getBins().forEach(b -> this.bins.add(Double.valueOf(b)));
-        this.minimum = param.getMinimum();
-        this.maximum = param.getMaximum();
+        this.bins = new ArrayList<>(param.getBins().size());
+        this.minimum = (float) param.getMinimum();
+        this.maximum = (float) param.getMaximum();
         this.sourceTable = sourceTable;
 
         this.slider = new JXMultiThumbSlider<>();
@@ -80,10 +79,10 @@ public class SelectBinsPanel extends JPanel {
         this.confirmButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
             List<Float> positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
-            List<Double> newBuckets =
+            List<Float> newBuckets =
                     positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum).toList();
             if (!newBuckets.equals(this.bins)) {
-                param.setBins(newBuckets);
+                param.setBins(newBuckets.stream().map(f -> (double) f).toList());
             }
             if (this.highlightRangeIsSet()) {
                 param.setHighlightRange(new HighlightRange(this.highlightFrom, this.highlightTo));
@@ -159,7 +158,7 @@ public class SelectBinsPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    double position = e.getX() * 1.0 / slider.getWidth();
+                    float position = (float) (e.getX() * 1.0 / slider.getWidth());
                     slider.getModel().addThumb((float) position, null);
                 } else if (e.getClickCount() == 1) {
                     if (selectHighlight) {
@@ -185,9 +184,11 @@ public class SelectBinsPanel extends JPanel {
             }
         });
 
-        for (double bin : this.bins) {
-            this.slider.getModel().addThumb((float) ((bin - this.minimum) / (this.maximum - this.minimum)), null);
+        for (double bin : param.getBins()) {
+            this.slider.getModel().addThumb(((float) bin - this.minimum) / (this.maximum - this.minimum), null);
         }
+        List<Float> positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
+        this.bins = positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum).toList();
     }
 
     private int getIndex(MouseEvent e) {

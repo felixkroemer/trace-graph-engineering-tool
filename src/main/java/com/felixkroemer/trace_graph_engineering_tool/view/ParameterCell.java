@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
@@ -19,6 +20,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     private JCheckBox checkBox;
     private JLabel label;
     private JButton editButton;
+    private JLabel highlightIndicator;
 
     public ParameterCell(CyServiceRegistrar reg, Parameter parameter, TraceGraphController controller) {
         IconManager iconManager = reg.getService(IconManager.class);
@@ -30,7 +32,14 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.label = new JLabel(parameter.getName());
         this.add(this.label, BorderLayout.CENTER);
         this.label.setHorizontalAlignment(JLabel.CENTER);
+
+        var containerPanel = new JPanel();
+        this.highlightIndicator = new JLabel();
+        containerPanel.add(highlightIndicator);
         this.editButton = new JButton(ICON_EDIT);
+        containerPanel.add(this.editButton);
+        this.add(containerPanel, BorderLayout.EAST);
+
         this.editButton.setFont(iconManager.getIconFont(14.0f));
         this.editButton.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
@@ -49,7 +58,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 parameter.disable();
             }
         });
-        this.add(this.editButton, BorderLayout.EAST);
+        this.highlightIndicator.setText(" ");
 
         this.label.setEnabled(parameter.isEnabled());
         this.editButton.setEnabled(parameter.isEnabled());
@@ -66,12 +75,16 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "enabled":
+            case "enabled" -> {
                 this.label.setEnabled((boolean) evt.getNewValue());
                 this.editButton.setEnabled((boolean) evt.getNewValue());
-                break;
-            case "bins":
-                break;
+            }
+            case "bins" -> {
+            }
+            case "highlightRange" -> {
+                HighlightRange range = (HighlightRange) evt.getNewValue();
+                this.highlightIndicator.setText(range == null ? " " : "⬤");
+            }
         }
     }
 }

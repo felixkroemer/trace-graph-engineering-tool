@@ -129,7 +129,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void hideUnhighlightedNodes() {
         Map<Parameter, HighlightRange> highlightRanges = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
-            highlightRanges.put(param, param.getHighlightRange());
+            HighlightRange range = param.getHighlightRange();
+            if (range != null) {
+                highlightRanges.put(param, range);
+            }
         }
         if (highlightRanges.isEmpty()) {
             for (var nodeView : this.view.getNodeViews()) {
@@ -175,11 +178,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void applyWorkingLayout() {
-        CyNetworkView view = this.displayManager.getNetworkView();
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         Object context = layoutFactory.getDefaultLayoutContext();
-        var taskIterator = layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+        var taskIterator = layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
         TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
         manager.execute(taskIterator);
     }
