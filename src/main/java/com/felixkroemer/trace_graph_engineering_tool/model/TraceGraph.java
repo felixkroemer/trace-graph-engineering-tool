@@ -32,6 +32,7 @@ public class TraceGraph {
         this.edgeTable = this.network.getDefaultEdgeTable();
         this.suidHashMapping = new HashMap<>(); //TODO: find way to create nodes with specified SUID (hash as suid)
         this.nodeMapping = new HashMap<>();
+
         this.initTables();
         this.initNetwork();
     }
@@ -104,7 +105,6 @@ public class TraceGraph {
                 }
                 edgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
                         Integer.class) - 1);
-
             }
             prevNode = currentNode;
         }

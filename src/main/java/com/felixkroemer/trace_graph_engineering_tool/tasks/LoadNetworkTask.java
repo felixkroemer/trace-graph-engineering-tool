@@ -21,9 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class LoadNetworkTask extends AbstractTask {
 
@@ -50,23 +48,18 @@ public class LoadNetworkTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         ParameterDiscretizationModelDTO dto = parsePDM();
-        CyTable table = parseCSV(dto);
-        Map<String, Double[]> minMaxValues = new HashMap<>();
-        dto.getParameters().forEach(p -> {
-            double max = table.getAllRows().stream().max(Comparator.comparingDouble(o -> o.get(p.getName(),
-                    Double.class))).get().get(p.getName(), Double.class);
-            double min = table.getAllRows().stream().min(Comparator.comparingDouble(o -> o.get(p.getName(),
-                    Double.class))).get().get(p.getName(), Double.class);
-            minMaxValues.put(p.getName(), new Double[]{max, min});
-        });
-        ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto, minMaxValues);
-        CyNetwork network = networkFactory.createNetwork();
+        List<String> csvs = dto.getCsvs();
+        ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
+        for (String csv : csvs) {
+            CyTable table = parseCSV(dto, csv);
+            CyNetwork network = networkFactory.createNetwork();
 
-        this.tableManager.addTable(table);
-        this.networkTableManager.setTable(network, CyNode.class, "com.felixkroemer", table);
+            this.tableManager.addTable(table);
+            this.networkTableManager.setTable(network, CyNode.class, "com.felixkroemer", table);
 
-        TraceGraph traceGraph = new TraceGraph(network, pdm, table);
-        manager.registerTraceGraph(traceGraph);
+            TraceGraph traceGraph = new TraceGraph(network, pdm, table);
+            manager.registerTraceGraph(pdm, traceGraph);
+        }
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {
@@ -77,13 +70,13 @@ public class LoadNetworkTask extends AbstractTask {
         return dto;
     }
 
-    private CyTable parseCSV(ParameterDiscretizationModelDTO dto) throws Exception {
+    private CyTable parseCSV(ParameterDiscretizationModelDTO dto, String csv) throws Exception {
         CyTable table = tableFactory.createTable("Source", Columns.SOURCE_ID, Integer.class, true, true);
         for (ParameterDTO param : dto.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }
         boolean header = true;
-        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), dto.getCsv())))) {
+        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), csv)))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (header) {

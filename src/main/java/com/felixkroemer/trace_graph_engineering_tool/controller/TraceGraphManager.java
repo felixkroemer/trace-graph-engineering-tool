@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
@@ -13,24 +14,27 @@ import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener {
 
     private CyServiceRegistrar registrar;
-    private Set<TraceGraphController> controllers;
+    private Map<ParameterDiscretizationModel, Set<TraceGraphController>> controllers;
     private final TraceGraphPanel panel;
 
     public TraceGraphManager(CyServiceRegistrar registrar, TraceGraphPanel panel) {
         this.registrar = registrar;
         this.panel = panel;
-        this.controllers = new HashSet<>();
+        this.controllers = new HashMap<>();
     }
 
-    public void registerTraceGraph(TraceGraph traceGraph) {
+    public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraph traceGraph) {
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-        this.controllers.add(controller);
+        this.controllers.computeIfAbsent(pdm, k -> new HashSet<>());
+        this.controllers.get(pdm).add(controller);
         controller.registerNetwork();
         this.showPanel();
     }
@@ -52,6 +56,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         TraceGraphController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
             controller.unregister();
+            //TODO
             this.controllers.remove(controller);
         }
         if (this.controllers.isEmpty()) {
@@ -60,9 +65,11 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     }
 
     public TraceGraphController findControllerForNetwork(CyNetwork network) {
-        for (var controller : this.controllers) {
-            if (controller.containsNetwork(network)) {
-                return controller;
+        for (var entry : this.controllers.entrySet()) {
+            for (var controller : entry.getValue()) {
+                if (controller.containsNetwork(network)) {
+                    return controller;
+                }
             }
         }
         return null;
@@ -79,9 +86,12 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     }
 
     public void clearTraceGraphs() {
-        for (var controller : this.controllers) {
-            controller.destroy();
+        for (var entry : this.controllers.entrySet()) {
+            for (var controller : entry.getValue()) {
+                controller.destroy();
+            }
         }
+        this.controllers.clear();
     }
 
 }

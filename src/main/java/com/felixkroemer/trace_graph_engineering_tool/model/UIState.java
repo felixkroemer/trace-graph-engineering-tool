@@ -1,5 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import com.felixkroemer.trace_graph_engineering_tool.util.ObservableSet;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashMap;

@@ -5,7 +5,7 @@ import java.util.List;
 public class ParameterDiscretizationModelDTO {
     private String name;
     private String version;
-    private String csv;
+    private List<String> csvs;
     private String description;
     private List<ParameterDTO> parameters;
 
@@ -25,12 +25,12 @@ public class ParameterDiscretizationModelDTO {
         this.version = version;
     }
 
-    public String getCsv() {
-        return csv;
+    public List<String> getCsvs() {
+        return csvs;
     }
 
-    public void setCsv(String csv) {
-        this.csv = csv;
+    public void setCsvs(String csv) {
+        this.csvs = csvs;
     }
 
     public String getDescription() {

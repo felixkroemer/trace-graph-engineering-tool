@@ -15,13 +15,11 @@ public class Parameter {
     private double maximum;
 
 
-    public Parameter(ParameterDTO dto, Double[] minMax) {
+    public Parameter(ParameterDTO dto) {
         this.name = dto.getName();
         this.bins = dto.getBins();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
-        this.maximum = minMax[0];
-        this.minimum = minMax[1];
     }
 
     public String getName() {

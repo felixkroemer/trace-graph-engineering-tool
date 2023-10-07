@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.model;
+package com.felixkroemer.trace_graph_engineering_tool.util;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

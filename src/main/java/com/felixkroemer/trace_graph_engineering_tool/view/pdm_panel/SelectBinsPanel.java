@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.view;
+package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.SelectBinsController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
@@ -15,10 +15,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.*;
 
 public class SelectBinsPanel extends JPanel {
 
@@ -59,8 +57,13 @@ public class SelectBinsPanel extends JPanel {
         this.buttonPanel = new JPanel();
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
-        this.minimum = (float) controller.getParameter().getMinimum();
-        this.maximum = (float) controller.getParameter().getMaximum();
+        var parameter = controller.getParameter();
+        this.minimum = controller.getSourceTable().getAllRows().stream().min(Comparator.comparingDouble(o -> {
+            return o.get(parameter.getName(), Double.class);
+        })).get().get(parameter.getName(), Double.class).floatValue();
+        this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> {
+            return o.get(parameter.getName(), Double.class);
+        })).get().get(parameter.getName(), Double.class).floatValue();
 
         this.slider = new JXMultiThumbSlider<>();
         initButtons(controller.getParameter());

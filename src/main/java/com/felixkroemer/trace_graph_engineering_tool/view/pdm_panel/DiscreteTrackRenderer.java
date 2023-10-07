@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.view;
+package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 // based on org/cytoscape/view/vizmap/gui/internal/view/editor/mappingeditor/DiscreteTrackRenderer.java
 

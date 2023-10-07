@@ -159,6 +159,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         TaskIterator iterator = new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) {
+                taskMonitor.setProgress(0.1);
                 taskMonitor.setStatusMessage("Clearing network");
                 traceGraph.clearNetwork();
                 taskMonitor.setStatusMessage("Recreating network");
@@ -183,6 +184,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void applyWorkingLayout() {
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
+        // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         Object context = layoutFactory.getDefaultLayoutContext();
         var taskIterator = layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
@@ -192,13 +194,13 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void setMode(String mode) {
         this.deselectAll();
-        this.view.getEdgeViews().forEach(edge -> {
-            this.defaultStyle.apply(this.view.getModel().getDefaultNodeTable().getRow(edge.getSUID()), edge);
-        });
 
         if (this.displayManager != null) {
+            // clear possible value locks
             this.displayManager.disable();
         }
+
+        this.defaultStyle.apply(this.view);
 
         switch (mode) {
             case RENDERING_MODE_FULL -> {
