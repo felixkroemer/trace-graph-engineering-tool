@@ -72,7 +72,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
             var controller = findControllerForNetwork(e.getNetwork());
-            this.panel.registerCallbacks(controller);
+            this.panel.registerCallbacks(controller, controller.getUiState());
         } else {
             this.panel.clear();
         }

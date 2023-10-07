@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
-import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
@@ -11,6 +10,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Set;
 
 import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 import static org.cytoscape.util.swing.IconManager.ICON_EDIT;
@@ -46,7 +46,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 var sourceTable = controller.getTraceGraph().getSourceTable();
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
-                d.setContentPane(new SelectBinsPanel(parameter, sourceTable));
+                d.setContentPane(new SelectBinsPanel(controller.createSelectBinsController(parameter)));
                 d.setModalityType(APPLICATION_MODAL);
                 d.showDialog();
             });
@@ -81,9 +81,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             }
             case "bins" -> {
             }
-            case "highlightRange" -> {
-                HighlightRange range = (HighlightRange) evt.getNewValue();
-                this.highlightIndicator.setText(range == null ? " " : "⬤");
+            case "highlightedBins" -> {
+                Set<Integer> bins = (Set<Integer>) evt.getNewValue();
+                this.highlightIndicator.setText(bins.isEmpty() ? " " : "⬤");
             }
         }
     }

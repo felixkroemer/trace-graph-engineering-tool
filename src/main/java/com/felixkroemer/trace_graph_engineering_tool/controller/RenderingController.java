@@ -2,7 +2,6 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.*;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
-import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
@@ -30,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
@@ -65,7 +65,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
 
-        this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
+        this.traceGraph.getPDM().forEach(p -> {
+            p.addObserver(this);
+            uiState.addHighlightObserver(p, this);
+        });
         this.uiState.addObserver(this);
 
         var mapper = registrar.getService(VisualMappingManager.class);
@@ -115,26 +118,23 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             case "bins" -> {
                 this.updateTraceGraph((Parameter) evt.getSource());
             }
-            case "highlightRange" -> {
-                this.hideUnhighlightedNodes();
-            }
 
             //UIState
             case "trace" -> {
                 this.setMode(RENDERING_MODE_SHORTEST_TRACE);
             }
+            case "highlightedBins" -> {
+                this.hideUnhighlightedNodes();
+            }
         }
     }
 
     public void hideUnhighlightedNodes() {
-        Map<Parameter, HighlightRange> highlightRanges = new HashMap<>();
+        Map<Parameter, Set<Integer>> highlightedBins = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
-            HighlightRange range = param.getHighlightRange();
-            if (range != null) {
-                highlightRanges.put(param, range);
-            }
+            highlightedBins.put(param, this.uiState.getHighlightedBins(param));
         }
-        if (highlightRanges.isEmpty()) {
+        if (highlightedBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);
             }
@@ -142,10 +142,14 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
         for (var node : traceGraph.getNetwork().getNodeList()) {
-            boolean match = highlightRanges.entrySet().stream().allMatch(entry -> {
-                var row = nodeTable.getRow(node.getSUID());
-                var value = row.get(entry.getKey().getName(), Integer.class);
-                return value >= entry.getValue().getLowerBound() && value <= entry.getValue().getUpperBound();
+            boolean match = highlightedBins.entrySet().stream().allMatch(entry -> {
+                if (entry.getValue().isEmpty()) {
+                    return true;
+                } else {
+                    var row = nodeTable.getRow(node.getSUID());
+                    var value = row.get(entry.getKey().getName(), Integer.class);
+                    return entry.getValue().contains(value);
+                }
             });
             view.getNodeView(node).setVisualProperty(NODE_VISIBLE, match);
         }

@@ -2,7 +2,6 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 // based on org/cytoscape/view/vizmap/gui/internal/view/editor/mappingeditor/DiscreteTrackRenderer.java
 
-import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
 import org.cytoscape.model.CyTable;
 import org.jdesktop.swingx.JXMultiThumbSlider;
 import org.jdesktop.swingx.multislider.Thumb;
@@ -38,18 +37,18 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable,
-                                 HighlightRange range) {
+    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable, int lowerBound,
+                                 int upperBound) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.name = name;
         this.sourceTable = sourceTable;
 
         this.highlightColor = new Color(0, 255, 0, 127);
-        if (range != null) {
+        if (lowerBound != -1 && upperBound != -1) {
             this.highlight = true;
-            this.highlightFrom = range.getLowerBound() - 1;
-            this.highlightTo = range.getUpperBound();
+            this.highlightFrom = lowerBound - 1;
+            this.highlightTo = upperBound;
         } else {
             this.highlight = false;
             this.highlightFrom = 0;

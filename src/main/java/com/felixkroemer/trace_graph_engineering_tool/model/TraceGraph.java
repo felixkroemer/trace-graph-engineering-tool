@@ -7,7 +7,6 @@ import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.PropertyChangeSupport;
 import java.util.*;
 
 public class TraceGraph {
@@ -21,7 +20,6 @@ public class TraceGraph {
     private CyTable edgeTable;
     private Map<Long, Long> suidHashMapping;
     private Map<Integer, CyNode> nodeMapping;
-    private PropertyChangeSupport pcs;
 
     public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm, CyTable sourceTable) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);

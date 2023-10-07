@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
@@ -67,8 +68,8 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         return "TraceGraphPanel";
     }
 
-    public void registerCallbacks(TraceGraphController controller) {
-        this.pdmPanel.registerCallbacks(controller.getTraceGraph().getPDM(), controller);
+    public void registerCallbacks(TraceGraphController controller, UIState uiState) {
+        this.pdmPanel.registerCallbacks(controller.getTraceGraph().getPDM(), controller, uiState);
     }
 
     public void showTracesPanel() {
@@ -84,7 +85,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         return -1;
     }
 
-    public void hidePanel(String title) {
+    private void hidePanel(String title) {
         var index = getPanelIndex(title);
         if (index != -1) {
             this.tabs.removeTabAt(index);

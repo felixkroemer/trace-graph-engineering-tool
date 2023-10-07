@@ -8,24 +8,20 @@ import java.util.List;
 
 public class Parameter {
     private String name;
-    private String type;
     private List<Double> bins;
     private boolean enabled;
     private PropertyChangeSupport pcs;
     private double minimum;
     private double maximum;
-    private HighlightRange highlightRange;
 
 
     public Parameter(ParameterDTO dto, Double[] minMax) {
         this.name = dto.getName();
-        this.type = dto.getType();
         this.bins = dto.getBins();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
         this.maximum = minMax[0];
         this.minimum = minMax[1];
-        this.highlightRange = null;
     }
 
     public String getName() {
@@ -58,20 +54,10 @@ public class Parameter {
     public void addObserver(PropertyChangeListener l) {
         pcs.addPropertyChangeListener("enabled", l);
         pcs.addPropertyChangeListener("bins", l);
-        pcs.addPropertyChangeListener("highlightRange", l);
     }
 
     public void clearObservers() {
         this.pcs = new PropertyChangeSupport(this);
-    }
-
-    public void setHighlightRange(HighlightRange range) {
-        this.highlightRange = range;
-        pcs.firePropertyChange("highlightRange", null, this.highlightRange);
-    }
-
-    public HighlightRange getHighlightRange() {
-        return this.highlightRange;
     }
 
     public double getMinimum() {

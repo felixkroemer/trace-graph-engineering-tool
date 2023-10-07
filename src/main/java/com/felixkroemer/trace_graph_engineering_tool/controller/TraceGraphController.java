@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
@@ -39,7 +39,7 @@ public class TraceGraphController {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = registrar;
         this.traceGraph = traceGraph;
-        this.uiState = new UIState();
+        this.uiState = new UIState(traceGraph);
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
         this.traceDetailsController = new TraceDetailsController(registrar, this.traceGraph, this.uiState);
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
@@ -121,6 +121,7 @@ public class TraceGraphController {
         }
     }
 
-    public void showTrace(List<CyNode> nodes) {
+    public SelectBinsController createSelectBinsController(Parameter parameter) {
+        return new SelectBinsController(parameter, this.uiState, this.traceGraph.getSourceTable());
     }
 }

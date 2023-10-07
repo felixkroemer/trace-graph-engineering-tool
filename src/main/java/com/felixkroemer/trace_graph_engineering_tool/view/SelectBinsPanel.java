@@ -1,6 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.HighlightRange;
+import com.felixkroemer.trace_graph_engineering_tool.controller.SelectBinsController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyTable;
@@ -16,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 public class SelectBinsPanel extends JPanel {
@@ -26,6 +28,7 @@ public class SelectBinsPanel extends JPanel {
 
     private final Logger logger;
 
+    private SelectBinsController controller;
     private JXMultiThumbSlider<Void> slider;
 
     private JPanel buttonPanel;
@@ -35,15 +38,15 @@ public class SelectBinsPanel extends JPanel {
     private float minimum;
     private float maximum;
     private DiscreteTrackRenderer trackRenderer;
-    private final CyTable sourceTable;
 
     private JButton toggleHighlightButton;
     private boolean selectHighlight;
     private int highlightFrom;
     private int highlightTo;
 
-    public SelectBinsPanel(Parameter param, CyTable sourceTable) {
+    public SelectBinsPanel(SelectBinsController controller) {
         this.logger = LoggerFactory.getLogger(CyUserLog.class);
+        this.controller = controller;
 
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(1000, 600));
@@ -55,14 +58,13 @@ public class SelectBinsPanel extends JPanel {
         this.highlightTo = -1;
         this.buttonPanel = new JPanel();
 
-        this.bins = new ArrayList<>(param.getBins().size());
-        this.minimum = (float) param.getMinimum();
-        this.maximum = (float) param.getMaximum();
-        this.sourceTable = sourceTable;
+        this.bins = new ArrayList<>(controller.getParameter().getBins().size());
+        this.minimum = (float) controller.getParameter().getMinimum();
+        this.maximum = (float) controller.getParameter().getMaximum();
 
         this.slider = new JXMultiThumbSlider<>();
-        initButtons(param);
-        initSlider(param);
+        initButtons(controller.getParameter());
+        initSlider(controller.getParameter(), controller.getSourceTable());
     }
 
     public void initButtons(Parameter param) {
@@ -82,23 +84,25 @@ public class SelectBinsPanel extends JPanel {
             List<Float> newBuckets =
                     positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum).toList();
             if (!newBuckets.equals(this.bins)) {
-                param.setBins(newBuckets.stream().map(f -> (double) f).toList());
+                controller.setNewBins(newBuckets);
             }
+            var highlightedBins = new HashSet<Integer>();
             if (this.highlightRangeIsSet()) {
-                param.setHighlightRange(new HighlightRange(this.highlightFrom, this.highlightTo));
-            } else {
-                param.setHighlightRange(null);
+                for (int i = this.highlightFrom; i <= this.highlightTo; i++) {
+                    highlightedBins.add(i);
+                }
             }
+            controller.setNewHighlightedBins(highlightedBins);
         });
 
         this.cancelButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
         });
 
-        if (param.getHighlightRange() != null) {
+        if (!controller.getHighlightedBins().isEmpty()) {
             this.selectHighlight = true;
-            this.highlightFrom = param.getHighlightRange().getLowerBound();
-            this.highlightTo = param.getHighlightRange().getUpperBound();
+            this.highlightFrom = Collections.min(controller.getHighlightedBins());
+            this.highlightTo = Collections.max(controller.getHighlightedBins());
             toggleHighlightButton.setText(TOGGLE_RESET);
         } else {
             this.selectHighlight = false;
@@ -145,12 +149,12 @@ public class SelectBinsPanel extends JPanel {
         return this.highlightFrom != -1 && this.highlightTo != -1;
     }
 
-    public void initSlider(Parameter param) {
+    public void initSlider(Parameter param, CyTable sourceTable) {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
         this.trackRenderer = new DiscreteTrackRenderer((float) this.minimum, (float) this.maximum, param.getName(),
-                sourceTable, param.getHighlightRange());
+                sourceTable, this.highlightFrom, this.highlightTo);
         this.slider.setTrackRenderer(trackRenderer);
         this.add(slider, BorderLayout.CENTER);
 
