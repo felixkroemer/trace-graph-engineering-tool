@@ -78,20 +78,9 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         TaskIterator iterator = new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) {
-                taskMonitor.setProgress(0.1);
-                taskMonitor.setStatusMessage("Clearing network");
                 for (TraceGraphController controller : controllers.get(pdm)) {
-                    controller.getTraceGraph().clearNetwork();
+                    controller.getTraceGraph().reinitNetwork(changedParam, taskMonitor);
                 }
-                // delete only after local node tables have been cleared, otherwise they have no reference to previously
-                // existing nodes (necessary for deleteRows())
-                pdm.getSuidHashMapping().clear();
-                pdm.getRootNetwork().removeNodes(pdm.getRootNetwork().getNodeList());
-                taskMonitor.setStatusMessage("Recreating network");
-                for (TraceGraphController controller : controllers.get(pdm)) {
-                    controller.initNetwork();
-                }
-                //traceGraph.reinitNetwork(changedParam, taskMonitor);
             }
         });
         //TODO: dialog does not display anything

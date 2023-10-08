@@ -22,7 +22,7 @@ public class TraceGraph {
     private CyTable defaultEdgetable;
     private CyTable localEdgeTable;
     private Map<Long, Long> suidHashMapping;
-    private Map<Integer, CyNode> nodeMapping;
+    private Map<Long, CyNode> nodeMapping;
 
     public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm, CyTable sourceTable) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -101,7 +101,7 @@ public class TraceGraph {
                 currentRow.set(Columns.NODE_FREQUENCY, 1);
                 currentRow.set(Columns.NODE_SOURCE_ROWS, new ArrayList<>());
             }
-            this.nodeMapping.put(sourceRow.get(Columns.SOURCE_ID, Long.class).intValue(), currentNode);
+            this.nodeMapping.put(sourceRow.get(Columns.SOURCE_ID, Long.class), currentNode);
             currentRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
                     Long.class).intValue());
             if (prevNode != null && prevNode != currentNode) {
@@ -145,7 +145,7 @@ public class TraceGraph {
     /*
      * Find the node that a row in the sourceTable belongs to
      */
-    public CyNode findNode(int sourceTableIndex) {
+    public CyNode findNode(long sourceTableIndex) {
         return this.nodeMapping.get(sourceTableIndex);
     }
 
@@ -196,7 +196,7 @@ public class TraceGraph {
             for (int j : sourceRowSet) {
                 visited[j] = true;
 
-                var sourceRow = this.sourceTable.getRow(j);
+                var sourceRow = this.sourceTable.getRow((long) j);
                 double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
                 var bucket = findBucket(sourceRowValue, changedParameter);
 
@@ -210,9 +210,22 @@ public class TraceGraph {
                     Long suid = suidHashMapping.get(hash);
                     CyNode newNode;
                     CyRow newNodeRow;
-                    if (suid != null && (newNode = network.getNode(suid)) != null) { // node for the given state
-                        // already exists
-                        newNodeRow = this.defaultNodeTable.getRow(newNode.getSUID());
+                    // node exists, maybe only in root network
+                    var rootNetwork = ((CySubNetwork) network).getRootNetwork();
+                    // may be null if suidHashMapping reference is stale; -> node may have been removed from all
+                    // TraceGraphs of the pdm, reference is not cleaned up automatically
+                    if (suid != null && (newNode = rootNetwork.getNode(suid)) != null) { // implies suid is not null
+                        // may be null
+                        newNodeRow = defaultNodeTable.getRow(newNode.getSUID());
+                        // node exists in root network, but not here
+                        if (!network.containsNode(newNode)) {
+                            // make node available from the default node table
+                            ((CySubNetwork) network).addNode(newNode);
+                            newNodeRow = defaultNodeTable.getRow(newNode.getSUID());
+                            newNodeRow.set(Columns.NODE_VISITS, 1);
+                            newNodeRow.set(Columns.NODE_FREQUENCY, 1);
+                            newNodeRow.set(Columns.NODE_SOURCE_ROWS, new ArrayList<>());
+                        }
                     } else {
                         newNode = network.addNode();
                         suidHashMapping.put(hash, newNode.getSUID());
@@ -229,10 +242,10 @@ public class TraceGraph {
                     // move source row index from old to new, remove old edge if traversals is 0
                     oldNodeRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).remove((Object) j);
                     newNodeRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).add(j);
-                    if (oldNodeRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).size() == 0) {
+                    this.nodeMapping.put((long) j, newNode);
+                    if (oldNodeRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).isEmpty()) {
                         nodesToRemove.add(oldNode);
                     }
-                    this.nodeMapping.put(j, newNode);
                     // move edges
                     // incoming
                     if (j != 1) {
@@ -241,11 +254,7 @@ public class TraceGraph {
                         if (oldEdge != null) {
                             var oldEdgeRow = this.defaultEdgetable.getRow(oldEdge.getSUID());
                             var oldEdgeTraversals = oldEdgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class);
-                            if (oldEdgeTraversals == 1) {
-                                edgesToRemove.add(oldEdge);
-                            } else {
-                                oldEdgeRow.set(Columns.EDGE_TRAVERSALS, oldEdgeTraversals - 1);
-                            }
+                            oldEdgeRow.set(Columns.EDGE_TRAVERSALS, oldEdgeTraversals - 1);
                             CyEdge newEdge = null;
                             CyRow newEdgeRow = null;
                             if ((newEdge = this.getEdge(source, newNode)) != null) {
@@ -258,7 +267,7 @@ public class TraceGraph {
                                 newEdgeRow = this.defaultEdgetable.getRow(newEdge.getSUID());
                                 newEdgeRow.set(Columns.EDGE_SOURCE_ROWS, new ArrayList<>());
                             }
-                            newEdgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add(j - 1);
+                            newEdgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add((int) j - 1);
                         }
                     }
                     if (j != sourceTable.getRowCount()) {
@@ -267,11 +276,7 @@ public class TraceGraph {
                         if (oldEdge != null) {
                             var oldEdgeRow = this.defaultEdgetable.getRow(oldEdge.getSUID());
                             var oldEdgeTraversals = oldEdgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class);
-                            if (oldEdgeTraversals == 1) {
-                                edgesToRemove.add(oldEdge);
-                            } else {
-                                oldEdgeRow.set(Columns.EDGE_TRAVERSALS, oldEdgeTraversals - 1);
-                            }
+                            oldEdgeRow.set(Columns.EDGE_TRAVERSALS, oldEdgeTraversals - 1);
 
                             CyEdge newEdge = null;
                             CyRow newEdgeRow = null;
@@ -285,15 +290,28 @@ public class TraceGraph {
                                 newEdgeRow = this.defaultEdgetable.getRow(newEdge.getSUID());
                                 newEdgeRow.set(Columns.EDGE_SOURCE_ROWS, new ArrayList<>());
                             }
-                            newEdgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add(j - 1);
+                            newEdgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add((int) j - 1);
                         }
                     }
                 }
             }
         }
+        // if node source rows is empty there is no entry in nodemapping that points to this node, it can be removed
+        // from this network but may still exist in another network with the same pdm
+        for (CyNode node : this.network.getNodeList()) {
+            if (this.defaultNodeTable.getRow(node.getSUID()).getList(Columns.NODE_SOURCE_ROWS, Integer.class).isEmpty()) {
+                nodesToRemove.add(node);
+            }
+        }
+        for (CyEdge edge : this.network.getEdgeList()) {
+            if (this.defaultEdgetable.getRow(edge.getSUID()).getList(Columns.EDGE_SOURCE_ROWS, Integer.class).isEmpty()) {
+                edgesToRemove.add(edge);
+            }
+        }
         // need to be removed in batches, otherwise events take forever
-        this.network.removeEdges(edgesToRemove);
+        // TODO: check problem with rendering timer concurrency (trying to render nodes that were already deleted)
         this.network.removeNodes(nodesToRemove);
+        this.network.removeEdges(edgesToRemove);
     }
 
     private void fixEdge(CyNode oldSource, CyNode newSource, CyNode target) {

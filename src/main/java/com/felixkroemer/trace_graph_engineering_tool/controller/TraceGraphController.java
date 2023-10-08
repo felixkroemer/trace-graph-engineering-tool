@@ -51,7 +51,7 @@ public class TraceGraphController {
         networkManager.addNetwork(traceGraph.getNetwork());
         var networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(renderingController.getView());
-        //this.hideUnneededColumns();
+        this.hideUnneededColumns();
         renderingController.applyWorkingLayout();
     }
 
