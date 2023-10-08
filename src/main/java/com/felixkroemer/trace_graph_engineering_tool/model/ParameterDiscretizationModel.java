@@ -3,11 +3,14 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import org.cytoscape.application.CyUserLog;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ParameterDiscretizationModel {
@@ -19,6 +22,8 @@ public class ParameterDiscretizationModel {
     private List<String> csvs;
     private String description;
     private List<Parameter> parameters;
+    private Map<Long, Long> suidHashMapping;
+    private CyRootNetwork rootNetwork;
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -30,6 +35,7 @@ public class ParameterDiscretizationModel {
         for (ParameterDTO param : dto.getParameters()) {
             this.parameters.add(new Parameter(param));
         }
+        this.suidHashMapping = new HashMap<>();
     }
 
     public List<Parameter> getParameters() {
@@ -92,6 +98,20 @@ public class ParameterDiscretizationModel {
         } else {
             throw new IllegalArgumentException(String.format("Parameter %s is unknown.", name));
         }
+    }
+
+    public Map<Long, Long> getSuidHashMapping() {
+        return this.suidHashMapping;
+    }
+
+
+    public CyRootNetwork getRootNetwork() {
+        return this.rootNetwork;
+    }
+
+    // can't be set in constructor because rootnetwork can't be created via api without subnetwork
+    public void setRootNetwork(CyRootNetwork rootNetwork) {
+        this.rootNetwork = rootNetwork;
     }
 }
 

@@ -11,6 +11,8 @@ import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
@@ -49,15 +51,28 @@ public class LoadNetworkTask extends AbstractTask {
     public void run(TaskMonitor taskMonitor) throws Exception {
         ParameterDiscretizationModelDTO dto = parsePDM();
         List<String> csvs = dto.getCsvs();
+
         ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
         for (String csv : csvs) {
             CyTable table = parseCSV(dto, csv);
-            CyNetwork network = networkFactory.createNetwork();
+            CyRootNetwork rootNetwork = pdm.getRootNetwork();
+            CySubNetwork subNetwork = null;
+            if (rootNetwork == null) {
+                subNetwork = (CySubNetwork) networkFactory.createNetwork();
+                rootNetwork = subNetwork.getRootNetwork();
+                pdm.setRootNetwork(rootNetwork);
+                var sharedNodeTable = rootNetwork.getSharedNodeTable();
+                pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
+                var sharedNetworkTable = rootNetwork.getDefaultNetworkTable();
+                sharedNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+            } else {
+                subNetwork = rootNetwork.addSubNetwork();
+            }
 
             this.tableManager.addTable(table);
-            this.networkTableManager.setTable(network, CyNode.class, "com.felixkroemer", table);
+            this.networkTableManager.setTable(subNetwork, CyNode.class, "com.felixkroemer", table);
 
-            TraceGraph traceGraph = new TraceGraph(network, pdm, table);
+            TraceGraph traceGraph = new TraceGraph(subNetwork, pdm, table);
             manager.registerTraceGraph(pdm, traceGraph);
         }
     }
