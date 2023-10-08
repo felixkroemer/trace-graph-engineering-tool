@@ -101,9 +101,9 @@ public class TraceGraph {
                 currentRow.set(Columns.NODE_FREQUENCY, 1);
                 currentRow.set(Columns.NODE_SOURCE_ROWS, new ArrayList<>());
             }
-            this.nodeMapping.put(sourceRow.get("id", Integer.class), currentNode);
+            this.nodeMapping.put(sourceRow.get(Columns.SOURCE_ID, Long.class).intValue(), currentNode);
             currentRow.getList(Columns.NODE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
-                    Integer.class));
+                    Long.class).intValue());
             if (prevNode != null && prevNode != currentNode) {
                 CyEdge edge;
                 CyRow edgeRow;
@@ -117,7 +117,7 @@ public class TraceGraph {
                     edgeRow.set(Columns.EDGE_TRAVERSALS, edgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class) + 1);
                 }
                 edgeRow.getList(Columns.EDGE_SOURCE_ROWS, Integer.class).add(sourceRow.get(Columns.SOURCE_ID,
-                        Integer.class) - 1);
+                        Long.class).intValue() - 1);
             }
             prevNode = currentNode;
         }
@@ -162,9 +162,8 @@ public class TraceGraph {
     }
 
     public void clearNetwork() {
-        this.network.removeNodes(this.network.getNodeList());
-        suidHashMapping.clear();
         nodeMapping.clear();
+        this.localNodeTable.deleteRows(this.network.getNodeList().stream().map(CyIdentifiable::getSUID).toList());
     }
 
     public void reinitNetwork(Parameter changedParameter, TaskMonitor monitor) {

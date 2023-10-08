@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.CyUserLog;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
@@ -52,6 +53,14 @@ public class TraceGraphController {
         networkViewManager.addNetworkView(renderingController.getView());
         //this.hideUnneededColumns();
         renderingController.applyWorkingLayout();
+    }
+
+    public void initNetwork() {
+        this.traceGraph.initNetwork();
+        CyEventHelper helper = registrar.getService(CyEventHelper.class);
+        helper.flushPayloadEvents();
+        this.renderingController.applyDefaultStyle();
+        this.renderingController.applyWorkingLayout();
     }
 
     private void hideUnneededColumns() {

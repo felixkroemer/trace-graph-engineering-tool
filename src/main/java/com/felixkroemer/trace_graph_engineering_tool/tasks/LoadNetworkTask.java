@@ -86,7 +86,7 @@ public class LoadNetworkTask extends AbstractTask {
     }
 
     private CyTable parseCSV(ParameterDiscretizationModelDTO dto, String csv) throws Exception {
-        CyTable table = tableFactory.createTable("Source", Columns.SOURCE_ID, Integer.class, true, true);
+        CyTable table = tableFactory.createTable("Source", Columns.SOURCE_ID, Long.class, true, true);
         for (ParameterDTO param : dto.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }
@@ -98,7 +98,7 @@ public class LoadNetworkTask extends AbstractTask {
                     header = false;
                     continue;
                 }
-                CyRow row = table.getRow(Integer.parseInt(line[0]));
+                CyRow row = table.getRow(Long.parseLong(line[0]));
                 for (int i = 1; i < line.length; i++) {
                     // csv has some empty entries
                     if (!line[i].isEmpty()) {

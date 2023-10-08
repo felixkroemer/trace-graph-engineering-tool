@@ -11,15 +11,15 @@ public class Parameter {
     private List<Double> bins;
     private boolean enabled;
     private PropertyChangeSupport pcs;
-    private double minimum;
-    private double maximum;
+    private ParameterDiscretizationModel pdm;
 
 
-    public Parameter(ParameterDTO dto) {
+    public Parameter(ParameterDTO dto, ParameterDiscretizationModel pdm) {
         this.name = dto.getName();
         this.bins = dto.getBins();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
+        this.pdm = pdm;
     }
 
     public String getName() {
@@ -39,6 +39,10 @@ public class Parameter {
         pcs.firePropertyChange("enabled", false, true);
     }
 
+    public ParameterDiscretizationModel getPdm() {
+        return this.pdm;
+    }
+
     public void disable() {
         this.enabled = false;
         pcs.firePropertyChange("enabled", true, false);
@@ -54,15 +58,4 @@ public class Parameter {
         pcs.addPropertyChangeListener("bins", l);
     }
 
-    public void clearObservers() {
-        this.pcs = new PropertyChangeSupport(this);
-    }
-
-    public double getMinimum() {
-        return this.minimum;
-    }
-
-    public double getMaximum() {
-        return this.maximum;
-    }
 }

@@ -33,7 +33,7 @@ public class ParameterDiscretizationModel {
         this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO param : dto.getParameters()) {
-            this.parameters.add(new Parameter(param));
+            this.parameters.add(new Parameter(param, this));
         }
         this.suidHashMapping = new HashMap<>();
     }

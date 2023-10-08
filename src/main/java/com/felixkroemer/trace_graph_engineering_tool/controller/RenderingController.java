@@ -16,13 +16,9 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -32,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
-import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener {
 
@@ -66,7 +61,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
 
         this.traceGraph.getPDM().forEach(p -> {
-            p.addObserver(this);
             uiState.addHighlightObserver(p, this);
         });
         this.uiState.addObserver(this);
@@ -107,18 +101,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "enabled" -> {
-                var tableViewManager = registrar.getService(CyTableViewManager.class);
-                var nodeTableView = tableViewManager.getTableView(traceGraph.getNetwork().getDefaultNodeTable());
-                Parameter param = (Parameter) evt.getSource();
-                var columnView = nodeTableView.getColumnView(param.getName());
-                columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
-                this.updateTraceGraph(param);
-            }
-            case "bins" -> {
-                this.updateTraceGraph((Parameter) evt.getSource());
-            }
-
             //UIState
             case "trace" -> {
                 this.setMode(RENDERING_MODE_SHORTEST_TRACE);
@@ -155,29 +137,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    private void updateTraceGraph(Parameter changedParam) {
-        TaskIterator iterator = new TaskIterator(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) {
-                taskMonitor.setProgress(0.1);
-                taskMonitor.setStatusMessage("Clearing network");
-                traceGraph.clearNetwork();
-                taskMonitor.setStatusMessage("Recreating network");
-                //traceGraph.reinitNetwork(changedParam, taskMonitor);
-                traceGraph.initNetwork();
-                taskMonitor.setProgress(0.5);
-                taskMonitor.setStatusMessage("Applying style");
-                defaultStyle.apply(view);
-                taskMonitor.setProgress(0.75);
-                taskMonitor.setStatusMessage("Applying layout");
-                applyWorkingLayout();
-            }
-        });
-        //TODO: dialog does not display anything
-        var taskManager = registrar.getService(TaskManager.class);
-        taskManager.execute(iterator);
-    }
-
     public CyNetworkView getView() {
         return this.view;
     }
@@ -190,6 +149,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var taskIterator = layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
         TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
         manager.execute(taskIterator);
+    }
+
+    public void applyDefaultStyle() {
+        this.defaultStyle.apply(view);
     }
 
     public void setMode(String mode) {
