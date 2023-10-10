@@ -267,7 +267,7 @@ public class TraceGraph {
         // from this network but may still exist in another network with the same pdm
         for (CyNode node : this.network.getNodeList()) {
             //TODO clear empty entries
-            if (this.nodeInfo.get(node).getSourceRows(this.sourceTable) == null || this.nodeInfo.get(node).getSourceRows(this.sourceTable).isEmpty()) {
+            if (this.nodeInfo.get(node).hasNoSourceRows()) {
                 nodesToRemove.add(node);
                 this.nodeInfo.remove(node);
             }
