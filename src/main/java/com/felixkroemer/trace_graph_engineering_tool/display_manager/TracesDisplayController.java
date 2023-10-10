@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.beans.PropertyChangeSupport;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -106,7 +107,7 @@ public class TracesDisplayController extends AbstractDisplayController {
     public static Set<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
                                                       boolean isEdge) {
         Set<TraceExtension> traces = new HashSet<>();
-        Set<Integer> sourceRows;
+        Collection<Integer> sourceRows;
         Set<Integer> foundIndices = new HashSet<>();
         CyNode startNode;
         if (isEdge) {
@@ -115,10 +116,8 @@ public class TracesDisplayController extends AbstractDisplayController {
                     Integer.class));
             startNode = ((CyEdge) identifiable).getSource();
         } else {
-            var table = traceGraph.getNetwork().getDefaultNodeTable();
-            sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.NODE_SOURCE_ROWS,
-                    Integer.class));
             startNode = ((CyNode) identifiable);
+            sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(traceGraph.getSourceTable());
         }
         var iterator = sourceRows.iterator();
         while (iterator.hasNext()) {

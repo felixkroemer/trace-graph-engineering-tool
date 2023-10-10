@@ -6,7 +6,6 @@ public class Columns {
     // number of hypothetical ingoing edges, equals number of outgoing edges;
     // except for first and last source row entry of a trace
     public static final String NODE_FREQUENCY = "frequency";
-    public static final String NODE_SOURCE_ROWS = "node_source_rows";
 
     public static final String EDGE_TRAVERSALS = "traversals";
     //TODO: remove if unnecessary

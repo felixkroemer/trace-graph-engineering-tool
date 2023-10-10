@@ -62,8 +62,9 @@ public class TraceGraphController {
         iterator.append(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
-                traceGraph.clearNetwork();
-                traceGraph.init();
+                // traceGraph.clearNetwork();
+                // traceGraph.init();
+                traceGraph.reinit(changedParameter);
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
                 helper.flushPayloadEvents();
             }

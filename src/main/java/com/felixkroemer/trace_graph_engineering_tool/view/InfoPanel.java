@@ -58,10 +58,10 @@ public class InfoPanel extends JPanel {
         var incoming = edges.stream().filter(edge -> edge.getSource() == node).count();
         this.nodeInfoTableModel.addRow(new String[]{"Incoming Edges", "" + incoming});
         this.nodeInfoTableModel.addRow(new String[]{"Outgoing Edges", "" + (edges.size() - incoming)});
-        var visits = network.getRow(node).get(Columns.NODE_VISITS, Integer.class);
+        /*var visits = network.getRow(node).get(Columns.NODE_VISITS, Integer.class);
         var frequency = network.getRow(node).get(Columns.NODE_FREQUENCY, Integer.class);
         this.nodeInfoTableModel.addRow(new String[]{"Visits", "" + visits});
-        this.nodeInfoTableModel.addRow(new String[]{"Frequency", "" + frequency});
+        this.nodeInfoTableModel.addRow(new String[]{"Frequency", "" + frequency});*/
     }
 
 }
