@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyApplicationManager;
@@ -15,6 +16,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
+import org.cytoscape.work.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +57,32 @@ public class TraceGraphController {
         renderingController.applyWorkingLayout();
     }
 
-    public void initNetwork() {
-        this.traceGraph.initNetwork();
-        CyEventHelper helper = registrar.getService(CyEventHelper.class);
-        helper.flushPayloadEvents();
-        this.renderingController.applyDefaultStyle();
-        this.renderingController.applyWorkingLayout();
+    public void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
+        var iterator = new TaskIterator();
+        iterator.append(new AbstractTask() {
+            @Override
+            public void run(TaskMonitor taskMonitor) throws Exception {
+                traceGraph.clearNetwork();
+                traceGraph.init();
+                CyEventHelper helper = registrar.getService(CyEventHelper.class);
+                helper.flushPayloadEvents();
+            }
+        });
+        var taskManager = this.registrar.getService(SynchronousTaskManager.class);
+        taskManager.execute(iterator);
+    }
+
+    public void applyStyleAndLayout() {
+        TaskIterator iterator = new TaskIterator();
+        iterator.append(new AbstractTask() {
+            @Override
+            public void run(TaskMonitor taskMonitor) throws Exception {
+                renderingController.applyDefaultStyle();
+            }
+        });
+        iterator.append(this.renderingController.createWorkingLayoutTask());
+        var taskManager = this.registrar.getService(TaskManager.class);
+        taskManager.execute(iterator);
     }
 
     private void hideUnneededColumns() {

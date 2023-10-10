@@ -15,10 +15,6 @@ import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.table.CyTableViewManager;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -74,18 +70,12 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         }
     }
 
-    private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParam) {
-        TaskIterator iterator = new TaskIterator(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) {
-                for (TraceGraphController controller : controllers.get(pdm)) {
-                    controller.getTraceGraph().reinitNetwork(changedParam, taskMonitor);
-                }
+    private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
+            //TODO: remove
+            for (TraceGraphController controller : controllers.get(pdm)) {
+                controller.updateTraceGraph(pdm, changedParameter);
+                controller.applyStyleAndLayout();
             }
-        });
-        //TODO: dialog does not display anything
-        var taskManager = registrar.getService(TaskManager.class);
-        taskManager.execute(iterator);
     }
 
     private void showPanel() {

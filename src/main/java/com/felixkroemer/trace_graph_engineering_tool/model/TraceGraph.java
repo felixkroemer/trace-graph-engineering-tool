@@ -41,7 +41,7 @@ public class TraceGraph {
         this.nodeMapping = new HashMap<>();
 
         this.initTables();
-        this.initNetwork();
+        this.init();
     }
 
     private void initTables() {
@@ -54,7 +54,7 @@ public class TraceGraph {
         this.localEdgeTable.createListColumn(Columns.EDGE_SOURCE_ROWS, Integer.class, false);
     }
 
-    public void initNetwork() {
+    public void init() {
         int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
         CyNode currentNode = null;
@@ -72,9 +72,8 @@ public class TraceGraph {
             }
             long hash = Arrays.hashCode(state);
             Long suid = suidHashMapping.get(hash);
-            if (suid != null) { // node for the given state already exists, maybe only in root
-                var rootNetwork = ((CySubNetwork) network).getRootNetwork();
-                currentNode = rootNetwork.getNode(suid);
+            var rootNetwork = ((CySubNetwork) network).getRootNetwork();
+            if (suid != null && (currentNode = rootNetwork.getNode(suid)) != null) { // node for the given state already exists, maybe only in root
                 currentRow = defaultNodeTable.getRow(currentNode.getSUID());
                 // node exists in root network, but not here
                 if (!network.containsNode(currentNode)) {
@@ -162,8 +161,8 @@ public class TraceGraph {
     }
 
     public void clearNetwork() {
-        nodeMapping.clear();
-        this.localNodeTable.deleteRows(this.network.getNodeList().stream().map(CyIdentifiable::getSUID).toList());
+        // also removes edges and clears all tables
+        this.network.removeNodes(this.network.getNodeList());
     }
 
     public void reinitNetwork(Parameter changedParameter, TaskMonitor monitor) {

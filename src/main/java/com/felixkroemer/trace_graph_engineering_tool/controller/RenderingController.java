@@ -18,6 +18,7 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
+import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
@@ -142,13 +143,17 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void applyWorkingLayout() {
+        TaskIterator taskIterator = createWorkingLayoutTask();
+        TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
+        manager.execute(taskIterator);
+    }
+
+    public TaskIterator createWorkingLayoutTask() {
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         Object context = layoutFactory.getDefaultLayoutContext();
-        var taskIterator = layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
-        TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
-        manager.execute(taskIterator);
+        return layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
     }
 
     public void applyDefaultStyle() {
