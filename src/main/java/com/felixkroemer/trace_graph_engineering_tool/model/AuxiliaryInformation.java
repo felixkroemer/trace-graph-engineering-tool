@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Auxiliary node information that is not contained in the local node table
+ * Auxiliary node/edge information that is not contained in the local tables
  */
-public class NodeAux {
+public class AuxiliaryInformation {
     private final Map<CyTable, List<Integer>> source_rows;
 
-    public NodeAux() {
+    public AuxiliaryInformation() {
         this.source_rows = new HashMap<>();
     }
 

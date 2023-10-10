@@ -111,9 +111,8 @@ public class TracesDisplayController extends AbstractDisplayController {
         Set<Integer> foundIndices = new HashSet<>();
         CyNode startNode;
         if (isEdge) {
-            var table = traceGraph.getNetwork().getDefaultEdgeTable();
-            sourceRows = new HashSet<>(table.getRow(identifiable.getSUID()).getList(Columns.EDGE_SOURCE_ROWS,
-                    Integer.class));
+            CyEdge edge = (CyEdge) identifiable;
+            sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(traceGraph.getSourceTable());
             startNode = ((CyEdge) identifiable).getSource();
         } else {
             startNode = ((CyNode) identifiable);

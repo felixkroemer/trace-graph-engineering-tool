@@ -9,7 +9,6 @@ public class Columns {
 
     public static final String EDGE_TRAVERSALS = "traversals";
     //TODO: remove if unnecessary
-    public static final String EDGE_SOURCE_ROWS = "edge_source_rows";
 
     public static final String NETWORK_TG_MARKER = "traceGraphMarker";
 
