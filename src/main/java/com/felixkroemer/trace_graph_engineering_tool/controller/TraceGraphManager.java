@@ -13,15 +13,13 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.table.CyTableViewManager;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
@@ -71,10 +69,10 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     }
 
     private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
-            for (TraceGraphController controller : controllers.get(pdm)) {
-                controller.updateTraceGraph(pdm, changedParameter);
-                controller.applyStyleAndLayout();
-            }
+        for (TraceGraphController controller : controllers.get(pdm)) {
+            controller.updateTraceGraph(pdm, changedParameter);
+            controller.applyStyleAndLayout();
+        }
     }
 
     private void showPanel() {
@@ -95,7 +93,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
             controller.unregister();
             var pdm = controller.getTraceGraph().getPDM();
             this.controllers.get(pdm).remove(controller);
-            if(controllers.get(pdm).isEmpty()) {
+            if (controllers.get(pdm).isEmpty()) {
                 controllers.remove(pdm);
             }
         }
@@ -132,6 +130,21 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
             }
         }
         this.controllers.clear();
+    }
+
+    public ParameterDiscretizationModel findPDM(List<String> params) {
+        for (var pdm : this.controllers.keySet()) {
+            if (pdm.getParameterCount() != params.size()) {
+                return null;
+            }
+            for(int i = 0; i<pdm.getParameters().size(); i++) {
+                if(!pdm.getParameters().get(i).getName().equals(params.get(i))) {
+                    return null;
+                }
+            }
+            return pdm;
+        }
+        return null;
     }
 
 }

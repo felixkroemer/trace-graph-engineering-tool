@@ -4,16 +4,16 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
-public class LoadNetworkTaskFactory extends AbstractTaskFactory {
+public class LoadTraceTaskFactory extends AbstractTaskFactory {
 
     private CyServiceRegistrar reg;
 
-    public LoadNetworkTaskFactory(CyServiceRegistrar reg) {
+    public LoadTraceTaskFactory(CyServiceRegistrar reg) {
         this.reg = reg;
     }
 
     @Override
     public TaskIterator createTaskIterator() {
-        return new TaskIterator(new LoadNetworkTask(this.reg));
+        return new TaskIterator(new LoadTraceTask(this.reg));
     }
 }

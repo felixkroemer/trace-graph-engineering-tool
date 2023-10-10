@@ -1,0 +1,71 @@
+package com.felixkroemer.trace_graph_engineering_tool.tasks;
+
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import com.opencsv.CSVReader;
+import org.cytoscape.application.CyUserLog;
+import org.cytoscape.model.*;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.Tunable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class LoadTraceTask extends AbstractTask {
+
+    @Tunable(description = "The trace to load", params = "input=true", required = true)
+    public File traceFile;
+
+    private final Logger logger;
+
+    private final TraceGraphManager manager;
+    private final CyTableFactory tableFactory;
+    private final CyNetworkFactory networkFactory;
+    private final CyNetworkTableManager networkTableManager;
+    private final CyTableManager tableManager;
+
+    public LoadTraceTask(CyServiceRegistrar reg) {
+        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
+        this.manager = reg.getService(TraceGraphManager.class);
+        this.tableFactory = reg.getService(CyTableFactory.class);
+        this.networkFactory = reg.getService(CyNetworkFactory.class);
+        this.networkTableManager = reg.getService(CyNetworkTableManager.class);
+        this.tableManager = reg.getService(CyTableManager.class);
+    }
+
+    @Override
+    public void run(TaskMonitor taskMonitor) throws Exception {
+        CyTable sourceTable = tableFactory.createTable(traceFile.getName(), Columns.SOURCE_ID, Long.class, true, true);
+        Util.parseCSV(sourceTable, traceFile);
+        List<String> params = new ArrayList<>();
+        sourceTable.getColumns().forEach(c -> {
+            if (!c.getName().equals(Columns.SOURCE_ID))
+                params.add(c.getName());
+        });
+        ParameterDiscretizationModel pdm = manager.findPDM(params);
+        if (pdm != null) {
+            this.tableManager.addTable(sourceTable);
+            var root = pdm.getRootNetwork();
+            var subNetwork = root.addSubNetwork();
+            this.networkTableManager.setTable(subNetwork, CyNode.class, traceFile.getName(), sourceTable);
+            var traceGraph = new TraceGraph(subNetwork, pdm);
+            traceGraph.init(sourceTable);
+            manager.registerTraceGraph(pdm, traceGraph);
+        } else {
+            throw new Error("No matching PDM was found.");
+        }
+    }
+}

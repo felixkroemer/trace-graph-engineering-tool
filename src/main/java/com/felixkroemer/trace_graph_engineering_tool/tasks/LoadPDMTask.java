@@ -3,16 +3,15 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
-import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
@@ -24,12 +23,11 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
-import java.util.List;
 
-public class LoadNetworkTask extends AbstractTask {
+public class LoadPDMTask extends AbstractTask {
 
-    @Tunable(description = "The pdm to load", params = "input=true", required = true)
-    public File pdmFile;
+    @Tunable(description = "The trace to load", params = "input=true", required = true)
+    public File traceFile;
 
     private final Logger logger;
 
@@ -39,7 +37,7 @@ public class LoadNetworkTask extends AbstractTask {
     private final CyNetworkTableManager networkTableManager;
     private final CyTableManager tableManager;
 
-    public LoadNetworkTask(CyServiceRegistrar reg) {
+    public LoadPDMTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.manager = reg.getService(TraceGraphManager.class);
         this.tableFactory = reg.getService(CyTableFactory.class);
@@ -64,7 +62,9 @@ public class LoadNetworkTask extends AbstractTask {
 
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {
-            CyTable sourceTable = parseCSV(dto, csv);
+            var path = new File(traceFile.getParentFile(), csv);
+            var sourceTable = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
+            Util.parseCSV(sourceTable, path);
             this.tableManager.addTable(sourceTable);
             this.networkTableManager.setTable(subNetwork, CyNode.class, csv, sourceTable);
             traceGraph.init(sourceTable);
@@ -75,35 +75,9 @@ public class LoadNetworkTask extends AbstractTask {
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        String pdmString = Files.readString(pdmFile.toPath());
+        String pdmString = Files.readString(traceFile.toPath());
         ParameterDiscretizationModelDTO dto = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
         return dto;
     }
 
-    private CyTable parseCSV(ParameterDiscretizationModelDTO dto, String csv) throws Exception {
-        CyTable table = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
-        for (ParameterDTO param : dto.getParameters()) {
-            table.createColumn(param.getName(), Double.class, false);
-        }
-        boolean header = true;
-        try (CSVReader reader = new CSVReader(new FileReader(new File(pdmFile.getParentFile(), csv)))) {
-            String[] line;
-            while ((line = reader.readNext()) != null) {
-                if (header) {
-                    header = false;
-                    continue;
-                }
-                CyRow row = table.getRow(Long.parseLong(line[0]));
-                for (int i = 1; i < line.length; i++) {
-                    // csv has some empty entries
-                    if (!line[i].isEmpty()) {
-                        row.set(dto.getParameters().get(i - 1).getName(), Double.parseDouble(line[i]));
-                    } else {
-                        row.set(dto.getParameters().get(i - 1).getName(), 0.0);
-                    }
-                }
-            }
-        }
-        return table;
-    }
 }

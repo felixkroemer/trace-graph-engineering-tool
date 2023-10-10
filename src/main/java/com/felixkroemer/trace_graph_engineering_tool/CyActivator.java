@@ -50,9 +50,14 @@ public class CyActivator extends AbstractCyActivator {
 
         registerService(bundleContext, panel, SelectedNodesAndEdgesListener.class, new Properties());
 
-        LoadNetworkTaskFactory loadNetworkTaskFactory = new LoadNetworkTaskFactory(reg);
-        registerService(bundleContext, loadNetworkTaskFactory, TaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace Graph",
+        LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
+        registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM",
+                        INSERT_SEPARATOR_BEFORE, "true")));
+
+        LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
+        registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace",
                         INSERT_SEPARATOR_BEFORE, "true")));
 
         TooltipMappingFactory tooltipMappingFactory = new TooltipMappingFactory(reg);
