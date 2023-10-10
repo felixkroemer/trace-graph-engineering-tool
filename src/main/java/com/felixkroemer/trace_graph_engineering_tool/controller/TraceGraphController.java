@@ -154,6 +154,7 @@ public class TraceGraphController {
     }
 
     public SelectBinsController createSelectBinsController(Parameter parameter) {
-        return new SelectBinsController(parameter, this.uiState, this.traceGraph.getSourceTable());
+        //TODO: support multiple traces per tg
+        return new SelectBinsController(parameter, this.uiState, this.traceGraph.getSourceTables().iterator().next());
     }
 }

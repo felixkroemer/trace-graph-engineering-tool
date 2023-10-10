@@ -43,7 +43,6 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.editButton.setFont(iconManager.getIconFont(14.0f));
         this.editButton.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> {
-                var sourceTable = controller.getTraceGraph().getSourceTable();
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
                 d.setContentPane(new SelectBinsPanel(controller.createSelectBinsController(parameter)));

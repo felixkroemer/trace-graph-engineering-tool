@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
@@ -50,31 +51,25 @@ public class LoadNetworkTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         ParameterDiscretizationModelDTO dto = parsePDM();
-        List<String> csvs = dto.getCsvs();
 
         ParameterDiscretizationModel pdm = new ParameterDiscretizationModel(dto);
-        for (String csv : csvs) {
-            CyTable table = parseCSV(dto, csv);
-            CyRootNetwork rootNetwork = pdm.getRootNetwork();
-            CySubNetwork subNetwork = null;
-            if (rootNetwork == null) {
-                subNetwork = (CySubNetwork) networkFactory.createNetwork();
-                rootNetwork = subNetwork.getRootNetwork();
-                pdm.setRootNetwork(rootNetwork);
-                var sharedNodeTable = rootNetwork.getSharedNodeTable();
-                pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
-                var sharedNetworkTable = rootNetwork.getDefaultNetworkTable();
-                sharedNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
-            } else {
-                subNetwork = rootNetwork.addSubNetwork();
-            }
+        var subNetwork = (CySubNetwork) networkFactory.createNetwork();
+        var rootNetwork = subNetwork.getRootNetwork();
+        pdm.setRootNetwork(rootNetwork);
 
-            this.tableManager.addTable(table);
-            this.networkTableManager.setTable(subNetwork, CyNode.class, "com.felixkroemer", table);
+        var sharedNodeTable = rootNetwork.getSharedNodeTable();
+        pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
+        var sharedNetworkTable = rootNetwork.getDefaultNetworkTable();
+        sharedNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
 
-            TraceGraph traceGraph = new TraceGraph(subNetwork, pdm, table);
-            manager.registerTraceGraph(pdm, traceGraph);
+        var traceGraph = new TraceGraph(subNetwork, pdm);
+        for (String csv : dto.getCsvs()) {
+            CyTable sourceTable = parseCSV(dto, csv);
+            this.tableManager.addTable(sourceTable);
+            this.networkTableManager.setTable(subNetwork, CyNode.class, csv, sourceTable);
+            traceGraph.init(sourceTable);
         }
+        manager.registerTraceGraph(pdm, traceGraph);
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {
@@ -86,7 +81,7 @@ public class LoadNetworkTask extends AbstractTask {
     }
 
     private CyTable parseCSV(ParameterDiscretizationModelDTO dto, String csv) throws Exception {
-        CyTable table = tableFactory.createTable("Source", Columns.SOURCE_ID, Long.class, true, true);
+        CyTable table = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
         for (ParameterDTO param : dto.getParameters()) {
             table.createColumn(param.getName(), Double.class, false);
         }

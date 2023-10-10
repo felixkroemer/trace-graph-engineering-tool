@@ -71,7 +71,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     }
 
     private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
-            //TODO: remove
             for (TraceGraphController controller : controllers.get(pdm)) {
                 controller.updateTraceGraph(pdm, changedParameter);
                 controller.applyStyleAndLayout();
@@ -91,12 +90,14 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
 
     @Override
     public void handleEvent(NetworkAboutToBeDestroyedEvent e) {
-        // TODO: find way to refer from CyNetwork to TraceGraph
         TraceGraphController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
             controller.unregister();
-            //TODO
-            this.controllers.remove(controller);
+            var pdm = controller.getTraceGraph().getPDM();
+            this.controllers.get(pdm).remove(controller);
+            if(controllers.get(pdm).isEmpty()) {
+                controllers.remove(pdm);
+            }
         }
         if (this.controllers.isEmpty()) {
             this.hidePanel();

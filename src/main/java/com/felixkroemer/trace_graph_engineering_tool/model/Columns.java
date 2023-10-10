@@ -8,7 +8,6 @@ public class Columns {
     public static final String NODE_FREQUENCY = "frequency";
 
     public static final String EDGE_TRAVERSALS = "traversals";
-    //TODO: remove if unnecessary
 
     public static final String NETWORK_TG_MARKER = "traceGraphMarker";
 

@@ -8,6 +8,7 @@ import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
@@ -78,13 +79,13 @@ public class TracesDisplayController extends AbstractDisplayController {
         });
     }
 
-    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, int length, boolean up) {
-        CyNode node = traceGraph.findNode(index);
+    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable, int length, boolean up) {
+        CyNode node = traceGraph.findNode(sourceTable, index);
         CyNode nextNode;
         int found = 0;
         while (true) {
             index = up ? index - 1 : index + 1;
-            nextNode = traceGraph.findNode(index);
+            nextNode = traceGraph.findNode(sourceTable, index);
             if (nextNode == null) {
                 return;
             }
@@ -108,31 +109,36 @@ public class TracesDisplayController extends AbstractDisplayController {
                                                       boolean isEdge) {
         Set<TraceExtension> traces = new HashSet<>();
         Collection<Integer> sourceRows;
-        Set<Integer> foundIndices = new HashSet<>();
-        CyNode startNode;
-        if (isEdge) {
-            CyEdge edge = (CyEdge) identifiable;
-            sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(traceGraph.getSourceTable());
-            startNode = ((CyEdge) identifiable).getSource();
-        } else {
-            startNode = ((CyNode) identifiable);
-            sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(traceGraph.getSourceTable());
-        }
-        var iterator = sourceRows.iterator();
-        while (iterator.hasNext()) {
-            int sourceIndex = iterator.next();
-            iterator.remove();
-            if (foundIndices.contains(sourceIndex)) {
+        for(CyTable sourceTable : traceGraph.getSourceTables()) {
+            Set<Integer> foundIndices = new HashSet<>();
+            CyNode startNode;
+            if (isEdge) {
+                CyEdge edge = (CyEdge) identifiable;
+                sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(sourceTable);
+                startNode = ((CyEdge) identifiable).getSource();
+            } else {
+                startNode = ((CyNode) identifiable);
+                sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(sourceTable);
+            }
+            if(sourceRows == null) {
                 continue;
             }
-            TraceExtension trace = new TraceExtension(startNode, sourceIndex, getNextColor());
-            traces.add(trace);
-            findNextNodes(sourceIndex, trace, traceGraph, length, true);
-            findNextNodes(sourceIndex, trace, traceGraph, length, false);
-            //TODO: add case where the node in question is also in other places but the middle of the trace
-            // (loop in trace)
-            for (var node : trace.getSequence()) {
-                foundIndices.add(node.getValue1());
+            var iterator = sourceRows.iterator();
+            while (iterator.hasNext()) {
+                int sourceIndex = iterator.next();
+                iterator.remove();
+                if (foundIndices.contains(sourceIndex)) {
+                    continue;
+                }
+                TraceExtension trace = new TraceExtension(startNode, sourceIndex, getNextColor());
+                traces.add(trace);
+                findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
+                findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
+                //TODO: add case where the node in question is also in other places but the middle of the trace
+                // (loop in trace)
+                for (var node : trace.getSequence()) {
+                    foundIndices.add(node.getValue1());
+                }
             }
         }
         return traces;
