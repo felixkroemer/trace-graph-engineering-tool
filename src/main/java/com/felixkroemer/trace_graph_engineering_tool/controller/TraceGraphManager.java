@@ -14,6 +14,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.table.CyTableViewManager;
 
@@ -23,16 +24,18 @@ import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, SetCurrentNetworkListener,
+public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
         PropertyChangeListener {
 
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<TraceGraphController>> controllers;
     private final TraceGraphPanel panel;
 
-    public TraceGraphManager(CyServiceRegistrar registrar, TraceGraphPanel panel) {
+    public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
-        this.panel = panel;
+        this.panel = new TraceGraphPanel(registrar, this);
+        registrar.registerService(panel, SelectedNodesAndEdgesListener.class, new Properties());
+        registrar.registerService(panel, SetCurrentNetworkListener.class, new Properties());
         this.controllers = new HashMap<>();
     }
 
@@ -121,19 +124,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
             }
         }
         return null;
-    }
-
-    @Override
-    public void handleEvent(SetCurrentNetworkEvent e) {
-        if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
-            var controller = findControllerForNetwork(e.getNetwork());
-            //TODO: distinction between regular trace graphs and comparison graphs
-            if(controller != null) {
-                this.panel.registerCallbacks(controller, controller.getUiState());
-            }
-        } else {
-            this.panel.clear();
-        }
     }
 
     // call to destroy networks, everything else is handled in

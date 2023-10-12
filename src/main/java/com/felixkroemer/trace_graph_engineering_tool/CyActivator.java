@@ -44,14 +44,11 @@ public class CyActivator extends AbstractCyActivator {
 
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
-        TraceGraphPanel panel = new TraceGraphPanel(reg);
-        TraceGraphManager manager = new TraceGraphManager(reg, panel);
+        TraceGraphManager manager = new TraceGraphManager(reg);
 
         registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
         registerService(bundleContext, manager, SetCurrentNetworkListener.class, new Properties());
-
-        registerService(bundleContext, panel, SelectedNodesAndEdgesListener.class, new Properties());
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
         registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class,
