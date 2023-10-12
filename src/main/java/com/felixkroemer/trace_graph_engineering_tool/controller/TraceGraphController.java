@@ -13,6 +13,7 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
@@ -25,22 +26,21 @@ import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController {
+public class TraceGraphController extends NetworkController{
 
     public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
     public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
 
     private final Logger logger;
 
-    private final CyServiceRegistrar registrar;
     private final TraceGraph traceGraph;
     private final UIState uiState;
     private final RenderingController renderingController;
     private final TraceDetailsController traceDetailsController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
+        super(registrar);
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
-        this.registrar = registrar;
         this.traceGraph = traceGraph;
         this.uiState = new UIState(traceGraph);
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
@@ -48,13 +48,14 @@ public class TraceGraphController {
         registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
     }
 
-    public void registerNetwork() {
-        var networkManager = registrar.getService(CyNetworkManager.class);
-        networkManager.addNetwork(traceGraph.getNetwork());
-        var networkViewManager = registrar.getService(CyNetworkViewManager.class);
-        networkViewManager.addNetworkView(renderingController.getView());
-        this.hideUnneededColumns();
-        renderingController.applyWorkingLayout();
+    @Override
+    public CyNetwork getNetwork() {
+        return this.traceGraph.getNetwork();
+    }
+
+    @Override
+    public CyNetworkView getView() {
+        return this.renderingController.getView();
     }
 
     public void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
@@ -73,6 +74,7 @@ public class TraceGraphController {
         taskManager.execute(iterator);
     }
 
+    @Override
     public void applyStyleAndLayout() {
         TaskIterator iterator = new TaskIterator();
         iterator.append(new AbstractTask() {

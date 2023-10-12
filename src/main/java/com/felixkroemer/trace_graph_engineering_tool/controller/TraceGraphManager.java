@@ -13,7 +13,6 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.table.CyTableViewManager;
 
@@ -36,8 +35,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         this.controllers = new HashMap<>();
     }
 
-    public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraph traceGraph) {
-        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+    public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraphController controller) {
         if (this.controllers.get(pdm) == null) {
             this.controllers.put(pdm, new HashSet<>());
             pdm.getParameters().forEach(p -> p.addObserver(this));
@@ -117,7 +115,10 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
             var controller = findControllerForNetwork(e.getNetwork());
-            this.panel.registerCallbacks(controller, controller.getUiState());
+            //TODO: distinction between regular trace graphs and comparison graphs
+            if(controller != null) {
+                this.panel.registerCallbacks(controller, controller.getUiState());
+            }
         } else {
             this.panel.clear();
         }

@@ -11,5 +11,7 @@ public class Columns {
 
     public static final String NETWORK_TG_MARKER = "traceGraphMarker";
 
+    public static String COMPARISON_GROUP_MEMBERSHIP = "groupMembership";
+
     public static final String SOURCE_ID = "id";
 }

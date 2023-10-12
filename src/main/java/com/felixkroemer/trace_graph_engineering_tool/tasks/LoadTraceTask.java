@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
@@ -36,6 +37,7 @@ public class LoadTraceTask extends AbstractTask {
     private final CyNetworkFactory networkFactory;
     private final CyNetworkTableManager networkTableManager;
     private final CyTableManager tableManager;
+    private final CyServiceRegistrar registrar;
 
     public LoadTraceTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -44,6 +46,7 @@ public class LoadTraceTask extends AbstractTask {
         this.networkFactory = reg.getService(CyNetworkFactory.class);
         this.networkTableManager = reg.getService(CyNetworkTableManager.class);
         this.tableManager = reg.getService(CyTableManager.class);
+        this.registrar = reg;
     }
 
     @Override
@@ -63,7 +66,8 @@ public class LoadTraceTask extends AbstractTask {
             this.networkTableManager.setTable(subNetwork, CyNode.class, traceFile.getName(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);
-            manager.registerTraceGraph(pdm, traceGraph);
+            TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+            manager.registerTraceGraph(pdm, controller);
         } else {
             throw new Error("No matching PDM was found.");
         }

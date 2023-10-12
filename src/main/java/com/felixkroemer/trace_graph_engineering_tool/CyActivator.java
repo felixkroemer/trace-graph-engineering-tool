@@ -7,11 +7,14 @@ import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
+import org.cytoscape.internal.actions.DestroyNetworksAction;
+import org.cytoscape.internal.view.NetworkMainPanel;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.EdgeViewTaskFactory;
+import org.cytoscape.task.NetworkCollectionTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
@@ -98,6 +101,11 @@ public class CyActivator extends AbstractCyActivator {
         var showTraceNodeTaskFactory = new ShowTraceNodeTaskFactory(reg);
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));
+
+
+        var compareTraceGraphsTaskFactory = new CompareTraceGraphsTaskFactory(reg);
+        registerService(bundleContext, compareTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class,
+                Util.genProperties(Map.of(TITLE, "Compare Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
 
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
 
