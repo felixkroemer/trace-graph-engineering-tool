@@ -14,9 +14,9 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
+import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +58,11 @@ public class TraceGraphController extends NetworkController{
         return this.renderingController.getView();
     }
 
+    @Override
+    public VisualStyle getVisualStyle() {
+        return this.renderingController.getVisualStyle();
+    }
+
     public void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
         var iterator = new TaskIterator();
         iterator.append(new AbstractTask() {
@@ -71,20 +76,6 @@ public class TraceGraphController extends NetworkController{
             }
         });
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
-        taskManager.execute(iterator);
-    }
-
-    @Override
-    public void applyStyleAndLayout() {
-        TaskIterator iterator = new TaskIterator();
-        iterator.append(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) throws Exception {
-                renderingController.applyDefaultStyle();
-            }
-        });
-        iterator.append(this.renderingController.createWorkingLayoutTask());
-        var taskManager = this.registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
     }
 

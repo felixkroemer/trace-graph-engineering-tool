@@ -80,25 +80,11 @@ public class NetworkComparisonController extends NetworkController{
     }
 
     @Override
-    public void applyStyleAndLayout() {
-        TaskIterator iterator = new TaskIterator();
-        iterator.append(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) throws Exception {
-                defaultVisualStyle.apply(view);
-            }
-        });
-        var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
-        // available as preinstalled app
-        CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
-        Object context = layoutFactory.getDefaultLayoutContext();
-        var layoutTask = layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
-        iterator.append(layoutTask);
-        var taskManager = this.registrar.getService(TaskManager.class);
-        taskManager.execute(iterator);
+    public VisualStyle getVisualStyle() {
+        return this.defaultVisualStyle;
     }
 
-    public VisualStyle createDefaultVisualStyle() {
+    private VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default-comparison");
 

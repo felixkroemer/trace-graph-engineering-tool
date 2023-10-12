@@ -142,18 +142,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         return this.view;
     }
 
-    public void applyWorkingLayout() {
-        TaskIterator taskIterator = createWorkingLayoutTask();
-        TaskManager<?, ?> manager = registrar.getService(TaskManager.class);
-        manager.execute(taskIterator);
-    }
-
-    public TaskIterator createWorkingLayoutTask() {
-        var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
-        // available as preinstalled app
-        CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
-        Object context = layoutFactory.getDefaultLayoutContext();
-        return layoutFactory.createTaskIterator(this.view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+    public VisualStyle getVisualStyle() {
+        return this.defaultStyle;
     }
 
     public void applyDefaultStyle() {
