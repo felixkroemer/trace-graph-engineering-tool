@@ -76,7 +76,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     }
 
     public void registerCallbacks(TraceGraphController controller, UIState uiState) {
-        this.pdmPanel.registerCallbacks(controller.getTraceGraph().getPDM(), controller, uiState);
+        this.pdmPanel.registerCallbacks(controller, uiState);
     }
 
     public void showTracesPanel() {

@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
@@ -39,7 +40,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
         this.controllers = new HashMap<>();
     }
 
-    public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraphController controller) {
+    public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraphController controller, UIState uiState) {
         if (this.controllers.get(pdm) == null) {
             this.controllers.put(pdm, new HashSet<>());
             pdm.getParameters().forEach(p -> p.addObserver(this));

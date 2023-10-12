@@ -36,10 +36,10 @@ public class TraceGraphController extends NetworkController{
     private final RenderingController renderingController;
     private final TraceDetailsController traceDetailsController;
 
-    public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
+    public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         super(registrar, traceGraph.getNetwork());
         this.traceGraph = traceGraph;
-        this.uiState = new UIState(traceGraph);
+        this.uiState = uiState;
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
         this.traceDetailsController = new TraceDetailsController(registrar, this.traceGraph, this.uiState);
     }

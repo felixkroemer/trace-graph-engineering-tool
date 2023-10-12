@@ -35,10 +35,10 @@ public class PDMPanel extends JPanel {
         this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
 
-    public void registerCallbacks(ParameterDiscretizationModel pdm, TraceGraphController controller, UIState uiState) {
+    public void registerCallbacks(TraceGraphController controller, UIState uiState) {
         SwingUtilities.invokeLater(() -> {
             this.innerPanel.removeAll();
-            pdm.forEach(parameter -> {
+            controller.getTraceGraph().getPDM().forEach(parameter -> {
                 ParameterCell cell = new ParameterCell(reg, parameter, controller);
                 parameter.addObserver(cell);
                 uiState.addHighlightObserver(parameter, cell);

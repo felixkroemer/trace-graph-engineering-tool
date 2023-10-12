@@ -15,11 +15,11 @@ public class UIState {
     private Map<Parameter, ObservableSet> highlightedBins;
     private PropertyChangeSupport pcs;
 
-    public UIState(TraceGraph traceGraph) {
+    public UIState(ParameterDiscretizationModel pdm) {
         this.trace = null;
         this.traceSet = null;
         this.highlightedBins = new HashMap<>();
-        for (Parameter param : traceGraph.getPDM().getParameters()) {
+        for (Parameter param : pdm.getParameters()) {
             this.highlightedBins.put(param, new ObservableSet());
         }
         this.pcs = new PropertyChangeSupport(this);
