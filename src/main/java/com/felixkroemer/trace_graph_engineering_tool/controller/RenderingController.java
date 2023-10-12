@@ -66,6 +66,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         });
         this.uiState.addObserver(this);
 
+        registrar.registerService(this, SelectedNodesAndEdgesListener.class);
+
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
     }
@@ -196,6 +198,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void focusNode(CyNode node) {
         view.setVisualProperty(NETWORK_CENTER_X_LOCATION, view.getNodeView(node).getVisualProperty(NODE_X_LOCATION));
         view.setVisualProperty(NETWORK_CENTER_Y_LOCATION, view.getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
+    }
+
+    public void destroy() {
+        registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
     }
 
 }

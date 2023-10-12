@@ -32,7 +32,7 @@ public class NetworkComparisonController extends NetworkController{
     private VisualStyle defaultVisualStyle;
 
     public NetworkComparisonController(CyNetwork networkA, CyNetwork networkB, CySubNetwork network, CyServiceRegistrar registrar) {
-        super(registrar);
+        super(registrar, network);
         this.networkA = networkA;
         this.networkB = networkB;
         this.network = network;
@@ -48,8 +48,8 @@ public class NetworkComparisonController extends NetworkController{
             this.network.addNode(node);
         }
 
-        var defaultNodeTable = this.getNetwork().getDefaultNodeTable();
-        for(CyNode node : this.getNetwork().getNodeList()) {
+        var defaultNodeTable = this.network.getDefaultNodeTable();
+        for(CyNode node : this.network.getNodeList()) {
             boolean bd = this.networkA.containsNode(node);
             boolean od = this.networkB.containsNode(node);
             var row = defaultNodeTable.getRow(node.getSUID());
@@ -64,14 +64,9 @@ public class NetworkComparisonController extends NetworkController{
     }
 
     public void initTables() {
-        this.getNetwork().getDefaultNodeTable().createColumn(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, false);
+        this.network.getDefaultNodeTable().createColumn(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, false);
 
         //TODO map columns of nodes that are compared to the node table of this network;
-    }
-
-    @Override
-    public CyNetwork getNetwork() {
-        return this.network;
     }
 
     @Override
@@ -82,6 +77,10 @@ public class NetworkComparisonController extends NetworkController{
     @Override
     public VisualStyle getVisualStyle() {
         return this.defaultVisualStyle;
+    }
+
+    @Override
+    public void destroy() {
     }
 
     private VisualStyle createDefaultVisualStyle() {
@@ -99,6 +98,6 @@ public class NetworkComparisonController extends NetworkController{
         var manager = this.registrar.getService(CyApplicationManager.class);
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
-        this.view = networkViewFactory.createNetworkView(this.getNetwork());
+        this.view = networkViewFactory.createNetworkView(this.network);
     }
 }

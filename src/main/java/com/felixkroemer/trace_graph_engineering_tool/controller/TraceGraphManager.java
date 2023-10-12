@@ -11,6 +11,7 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -88,8 +89,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
     public void handleEvent(NetworkAboutToBeDestroyedEvent e) {
         TraceGraphController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
-            controller.unregister();
-            var pdm = controller.getTraceGraph().getPDM();
+            controller.destroy();
+            var pdm = findPDMForNetwork(controller.getNetwork());
             this.controllers.get(pdm).remove(controller);
             if (controllers.get(pdm).isEmpty()) {
                 controllers.remove(pdm);
@@ -111,6 +112,17 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         return null;
     }
 
+    public ParameterDiscretizationModel findPDMForNetwork(CyNetwork network) {
+        for(var entry : this.controllers.entrySet()) {
+            for(var controller : entry.getValue()) {
+                if(controller.getNetwork() == network) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
@@ -124,10 +136,13 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Set
         }
     }
 
+    // call to destroy networks, everything else is handled in
+    // handleEvent(NetworkAboutToBeDestroyedEvent e)
     public void clearTraceGraphs() {
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
-                controller.destroy();
+                var networkManager = registrar.getService(CyNetworkManager.class);
+                networkManager.destroyNetwork(controller.getNetwork());
             }
         }
         this.controllers.clear();

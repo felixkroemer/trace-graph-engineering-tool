@@ -31,26 +31,17 @@ public class TraceGraphController extends NetworkController{
     public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
     public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
 
-    private final Logger logger;
-
     private final TraceGraph traceGraph;
     private final UIState uiState;
     private final RenderingController renderingController;
     private final TraceDetailsController traceDetailsController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
-        super(registrar);
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
+        super(registrar, traceGraph.getNetwork());
         this.traceGraph = traceGraph;
         this.uiState = new UIState(traceGraph);
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
         this.traceDetailsController = new TraceDetailsController(registrar, this.traceGraph, this.uiState);
-        registrar.registerService(this.renderingController, SelectedNodesAndEdgesListener.class);
-    }
-
-    @Override
-    public CyNetwork getNetwork() {
-        return this.traceGraph.getNetwork();
     }
 
     @Override
@@ -104,8 +95,9 @@ public class TraceGraphController extends NetworkController{
         return this.uiState;
     }
 
-    public void unregister() {
-        registrar.unregisterService(renderingController, SelectedNodesAndEdgesListener.class);
+    @Override
+    public void destroy() {
+        this.renderingController.destroy();
     }
 
     public void showTraceDetails() {
@@ -134,15 +126,6 @@ public class TraceGraphController extends NetworkController{
             return NETWORK_TYPE_TRACE_DETAILS;
         } else {
             throw new IllegalArgumentException("Network does not belong to this trace graph");
-        }
-    }
-
-    public void destroy() {
-        var networkManager = registrar.getService(CyNetworkManager.class);
-        networkManager.destroyNetwork(this.traceGraph.getNetwork());
-        var traceDetailsNetwork = this.traceDetailsController.getNetwork();
-        if (traceDetailsNetwork != null) {
-            networkManager.destroyNetwork(traceDetailsNetwork);
         }
     }
 

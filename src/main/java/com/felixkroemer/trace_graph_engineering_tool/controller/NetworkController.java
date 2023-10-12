@@ -10,15 +10,17 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.*;
 
+import java.util.Set;
+
 public abstract class NetworkController {
 
     protected CyServiceRegistrar registrar;
+    protected CyNetwork network;
 
-    public NetworkController(CyServiceRegistrar registrar) {
+    public NetworkController(CyServiceRegistrar registrar, CyNetwork network) {
         this.registrar = registrar;
+        this.network = network;
     }
-
-    public abstract CyNetwork getNetwork();
 
     public abstract CyNetworkView getView();
 
@@ -34,7 +36,7 @@ public abstract class NetworkController {
 
     public void registerNetwork() {
         var networkManager = registrar.getService(CyNetworkManager.class);
-        networkManager.addNetwork(this.getNetwork());
+        networkManager.addNetwork(this.network);
         var networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(this.getView());
         this.applyStyleAndLayout();
@@ -51,6 +53,12 @@ public abstract class NetworkController {
         iterator.append(this.createLayoutTask());
         var taskManager = this.registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
+    }
+
+    public abstract void destroy();
+
+    public CyNetwork getNetwork() {
+        return this.network;
     }
 
 }
