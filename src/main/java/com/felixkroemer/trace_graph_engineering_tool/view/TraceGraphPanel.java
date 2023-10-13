@@ -2,6 +2,8 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
@@ -19,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 
-public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener, SetCurrentNetworkListener {
+public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener,
+        SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener {
 
     private Logger logger;
     private TraceGraphManager manager;
@@ -79,10 +82,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.pdmPanel.registerCallbacks(controller, uiState);
     }
 
-    public void showTracesPanel() {
-        this.tabs.addTab(TRACES_TITLE, this.tracesPanel);
-    }
-
     private int getPanelIndex(String title) {
         for (int i = 0; i < this.tabs.getTabCount(); i++) {
             if (this.tabs.getTitleAt(i).equals(title)) {
@@ -99,10 +98,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         }
     }
 
-    public void clear() {
-        this.pdmPanel.clear();
-    }
-
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getSelectedNodes().size() == 1) {
@@ -116,14 +111,13 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
-        if (e.getNetwork() != null && Util.isTraceGraphNetwork(e.getNetwork())) {
-            var controller = this.manager.findControllerForNetwork(e.getNetwork());
-            //TODO: distinction between regular trace graphs and comparison graphs
-            if (controller != null) {
-                this.registerCallbacks(controller, controller.getUiState());
-            }
-        } else {
-            this.clear();
+        if (e.getNetwork() == null || !Util.isTraceGraphNetwork(e.getNetwork())) {
+            this.pdmPanel.clear();
         }
+    }
+
+    @Override
+    public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
+        this.registerCallbacks(event.getTraceGraphController(), event.getTraceGraphController().getUiState());
     }
 }

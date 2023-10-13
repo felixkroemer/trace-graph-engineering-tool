@@ -1,8 +1,11 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
+import org.cytoscape.application.events.SetCurrentNetworkEvent;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNode;
@@ -17,11 +20,12 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController extends NetworkController {
+public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener {
 
     public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
     public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
@@ -35,6 +39,8 @@ public class TraceGraphController extends NetworkController {
         this.traceGraph = traceGraph;
         this.uiState = uiState;
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
+
+        this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
     }
 
     @Override
@@ -90,6 +96,7 @@ public class TraceGraphController extends NetworkController {
     @Override
     public void destroy() {
         this.renderingController.destroy();
+        this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
     }
 
     public void focusNode(CyNode node) {
@@ -99,5 +106,13 @@ public class TraceGraphController extends NetworkController {
     public SelectBinsController createSelectBinsController(Parameter parameter) {
         //TODO: support multiple traces per tg
         return new SelectBinsController(parameter, this.uiState, this.traceGraph.getSourceTables().iterator().next());
+    }
+
+    @Override
+    public void handleEvent(SetCurrentNetworkEvent e) {
+        if (e.getNetwork() == this.getNetwork()) {
+            var eventHelper = this.registrar.getService(CyEventHelper.class);
+            eventHelper.fireEvent(new SetCurrentTraceGraphControllerEvent(this, this));
+        }
     }
 }

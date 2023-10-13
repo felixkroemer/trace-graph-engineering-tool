@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
@@ -36,6 +37,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         this.panel = new TraceGraphPanel(registrar, this);
         registrar.registerService(panel, SelectedNodesAndEdgesListener.class, new Properties());
         registrar.registerService(panel, SetCurrentNetworkListener.class, new Properties());
+        registrar.registerService(panel, SetCurrentTraceGraphControllerListener.class, new Properties());
         this.controllers = new HashMap<>();
         this.traceDetailsController = new TraceDetailsController(registrar);
     }
