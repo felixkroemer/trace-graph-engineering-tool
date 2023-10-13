@@ -2,11 +2,8 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
-import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
-import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
@@ -25,11 +22,10 @@ import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
-        PropertyChangeListener {
+public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, PropertyChangeListener {
 
     private CyServiceRegistrar registrar;
-    private Map<ParameterDiscretizationModel, Set<TraceGraphController>> controllers;
+    private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
     private final TraceGraphPanel panel;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
@@ -56,9 +52,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
         switch (evt.getPropertyName()) {
             case "enabled" -> {
                 var tableViewManager = registrar.getService(CyTableViewManager.class);
-                for (TraceGraphController controller : this.controllers.get(pdm)) {
-                    var nodeTableView =
-                            tableViewManager.getTableView(controller.getTraceGraph().getNetwork().getDefaultNodeTable());
+                for (NetworkController controller : this.controllers.get(pdm)) {
+                    var nodeTableView = tableViewManager.getTableView(controller.getNetwork().getDefaultNodeTable());
                     Parameter param = (Parameter) evt.getSource();
                     var columnView = nodeTableView.getColumnView(param.getName());
                     columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
@@ -72,8 +67,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
     }
 
     private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
-        for (TraceGraphController controller : controllers.get(pdm)) {
-            controller.updateTraceGraph(pdm, changedParameter);
+        for (NetworkController controller : controllers.get(pdm)) {
+            controller.updateNetwork(changedParameter);
             controller.applyStyleAndLayout();
         }
     }
@@ -91,7 +86,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
 
     @Override
     public void handleEvent(NetworkAboutToBeDestroyedEvent e) {
-        TraceGraphController controller = findControllerForNetwork(e.getNetwork());
+        NetworkController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
             controller.destroy();
             var pdm = findPDMForNetwork(controller.getNetwork());
@@ -108,8 +103,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
     public TraceGraphController findControllerForNetwork(CyNetwork network) {
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
-                if (controller.containsNetwork(network)) {
-                    return controller;
+                if (controller instanceof TraceGraphController tgc && controller.getNetwork() == network) {
+                    return tgc;
                 }
             }
         }
@@ -117,9 +112,9 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
     }
 
     public ParameterDiscretizationModel findPDMForNetwork(CyNetwork network) {
-        for(var entry : this.controllers.entrySet()) {
-            for(var controller : entry.getValue()) {
-                if(controller.getNetwork() == network) {
+        for (var entry : this.controllers.entrySet()) {
+            for (var controller : entry.getValue()) {
+                if (controller.getNetwork() == network) {
                     return entry.getKey();
                 }
             }
@@ -144,8 +139,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener,
             if (pdm.getParameterCount() != params.size()) {
                 return null;
             }
-            for(int i = 0; i<pdm.getParameters().size(); i++) {
-                if(!pdm.getParameters().get(i).getName().equals(params.get(i))) {
+            for (int i = 0; i < pdm.getParameters().size(); i++) {
+                if (!pdm.getParameters().get(i).getName().equals(params.get(i))) {
                     return null;
                 }
             }

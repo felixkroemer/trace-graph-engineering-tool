@@ -26,7 +26,7 @@ import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController extends NetworkController{
+public class TraceGraphController extends NetworkController {
 
     public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
     public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
@@ -54,7 +54,8 @@ public class TraceGraphController extends NetworkController{
         return this.renderingController.getVisualStyle();
     }
 
-    public void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
+    @Override
+    public void updateNetwork(Parameter changedParameter) {
         var iterator = new TaskIterator();
         iterator.append(new AbstractTask() {
             @Override
@@ -113,10 +114,6 @@ public class TraceGraphController extends NetworkController{
             var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
             this.renderingController.focusNode(defaultNetworkNode);
         }
-    }
-
-    public boolean containsNetwork(CyNetwork network) {
-        return this.traceGraph.getNetwork() == network || this.traceDetailsController.getNetwork() == network;
     }
 
     public String getNetworkType(CyNetwork network) {

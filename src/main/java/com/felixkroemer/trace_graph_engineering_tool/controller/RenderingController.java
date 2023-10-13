@@ -13,13 +13,9 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -43,6 +39,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private AbstractDisplayController displayManager;
     private TraceGraph traceGraph;
     private UIState uiState;
+    private String mode;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         this.registrar = registrar;
@@ -60,10 +57,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
+        this.mode = RENDERING_MODE_FOLLOW;
 
         this.traceGraph.getPDM().forEach(p -> {
             uiState.addHighlightObserver(p, this);
         });
+
         this.uiState.addObserver(this);
 
         registrar.registerService(this, SelectedNodesAndEdgesListener.class);
@@ -109,12 +108,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.setMode(RENDERING_MODE_SHORTEST_TRACE);
             }
             case "highlightedBins" -> {
-                this.hideUnhighlightedNodes();
+                this.hideNodes();
             }
         }
     }
 
-    public void hideUnhighlightedNodes() {
+    public void hideNodes() {
         Map<Parameter, Set<Integer>> highlightedBins = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
             highlightedBins.put(param, this.uiState.getHighlightedBins(param));
@@ -148,33 +147,33 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         return this.defaultStyle;
     }
 
-    public void applyDefaultStyle() {
-        this.defaultStyle.apply(view);
+    private void setDisplayManager(AbstractDisplayController displayManager) {
+        if (this.displayManager != null) {
+            if (this.displayManager.getClass() == displayManager.getClass()) {
+                return;
+            } else {
+                this.displayManager.disable();
+            }
+        }
+        this.deselectAll();
+        this.defaultStyle.apply(this.view);
+        this.displayManager = displayManager;
     }
 
     public void setMode(String mode) {
-        this.deselectAll();
-
-        if (this.displayManager != null) {
-            // clear possible value locks
-            this.displayManager.disable();
-        }
-
-        this.defaultStyle.apply(this.view);
-
         switch (mode) {
             case RENDERING_MODE_FULL -> {
-                this.displayManager = new DefaultDisplayController(view, this.traceGraph);
+                this.setDisplayManager(new DefaultDisplayController(view, this.traceGraph));
             }
             case RENDERING_MODE_FOLLOW -> {
-                this.displayManager = new FollowDisplayController(view, this.traceGraph);
+                this.setDisplayManager(new FollowDisplayController(view, this.traceGraph));
             }
             case RENDERING_MODE_TRACES -> {
-                this.displayManager = new TracesDisplayController(this.registrar, view, this.traceGraph, 2,
-                        this.uiState);
+                this.setDisplayManager(new TracesDisplayController(this.registrar, view, this.traceGraph, 2,
+                        this.uiState));
             }
             case RENDERING_MODE_SHORTEST_TRACE -> {
-                this.displayManager = new ShortestTraceDisplayController(view, this.traceGraph, this.uiState);
+                this.setDisplayManager(new ShortestTraceDisplayController(view, this.traceGraph, this.uiState));
             }
         }
     }

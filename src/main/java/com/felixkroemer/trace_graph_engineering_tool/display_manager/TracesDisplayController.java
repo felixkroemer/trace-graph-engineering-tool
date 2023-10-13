@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
@@ -17,10 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.beans.PropertyChangeSupport;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -79,7 +75,8 @@ public class TracesDisplayController extends AbstractDisplayController {
         });
     }
 
-    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable, int length, boolean up) {
+    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable,
+                                     int length, boolean up) {
         CyNode node = traceGraph.findNode(sourceTable, index);
         CyNode nextNode;
         int found = 0;
@@ -109,7 +106,7 @@ public class TracesDisplayController extends AbstractDisplayController {
                                                       boolean isEdge) {
         Set<TraceExtension> traces = new HashSet<>();
         Collection<Integer> sourceRows;
-        for(CyTable sourceTable : traceGraph.getSourceTables()) {
+        for (CyTable sourceTable : traceGraph.getSourceTables()) {
             Set<Integer> foundIndices = new HashSet<>();
             CyNode startNode;
             if (isEdge) {
@@ -120,8 +117,10 @@ public class TracesDisplayController extends AbstractDisplayController {
                 startNode = ((CyNode) identifiable);
                 sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(sourceTable);
             }
-            if(sourceRows == null) {
+            if (sourceRows == null) {
                 continue;
+            } else {
+                sourceRows = new ArrayList<>(sourceRows);
             }
             var iterator = sourceRows.iterator();
             while (iterator.hasNext()) {
@@ -145,19 +144,19 @@ public class TracesDisplayController extends AbstractDisplayController {
     }
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
-        if (event.nodesChanged() || event.edgesChanged()) {
-            this.hideAllEdges();
-        }
+        this.hideAllEdges();
         this.edgeVisits.clear();
+        Set<TraceExtension> traces = null;
         if (event.getSelectedNodes().size() == 1) {
-            this.uiState.setTraceSet(calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length,
-                    false));
+            traces = calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false);
         }
         if (event.getSelectedEdges().size() == 1) {
-            this.uiState.setTraceSet(calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length,
-                    true));
+            traces = calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true);
         }
-        drawTraces();
+        this.uiState.setTraceSet(traces);
+        if (traces != null) {
+            drawTraces(traces);
+        }
     }
 
     @Override
@@ -165,10 +164,9 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.uiState.setTraceSet(null);
     }
 
-    public void drawTraces() {
+    public void drawTraces(Set<TraceExtension> traces) {
         colorIndex = 0;
-        for (var trace : this.uiState.getTraceSet()) {
-            logger.info(trace.toString());
+        for (var trace : traces) {
             for (int i = 0; i < trace.getSequence().size() - 1; i++) {
                 CyEdge edge;
                 // is null if the edge is a self edge

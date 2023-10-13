@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
@@ -61,5 +62,7 @@ public abstract class NetworkController {
     public CyNetwork getNetwork() {
         return this.network;
     }
+
+    public abstract void updateNetwork(Parameter parameter);
 
 }

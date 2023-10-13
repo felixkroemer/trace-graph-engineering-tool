@@ -4,13 +4,8 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.application.events.SetCurrentNetworkListener;
-import org.cytoscape.internal.actions.DestroyNetworksAction;
-import org.cytoscape.internal.view.NetworkMainPanel;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.EdgeViewTaskFactory;
@@ -48,12 +43,11 @@ public class CyActivator extends AbstractCyActivator {
 
         registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
-        registerService(bundleContext, manager, SetCurrentNetworkListener.class, new Properties());
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
         registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM",
-                        INSERT_SEPARATOR_BEFORE, "true")));
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM", INSERT_SEPARATOR_BEFORE
+                        , "true")));
 
         LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
         registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,

@@ -1,11 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.javatuples.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -76,7 +73,8 @@ public class TraceGraph {
             long hash = Arrays.hashCode(state);
             Long suid = suidHashMapping.get(hash);
             var rootNetwork = ((CySubNetwork) network).getRootNetwork();
-            if (suid != null && (currentNode = rootNetwork.getNode(suid)) != null) { // node for the given state already exists, maybe only in root
+            if (suid != null && (currentNode = rootNetwork.getNode(suid)) != null) { // node for the given state
+                // already exists, maybe only in root
                 currentRow = defaultNodeTable.getRow(currentNode.getSUID());
                 currentNodeInfo = this.nodeInfo.get(currentNode);
                 // node exists in root network, but not here
@@ -182,12 +180,13 @@ public class TraceGraph {
             }
         }
         int[] state = new int[this.pdm.getParameterCount()];
-        for(var source : this.nodeMapping.entrySet()) {
+        for (var source : this.nodeMapping.entrySet()) {
             CyTable sourceTable = source.getKey();
             boolean[] visited = new boolean[sourceTable.getRowCount() + 1];
             for (int i = 1; i <= sourceTable.getRowCount(); i++) {
                 if (visited[i]) continue;
-                // old node, may contain source rows that dont belong to this node anymore (if bucket of source row changes)
+                // old node, may contain source rows that dont belong to this node anymore (if bucket of source row
+                // changes)
                 // uses source row index to node map, not influenced by already changed parameter bins
                 var oldNode = this.nodeMapping.get(sourceTable)[i];
                 var oldNodeRow = this.defaultNodeTable.getRow(oldNode.getSUID());
@@ -281,9 +280,10 @@ public class TraceGraph {
     public void generateEdges() {
         CyNode prevNode = null;
         CyNode currentNode;
-        for(CyTable sourceTable : this.sourceTables) {
+        for (CyTable sourceTable : this.sourceTables) {
             for (CyRow sourceRow : sourceTable.getAllRows()) {
-                currentNode = this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
+                currentNode =
+                        this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     CyRow edgeRow;
@@ -306,39 +306,50 @@ public class TraceGraph {
 
     public Trace findTrace(List<CyNode> nodes) {
         //TODO: support multiple traces per tg
-        var sourceTable = this.sourceTables.iterator().next();
+        Trace shortestTrace = null;
+        Trace trace = null;
+        for (CyTable sourceTable : this.sourceTables) {
+            trace = new Trace();
+            if (nodes.size() != 2) {
+                return null;
+            }
+            var nodeA = nodes.get(0);
+            var nodeB = nodes.get(1);
 
-        if (nodes.size() != 2) {
-            return null;
-        }
-        var nodeA = nodes.get(0);
-        var nodeB = nodes.get(1);
+            var sourcesA = this.nodeInfo.get(nodeA).getSourceRows(sourceTable);
+            var sourcesB = this.nodeInfo.get(nodeB).getSourceRows(sourceTable);
 
-        var sourcesA = this.nodeInfo.get(nodeA).getSourceRows(sourceTable);
-        var sourcesB = this.nodeInfo.get(nodeB).getSourceRows(sourceTable);
+            if (sourcesA == null || sourcesB == null) {
+                continue;
+            }
 
-        Pair<Integer, Integer> window = null;
-        Trace trace = new Trace();
-        for (var x : sourcesA) {
-            for (var y : sourcesB) {
-                if (window == null) {
-                    var lowerBound = x < y ? x : y;
-                    var upperBound = lowerBound == x ? y : x;
-                    window = new Pair<>(lowerBound, upperBound);
-                } else {
-                    if (Math.abs(x - y) < window.getValue1() - window.getValue0()) {
+            Pair<Integer, Integer> window = null;
+            for (var x : sourcesA) {
+                for (var y : sourcesB) {
+                    if (window == null) {
                         var lowerBound = x < y ? x : y;
                         var upperBound = lowerBound == x ? y : x;
                         window = new Pair<>(lowerBound, upperBound);
+                    } else {
+                        if (Math.abs(x - y) < window.getValue1() - window.getValue0()) {
+                            var lowerBound = x < y ? x : y;
+                            var upperBound = lowerBound == x ? y : x;
+                            window = new Pair<>(lowerBound, upperBound);
+                        }
                     }
                 }
             }
-        }
 
-        for (int i = window.getValue0(); i <= window.getValue1(); i++) {
-            trace.addAfter(findNode(sourceTable, i), i);
+            for (int i = window.getValue0(); i <= window.getValue1(); i++) {
+                trace.addAfter(findNode(sourceTable, i), i);
+            }
+
+            if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {
+                shortestTrace = trace;
+            }
+
         }
-        return trace;
+        return shortestTrace;
     }
 
     public AuxiliaryInformation getNodeAux(CyNode node) {

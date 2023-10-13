@@ -3,7 +3,6 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTableUtil;
@@ -33,9 +32,9 @@ public class ShowTraceTask extends AbstractTask {
         var controller = manager.findControllerForNetwork(network);
         var nodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
         Trace trace = controller.getTraceGraph().findTrace(nodes);
-        var eventHelper = registrar.getService(CyEventHelper.class);
-
-        controller.getUiState().setTrace(trace);
+        if (trace != null) {
+            controller.getUiState().setTrace(trace);
+        }
     }
 
 }

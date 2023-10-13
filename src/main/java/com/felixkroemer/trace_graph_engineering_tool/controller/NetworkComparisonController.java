@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyNetwork;
@@ -81,6 +82,10 @@ public class NetworkComparisonController extends NetworkController{
 
     @Override
     public void destroy() {
+    }
+
+    @Override
+    public void updateNetwork(Parameter parameter) {
     }
 
     private VisualStyle createDefaultVisualStyle() {

@@ -5,7 +5,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNetworkCollectionTask;
-import org.cytoscape.task.create.NewEmptyNetworkViewFactory;
 import org.cytoscape.work.TaskMonitor;
 
 import java.util.Collection;
