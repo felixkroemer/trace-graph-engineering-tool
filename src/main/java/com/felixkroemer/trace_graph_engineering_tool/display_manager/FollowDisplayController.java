@@ -7,6 +7,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.LabelBackgroundShapeVisualProperty;
 
@@ -16,8 +17,8 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     private CyNode previousNode;
 
-    public FollowDisplayController(CyNetworkView view, TraceGraph traceGraph) {
-        super(view, traceGraph);
+    public FollowDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
+        super(registrar, view, traceGraph);
         this.hideAllEdges();
         showEdgesOfHighlightedNodes();
     }
@@ -36,8 +37,10 @@ public class FollowDisplayController extends AbstractDisplayController {
         } else {
             if (event.getSelectedNodes().size() == 1) {
                 this.previousNode = event.getSelectedNodes().iterator().next();
+                showEdgesOfHighlightedNodes();
+            } else {
+                this.hideAllEdges();
             }
-            showEdgesOfHighlightedNodes();
         }
     }
 

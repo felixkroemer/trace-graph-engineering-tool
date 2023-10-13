@@ -1,6 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_manager.*;
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -26,7 +28,8 @@ import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener {
+public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
+        ShowTraceEventListener {
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
     public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
@@ -56,7 +59,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
-        this.displayManager = new FollowDisplayController(this.view, this.traceGraph);
+        this.displayManager = new FollowDisplayController(registrar, this.view, this.traceGraph);
         this.mode = RENDERING_MODE_FOLLOW;
 
         this.traceGraph.getPDM().forEach(p -> {
@@ -66,6 +69,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.uiState.addObserver(this);
 
         registrar.registerService(this, SelectedNodesAndEdgesListener.class);
+        registrar.registerService(this, ShowTraceEventListener.class);
 
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
@@ -104,9 +108,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             //UIState
-            case "trace" -> {
-                this.setMode(RENDERING_MODE_SHORTEST_TRACE);
-            }
             case "highlightedBins" -> {
                 this.hideNodes();
             }
@@ -163,17 +164,14 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void setMode(String mode) {
         switch (mode) {
             case RENDERING_MODE_FULL -> {
-                this.setDisplayManager(new DefaultDisplayController(view, this.traceGraph));
+                this.setDisplayManager(new DefaultDisplayController(registrar, view, this.traceGraph));
             }
             case RENDERING_MODE_FOLLOW -> {
-                this.setDisplayManager(new FollowDisplayController(view, this.traceGraph));
+                this.setDisplayManager(new FollowDisplayController(registrar, view, this.traceGraph));
             }
             case RENDERING_MODE_TRACES -> {
                 this.setDisplayManager(new TracesDisplayController(this.registrar, view, this.traceGraph, 2,
                         this.uiState));
-            }
-            case RENDERING_MODE_SHORTEST_TRACE -> {
-                this.setDisplayManager(new ShortestTraceDisplayController(view, this.traceGraph, this.uiState));
             }
         }
     }
@@ -201,6 +199,16 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void destroy() {
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
+        registrar.unregisterService(this, ShowTraceEventListener.class);
     }
 
+    @Override
+    public void handleEvent(ShowTraceEvent e) {
+        if (e.getNetwork() != this.traceGraph.getNetwork()) {
+            return;
+        }
+        if (!(this.displayManager instanceof ShortestTraceDisplayController)) {
+            this.setDisplayManager(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getNodes()));
+        }
+    }
 }

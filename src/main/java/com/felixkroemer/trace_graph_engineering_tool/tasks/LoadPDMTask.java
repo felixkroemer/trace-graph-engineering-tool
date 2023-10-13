@@ -74,7 +74,7 @@ public class LoadPDMTask extends AbstractTask {
         }
         UIState uiState = new UIState(pdm);
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph, uiState);
-        manager.registerTraceGraph(pdm, controller, uiState);
+        manager.registerTraceGraph(pdm, controller);
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {

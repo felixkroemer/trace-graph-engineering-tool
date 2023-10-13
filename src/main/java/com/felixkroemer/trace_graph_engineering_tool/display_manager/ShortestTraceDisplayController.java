@@ -1,31 +1,33 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class ShortestTraceDisplayController extends AbstractDisplayController implements PropertyChangeListener {
+public class ShortestTraceDisplayController extends AbstractDisplayController implements ShowTraceEventListener {
 
-    private UIState uiState;
+    public ShortestTraceDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                          List<CyNode> nodes) {
+        super(registrar, view, traceGraph);
 
-    public ShortestTraceDisplayController(CyNetworkView view, TraceGraph traceGraph, UIState uiState) {
-        super(view, traceGraph);
-        this.uiState = uiState;
-
-        this.uiState.addObserver(this);
-        if (uiState.getTrace() != null) {
-            this.showTrace(uiState.getTrace());
+        Trace trace = this.traceGraph.findTrace(nodes);
+        if (trace != null) {
+            this.showTrace(trace);
         }
+
+        this.registrar.registerService(this, ShowTraceEventListener.class);
     }
 
     @Override
@@ -45,10 +47,11 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
 
     @Override
     public void disable() {
-        this.uiState.removeObserver(this);
+        this.registrar.unregisterService(this, ShowTraceEventListener.class);
     }
 
     public void showTrace(Trace trace) {
+        this.hideAllEdges();
         for (int i = 0; i < trace.getSequence().size() - 1; i++) {
             CyEdge edge;
             // is null if the edge is a self edge
@@ -64,11 +67,13 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case "trace" -> {
-                this.showTrace((Trace) evt.getNewValue());
-            }
+    public void handleEvent(ShowTraceEvent e) {
+        if (e.getNetwork() != this.traceGraph.getNetwork()) {
+            return;
+        }
+        Trace trace = this.traceGraph.findTrace(e.getNodes());
+        if (trace != null) {
+            this.showTrace(trace);
         }
     }
 }

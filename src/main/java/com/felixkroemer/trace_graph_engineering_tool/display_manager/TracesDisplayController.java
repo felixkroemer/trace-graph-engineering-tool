@@ -33,7 +33,7 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                    int length, UIState uiState) {
-        super(view, traceGraph);
+        super(registrar, view, traceGraph);
         this.registrar = registrar;
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;

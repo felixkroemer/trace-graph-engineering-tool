@@ -37,6 +37,6 @@ public class CompareTraceGraphsTask extends AbstractNetworkCollectionTask {
 
         NetworkComparisonController networkComparisonController = new NetworkComparisonController(networkA, networkB,
                 subNetwork, registrar);
-        networkComparisonController.registerNetwork();
+        manager.registerTraceGraph(pdm, networkComparisonController);
     }
 }

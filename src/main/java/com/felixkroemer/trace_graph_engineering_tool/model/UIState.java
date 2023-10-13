@@ -11,29 +11,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class UIState {
-    private Trace trace;
     private Set<TraceExtension> traceSet;
     private CyNetwork traceSetNetwork;
     private Map<Parameter, ObservableSet> highlightedBins;
     private PropertyChangeSupport pcs;
 
     public UIState(ParameterDiscretizationModel pdm) {
-        this.trace = null;
         this.traceSet = null;
         this.highlightedBins = new HashMap<>();
         for (Parameter param : pdm.getParameters()) {
             this.highlightedBins.put(param, new ObservableSet());
         }
         this.pcs = new PropertyChangeSupport(this);
-    }
-
-    public void setTrace(Trace trace) {
-        this.trace = trace;
-        this.pcs.firePropertyChange("trace", null, this.trace);
-    }
-
-    public Trace getTrace() {
-        return trace;
     }
 
     public void setTraceSet(Set<TraceExtension> traceSet, CyNetwork network) {
@@ -51,7 +40,6 @@ public class UIState {
     }
 
     public void addObserver(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener("trace", l);
         pcs.addPropertyChangeListener("traceSet", l);
     }
 

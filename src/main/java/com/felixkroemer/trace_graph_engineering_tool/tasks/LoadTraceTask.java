@@ -68,7 +68,7 @@ public class LoadTraceTask extends AbstractTask {
             traceGraph.init(sourceTable);
             UIState uiState = new UIState(pdm);
             TraceGraphController controller = new TraceGraphController(registrar, traceGraph, uiState);
-            manager.registerTraceGraph(pdm, controller, uiState);
+            manager.registerTraceGraph(pdm, controller);
         } else {
             throw new Error("No matching PDM was found.");
         }
