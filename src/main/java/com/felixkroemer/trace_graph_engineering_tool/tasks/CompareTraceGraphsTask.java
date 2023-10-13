@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkComparisonController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNetworkCollectionTask;
@@ -29,9 +30,13 @@ public class CompareTraceGraphsTask extends AbstractNetworkCollectionTask {
         var controller = manager.findControllerForNetwork(this.networkA);
         var pdm = controller.getTraceGraph().getPDM();
         var rootNetwork = pdm.getRootNetwork();
-        var network = rootNetwork.addSubNetwork();
-        NetworkComparisonController networkComparisonController =
-                new NetworkComparisonController(networkA, networkB, network, registrar);
+        var subNetwork = rootNetwork.addSubNetwork();
+
+        var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+        localNetworkTable.createColumn(Columns.NETWORK_COMPARISON_MARKER, Integer.class, true);
+
+        NetworkComparisonController networkComparisonController = new NetworkComparisonController(networkA, networkB,
+                subNetwork, registrar);
         networkComparisonController.registerNetwork();
     }
 }

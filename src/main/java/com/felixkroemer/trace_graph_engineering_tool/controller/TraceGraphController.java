@@ -1,25 +1,20 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.SynchronousTaskManager;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskMonitor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,14 +29,12 @@ public class TraceGraphController extends NetworkController {
     private final TraceGraph traceGraph;
     private final UIState uiState;
     private final RenderingController renderingController;
-    private final TraceDetailsController traceDetailsController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
         super(registrar, traceGraph.getNetwork());
         this.traceGraph = traceGraph;
         this.uiState = uiState;
         this.renderingController = new RenderingController(registrar, traceGraph, uiState);
-        this.traceDetailsController = new TraceDetailsController(registrar, this.traceGraph, this.uiState);
     }
 
     @Override
@@ -60,8 +53,6 @@ public class TraceGraphController extends NetworkController {
         iterator.append(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
-                // traceGraph.clearNetwork();
-                // traceGraph.init();
                 traceGraph.reinit(changedParameter);
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
                 helper.flushPayloadEvents();
@@ -101,29 +92,8 @@ public class TraceGraphController extends NetworkController {
         this.renderingController.destroy();
     }
 
-    public void showTraceDetails() {
-        var manager = this.registrar.getService(CyApplicationManager.class);
-        manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
-        this.traceDetailsController.update();
-    }
-
-    public void showDefaultView(CyNode node) {
-        var manager = this.registrar.getService(CyApplicationManager.class);
-        manager.setCurrentNetwork(this.traceGraph.getNetwork());
-        if (node != null) {
-            var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
-            this.renderingController.focusNode(defaultNetworkNode);
-        }
-    }
-
-    public String getNetworkType(CyNetwork network) {
-        if (network == this.traceGraph.getNetwork()) {
-            return NETWORK_TYPE_DEFAULT;
-        } else if (network == this.traceDetailsController.getNetwork()) {
-            return NETWORK_TYPE_TRACE_DETAILS;
-        } else {
-            throw new IllegalArgumentException("Network does not belong to this trace graph");
-        }
+    public void focusNode(CyNode node) {
+        this.renderingController.focusNode(node);
     }
 
     public SelectBinsController createSelectBinsController(Parameter parameter) {

@@ -153,7 +153,7 @@ public class TracesDisplayController extends AbstractDisplayController {
         if (event.getSelectedEdges().size() == 1) {
             traces = calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true);
         }
-        this.uiState.setTraceSet(traces);
+        this.uiState.setTraceSet(traces, event.getNetwork());
         if (traces != null) {
             drawTraces(traces);
         }
@@ -161,7 +161,7 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
-        this.uiState.setTraceSet(null);
+        this.uiState.setTraceSet(null, null);
     }
 
     public void drawTraces(Set<TraceExtension> traces) {

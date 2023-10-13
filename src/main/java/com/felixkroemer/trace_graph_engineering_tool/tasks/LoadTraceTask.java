@@ -6,13 +6,9 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
-import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
-import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
@@ -21,9 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LoadTraceTask extends AbstractTask {
@@ -56,14 +50,19 @@ public class LoadTraceTask extends AbstractTask {
         Util.parseCSV(sourceTable, traceFile);
         List<String> params = new ArrayList<>();
         sourceTable.getColumns().forEach(c -> {
-            if (!c.getName().equals(Columns.SOURCE_ID))
-                params.add(c.getName());
+            if (!c.getName().equals(Columns.SOURCE_ID)) params.add(c.getName());
         });
         ParameterDiscretizationModel pdm = manager.findPDM(params);
         if (pdm != null) {
             this.tableManager.addTable(sourceTable);
             var root = pdm.getRootNetwork();
             var subNetwork = root.addSubNetwork();
+
+            var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+            localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+
+            subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
+
             this.networkTableManager.setTable(subNetwork, CyNode.class, traceFile.getName(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);

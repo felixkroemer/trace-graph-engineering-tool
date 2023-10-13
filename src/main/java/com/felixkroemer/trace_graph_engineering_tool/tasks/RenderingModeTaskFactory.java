@@ -1,12 +1,10 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskIterator;
-
-import static com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController.NETWORK_TYPE_DEFAULT;
 
 public class RenderingModeTaskFactory extends AbstractNetworkViewTaskFactory {
 
@@ -20,13 +18,7 @@ public class RenderingModeTaskFactory extends AbstractNetworkViewTaskFactory {
 
     @Override
     public boolean isReady(CyNetworkView networkView) {
-        var manager = this.reg.getService(TraceGraphManager.class);
-        var controller = manager.findControllerForNetwork(networkView.getModel());
-        if (controller != null) {
-            return controller.getNetworkType(networkView.getModel()).equals(NETWORK_TYPE_DEFAULT);
-        } else {
-            return false;
-        }
+        return Util.isTraceGraphNetwork(networkView.getModel());
     }
 
     @Override

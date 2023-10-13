@@ -1,14 +1,14 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -21,7 +21,6 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,36 +32,51 @@ public class TraceDetailsController implements PropertyChangeListener {
     private CyNetwork network;
     private CyNetworkView networkView;
     private Map<CyNode, CyNode> nodeMapping;
-    private TraceGraph traceGraph;
     private UIState uiState;
     private boolean liveUpdate;
 
-    public TraceDetailsController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
+    public TraceDetailsController(CyServiceRegistrar registrar) {
         this.registrar = registrar;
         this.nodeMapping = new HashMap<>();
-        this.traceGraph = traceGraph;
-        this.uiState = uiState;
         this.liveUpdate = false;
-
-        this.uiState.addObserver(this);
-        this.createNetwork();
     }
 
-    public void createNetwork() {
+    public void setUiState(UIState uiState) {
+        if (this.uiState != null) {
+            this.uiState.removeObserver(this);
+        }
+        this.uiState = uiState;
+        this.uiState.addObserver(this);
+    }
+
+    public void createAndRegisterNetwork() {
         CyNetworkFactory networkFactory = registrar.getService(CyNetworkFactory.class);
         this.network = networkFactory.createNetwork();
+
+        this.network.getRow(this.network).set(CyRootNetwork.SHARED_NAME, "Trace Graph Helper Networks");
+        this.network.getRow(this.network).set(CyNetwork.NAME, "Trace Details Network");
+
+        var localNetworkTable = this.network.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+        localNetworkTable.createColumn(Columns.NETWORK_TRACE_DETAILS_MARKER, Integer.class, true);
+
         CyNetworkManager networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.addNetwork(network);
         CyNetworkViewFactory networkViewFactory = registrar.getService(CyNetworkViewFactory.class);
         this.networkView = networkViewFactory.createNetworkView(network);
         CyNetworkViewManager networkViewManager = registrar.getService(CyNetworkViewManager.class);
         networkViewManager.addNetworkView(networkView, false);
-        CyApplicationManager manager = registrar.getService(CyApplicationManager.class);
-        manager.setSelectedNetworks(List.of(traceGraph.getNetwork(), this.network));
     }
 
     public void update() {
         this.updateTraces(this.uiState.getTraceSet());
+    }
+
+    public CyNode findCorrespondingNode(CyNode node) {
+        return this.nodeMapping.get(node);
+    }
+
+    public CyNetwork getCorrespondingNetwork() {
+        return this.uiState.getTraceSetNetwork();
     }
 
     public void updateTraces(Set<TraceExtension> traces) {
@@ -112,10 +126,6 @@ public class TraceDetailsController implements PropertyChangeListener {
 
     public CyNetwork getNetwork() {
         return this.network;
-    }
-
-    public CyNode findCorrespondingNode(CyNode node) {
-        return this.nodeMapping.get(node);
     }
 
 

@@ -6,12 +6,10 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
-import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.opencsv.CSVReader;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
@@ -23,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
 import java.nio.file.Files;
 
 public class LoadPDMTask extends AbstractTask {
@@ -61,8 +58,10 @@ public class LoadPDMTask extends AbstractTask {
 
         var sharedNodeTable = rootNetwork.getSharedNodeTable();
         pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
-        var sharedNetworkTable = rootNetwork.getDefaultNetworkTable();
-        sharedNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+        var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+        localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+
+        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
 
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {

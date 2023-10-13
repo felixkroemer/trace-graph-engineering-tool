@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.util.ObservableSet;
+import org.cytoscape.model.CyNetwork;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -12,6 +13,7 @@ import java.util.Set;
 public class UIState {
     private Trace trace;
     private Set<TraceExtension> traceSet;
+    private CyNetwork traceSetNetwork;
     private Map<Parameter, ObservableSet> highlightedBins;
     private PropertyChangeSupport pcs;
 
@@ -34,13 +36,18 @@ public class UIState {
         return trace;
     }
 
-    public void setTraceSet(Set<TraceExtension> traceSet) {
+    public void setTraceSet(Set<TraceExtension> traceSet, CyNetwork network) {
         this.traceSet = traceSet;
+        this.traceSetNetwork = network;
         this.pcs.firePropertyChange("traceSet", null, this.traceSet);
     }
 
     public Set<TraceExtension> getTraceSet() {
         return this.traceSet;
+    }
+
+    public CyNetwork getTraceSetNetwork() {
+        return this.traceSetNetwork;
     }
 
     public void addObserver(PropertyChangeListener l) {

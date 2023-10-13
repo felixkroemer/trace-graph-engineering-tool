@@ -28,8 +28,7 @@ public class TraceGraph {
         this.pdm = pdm;
         this.sourceTables = new HashSet<>();
         this.network = network;
-
-        this.network.getRow(network).set(CyNetwork.NAME, pdm.getName());
+        
         // DEFAULT_ATTRS = Shared (root) + Local
         this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
         this.defaultEdgetable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);

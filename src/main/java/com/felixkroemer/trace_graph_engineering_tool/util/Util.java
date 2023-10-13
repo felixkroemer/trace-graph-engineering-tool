@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.util;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.opencsv.CSVReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
@@ -9,6 +8,8 @@ import org.cytoscape.model.CyTable;
 import java.io.File;
 import java.io.FileReader;
 import java.util.*;
+
+import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.*;
 
 public class Util {
 
@@ -19,7 +20,15 @@ public class Util {
     }
 
     public static boolean isTraceGraphNetwork(CyNetwork network) {
-        return network.getDefaultNetworkTable().getColumn("TraceGraphMarker") != null;
+        return network.getDefaultNetworkTable().getColumn(NETWORK_TG_MARKER) != null;
+    }
+
+    public static boolean isComparisonNetwork(CyNetwork network) {
+        return network.getDefaultNetworkTable().getColumn(NETWORK_COMPARISON_MARKER) != null;
+    }
+
+    public static boolean isTraceDetailsNetwork(CyNetwork network) {
+        return network.getDefaultNetworkTable().getColumn(NETWORK_TRACE_DETAILS_MARKER) != null;
     }
 
     public static void parseCSV(CyTable table, File csv) throws Exception {
@@ -31,7 +40,7 @@ public class Util {
                 if (header) {
                     header = false;
                     params = Arrays.asList(line);
-                    for(int i = 1; i<params.size(); i++) {
+                    for (int i = 1; i < params.size(); i++) {
                         table.createColumn(params.get(i), Double.class, false);
                     }
                     continue;

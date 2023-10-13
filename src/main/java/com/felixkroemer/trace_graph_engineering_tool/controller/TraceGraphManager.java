@@ -4,12 +4,14 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
@@ -27,6 +29,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
     private final TraceGraphPanel panel;
+    private final TraceDetailsController traceDetailsController;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
@@ -34,9 +37,13 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         registrar.registerService(panel, SelectedNodesAndEdgesListener.class, new Properties());
         registrar.registerService(panel, SetCurrentNetworkListener.class, new Properties());
         this.controllers = new HashMap<>();
+        this.traceDetailsController = new TraceDetailsController(registrar);
     }
 
     public void registerTraceGraph(ParameterDiscretizationModel pdm, TraceGraphController controller, UIState uiState) {
+        if (this.controllers.isEmpty()) {
+            this.traceDetailsController.createAndRegisterNetwork();
+        }
         if (this.controllers.get(pdm) == null) {
             this.controllers.put(pdm, new HashSet<>());
             pdm.getParameters().forEach(p -> p.addObserver(this));
@@ -125,11 +132,15 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     // call to destroy networks, everything else is handled in
     // handleEvent(NetworkAboutToBeDestroyedEvent e)
     public void clearTraceGraphs() {
+        var networkManager = registrar.getService(CyNetworkManager.class);
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
-                var networkManager = registrar.getService(CyNetworkManager.class);
                 networkManager.destroyNetwork(controller.getNetwork());
             }
+        }
+        CyNetwork traceDetailsNetwork;
+        if ((traceDetailsNetwork = traceDetailsController.getNetwork()) != null) {
+            networkManager.destroyNetwork(traceDetailsNetwork);
         }
         this.controllers.clear();
     }
@@ -147,6 +158,25 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             return pdm;
         }
         return null;
+    }
+
+    public void showTraceDetailsNetwork(CyNetwork network) {
+        var controller = this.findControllerForNetwork(network);
+        var manager = this.registrar.getService(CyApplicationManager.class);
+        manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
+        this.traceDetailsController.setUiState(controller.getUiState());
+        this.traceDetailsController.update();
+    }
+
+    public void focusNode(CyNode node) {
+        var manager = this.registrar.getService(CyApplicationManager.class);
+        var network = this.traceDetailsController.getCorrespondingNetwork();
+        var controller = findControllerForNetwork(network);
+        manager.setCurrentNetwork(network);
+        if (node != null) {
+            var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
+            controller.focusNode(defaultNetworkNode);
+        }
     }
 
 }
