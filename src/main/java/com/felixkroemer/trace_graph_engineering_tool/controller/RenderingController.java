@@ -155,7 +155,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.displayManager.disable();
             }
         }
-        this.deselectAll();
+        //this.deselectAll();
         this.defaultStyle.apply(this.view);
         this.displayManager = displayManager;
     }

@@ -18,6 +18,7 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     public FollowDisplayController(CyNetworkView view, TraceGraph traceGraph) {
         super(view, traceGraph);
+        this.hideAllEdges();
         showEdgesOfHighlightedNodes();
     }
 

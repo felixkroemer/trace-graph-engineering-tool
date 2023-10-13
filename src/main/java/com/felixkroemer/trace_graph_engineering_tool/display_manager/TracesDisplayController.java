@@ -4,10 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
@@ -46,6 +43,8 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.uiState = uiState;
 
         this.hideAllEdges();
+        var selectedNodes = CyTableUtil.getNodesInState(view.getModel(), CyNetwork.SELECTED, true);
+        this.displayTraces(selectedNodes, Collections.emptyList(), view.getModel());
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -145,15 +144,19 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         this.hideAllEdges();
+        this.displayTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
+    }
+
+    public void displayTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
         this.edgeVisits.clear();
         Set<TraceExtension> traces = null;
-        if (event.getSelectedNodes().size() == 1) {
-            traces = calculateTraces(event.getSelectedNodes().iterator().next(), traceGraph, length, false);
+        if (selectedNodes.size() == 1) {
+            traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
         }
-        if (event.getSelectedEdges().size() == 1) {
-            traces = calculateTraces(event.getSelectedEdges().iterator().next(), traceGraph, length, true);
+        if (selectedEdges.size() == 1) {
+            traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
         }
-        this.uiState.setTraceSet(traces, event.getNetwork());
+        this.uiState.setTraceSet(traces, network);
         if (traces != null) {
             drawTraces(traces);
         }
