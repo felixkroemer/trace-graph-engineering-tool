@@ -1,11 +1,9 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
@@ -14,7 +12,6 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
-import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.table.CyTableViewManager;
 
@@ -34,9 +31,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
         this.panel = new TraceGraphPanel(registrar, this);
-        registrar.registerService(panel, SelectedNodesAndEdgesListener.class, new Properties());
-        registrar.registerService(panel, SetCurrentNetworkListener.class, new Properties());
-        registrar.registerService(panel, SetCurrentTraceGraphControllerListener.class, new Properties());
         this.controllers = new HashMap<>();
         this.traceDetailsController = new TraceDetailsController(registrar);
     }

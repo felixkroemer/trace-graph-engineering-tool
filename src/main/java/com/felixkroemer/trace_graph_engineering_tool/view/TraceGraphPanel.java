@@ -1,10 +1,10 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.CyUserLog;
@@ -20,9 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Properties;
 
 public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener,
-        SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener {
+        SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener, SetCurrentComparisonControllerListener {
 
     private Logger logger;
     private TraceGraphManager manager;
@@ -30,11 +31,13 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     private PDMPanel pdmPanel;
     private TracesPanel tracesPanel;
     private InfoPanel infoPanel;
+    private ComparisonPanel comparisonPanel;
     private CyServiceRegistrar reg;
 
     private static String TRACES_TITLE = "traces";
     private static String PDM_TITLE = "PDM";
     private static String INFO_TITLE = "Info";
+    private static String COMPARISON_TITLE = "Comparison";
 
     public TraceGraphPanel(CyServiceRegistrar reg, TraceGraphManager manager) {
         super(new BorderLayout());
@@ -44,7 +47,14 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.pdmPanel = new PDMPanel(reg);
         this.tracesPanel = new TracesPanel(reg);
         this.infoPanel = new InfoPanel(reg);
+        this.comparisonPanel = new ComparisonPanel(reg);
         this.reg = reg;
+
+        this.reg.registerService(this, SelectedNodesAndEdgesListener.class, new Properties());
+        this.reg.registerService(this, SetCurrentNetworkListener.class, new Properties());
+        this.reg.registerService(this, SetCurrentTraceGraphControllerListener.class, new Properties());
+        this.reg.registerService(this, SetCurrentComparisonControllerListener.class, new Properties());
+
         init();
     }
 
@@ -55,6 +65,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     public void init() {
         this.tabs.addTab(PDM_TITLE, this.pdmPanel);
+        this.tabs.addTab(COMPARISON_TITLE, this.comparisonPanel);
         this.add(this.tabs, BorderLayout.CENTER);
     }
 
@@ -76,10 +87,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     @Override
     public String getIdentifier() {
         return "TraceGraphPanel";
-    }
-
-    public void registerCallbacks(TraceGraphController controller, UIState uiState) {
-        this.pdmPanel.registerCallbacks(controller, uiState);
     }
 
     private int getPanelIndex(String title) {
@@ -118,6 +125,11 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
-        this.registerCallbacks(event.getTraceGraphController(), event.getTraceGraphController().getUiState());
+        this.pdmPanel.registerCallbacks(event.getTraceGraphController(), event.getTraceGraphController().getUiState());
+    }
+
+    @Override
+    public void handleEvent(SetCurrentComparisonControllerEvent e) {
+        this.comparisonPanel.setComparisonController(e.getNetworkComparisonController());
     }
 }
