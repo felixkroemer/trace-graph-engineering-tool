@@ -1,8 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
 import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
@@ -51,17 +50,17 @@ public class InfoPanel extends JPanel {
         this.add(nodeInfoPanel, BorderLayout.NORTH);
     }
 
-    public void setNode(CyNetwork network, CyNode node) {
+    public void setNode(NetworkController controller, CyNode node) {
         this.nodeInfoTableModel.setRowCount(0);
         this.nodeInfoTableModel.addRow(new String[]{"SUID", node.getSUID().toString()});
-        var edges = network.getAdjacentEdgeList(node, CyEdge.Type.DIRECTED);
+        var edges = controller.getNetwork().getAdjacentEdgeList(node, CyEdge.Type.DIRECTED);
         var incoming = edges.stream().filter(edge -> edge.getSource() == node).count();
         this.nodeInfoTableModel.addRow(new String[]{"Incoming Edges", "" + incoming});
         this.nodeInfoTableModel.addRow(new String[]{"Outgoing Edges", "" + (edges.size() - incoming)});
-        /*var visits = network.getRow(node).get(Columns.NODE_VISITS, Integer.class);
-        var frequency = network.getRow(node).get(Columns.NODE_FREQUENCY, Integer.class);
-        this.nodeInfoTableModel.addRow(new String[]{"Visits", "" + visits});
-        this.nodeInfoTableModel.addRow(new String[]{"Frequency", "" + frequency});*/
+        var info = controller.getNodeInfo(node);
+        for (var entry : info.entrySet()) {
+            this.nodeInfoTableModel.addRow(new String[]{entry.getKey(), entry.getValue()});
+        }
     }
 
 }

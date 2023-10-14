@@ -63,10 +63,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.mode = RENDERING_MODE_FOLLOW;
 
         this.traceGraph.getPDM().forEach(p -> {
-            uiState.addHighlightObserver(p, this);
+            p.addObserver(this);
         });
-
-        this.uiState.addObserver(this);
 
         registrar.registerService(this, SelectedNodesAndEdgesListener.class);
         registrar.registerService(this, ShowTraceEventListener.class);
@@ -117,7 +115,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void hideNodes() {
         Map<Parameter, Set<Integer>> highlightedBins = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
-            highlightedBins.put(param, this.uiState.getHighlightedBins(param));
+            highlightedBins.put(param, param.getHighlightedBins());
         }
         if (highlightedBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {

@@ -21,6 +21,8 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
@@ -93,8 +95,6 @@ public class NetworkComparisonController extends NetworkController implements Se
         var localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
         localNodeTable.createColumn(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, false);
         localEdgeTable.createColumn(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, false);
-
-        //TODO map columns of nodes that are compared to the node table of this network;
     }
 
     @Override
@@ -173,6 +173,13 @@ public class NetworkComparisonController extends NetworkController implements Se
                 }
             }
         }
+    }
+
+    public Map<String, String> getNodeInfo(CyNode node) {
+        HashMap<String, String> map = new HashMap<>();
+        var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
+        map.put("Group", group == 2 ? "BD" : (group == 1 ? "DO" : "BO"));
+        return map;
     }
 
     @Override

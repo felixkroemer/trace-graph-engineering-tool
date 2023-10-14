@@ -1,8 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
-import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.slf4j.Logger;
@@ -35,13 +33,14 @@ public class PDMPanel extends JPanel {
         this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
 
-    public void registerCallbacks(TraceGraphController controller, UIState uiState) {
+    public void registerCallbacks(TraceGraphController controller) {
         SwingUtilities.invokeLater(() -> {
             this.innerPanel.removeAll();
             controller.getTraceGraph().getPDM().forEach(parameter -> {
                 ParameterCell cell = new ParameterCell(reg, parameter, controller);
                 parameter.addObserver(cell);
-                uiState.addHighlightObserver(parameter, cell);
+                //TODO: move highlighting back to main model
+                //uiState.addHighlightObserver(parameter, cell);
                 this.innerPanel.add(cell);
             });
         });

@@ -1,18 +1,21 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.*;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskMonitor;
 
-import java.util.Set;
+import java.util.Map;
 
 public abstract class NetworkController {
 
@@ -65,4 +68,5 @@ public abstract class NetworkController {
 
     public abstract void updateNetwork(Parameter parameter);
 
+    public abstract Map<String, String> getNodeInfo(CyNode node);
 }

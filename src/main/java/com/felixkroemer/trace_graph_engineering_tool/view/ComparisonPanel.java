@@ -5,11 +5,11 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class ComparisonPanel extends JPanel {
 
     private CyServiceRegistrar reg;
-    private NetworkComparisonController controller;
     private JButton tempButton;
 
     public ComparisonPanel(CyServiceRegistrar reg) {
@@ -24,7 +24,9 @@ public class ComparisonPanel extends JPanel {
     }
 
     public void setComparisonController(NetworkComparisonController controller) {
-        this.controller = controller;
+        for (ActionListener al : tempButton.getActionListeners()) {
+            tempButton.removeActionListener(al);
+        }
         this.tempButton.addActionListener(e -> {
             controller.hideBO();
         });

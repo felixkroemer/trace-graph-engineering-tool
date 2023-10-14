@@ -1,27 +1,18 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import com.felixkroemer.trace_graph_engineering_tool.util.ObservableSet;
 import org.cytoscape.model.CyNetwork;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class UIState {
     private Set<TraceExtension> traceSet;
     private CyNetwork traceSetNetwork;
-    private Map<Parameter, ObservableSet> highlightedBins;
     private PropertyChangeSupport pcs;
 
     public UIState(ParameterDiscretizationModel pdm) {
         this.traceSet = null;
-        this.highlightedBins = new HashMap<>();
-        for (Parameter param : pdm.getParameters()) {
-            this.highlightedBins.put(param, new ObservableSet());
-        }
         this.pcs = new PropertyChangeSupport(this);
     }
 
@@ -45,17 +36,5 @@ public class UIState {
 
     public void removeObserver(PropertyChangeListener l) {
         pcs.removePropertyChangeListener(l);
-    }
-
-    public void addHighlightObserver(Parameter parameter, PropertyChangeListener l) {
-        this.highlightedBins.get(parameter).addObserver(l);
-    }
-
-    public Set<Integer> getHighlightedBins(Parameter parameter) {
-        return this.highlightedBins.get(parameter).getSet();
-    }
-
-    public void highlightBins(Parameter parameter, Set<Integer> bins) {
-        this.highlightedBins.get(parameter).replace(bins != null ? bins : new HashSet<>());
     }
 }

@@ -34,7 +34,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     private ComparisonPanel comparisonPanel;
     private CyServiceRegistrar reg;
 
-    private static String TRACES_TITLE = "traces";
     private static String PDM_TITLE = "PDM";
     private static String INFO_TITLE = "Info";
     private static String COMPARISON_TITLE = "Comparison";
@@ -108,7 +107,10 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getSelectedNodes().size() == 1) {
-            this.infoPanel.setNode(event.getNetwork(), event.getSelectedNodes().iterator().next());
+            var manager = this.reg.getService(TraceGraphManager.class);
+            var controller = manager.findControllerForNetwork(event.getNetwork());
+            //TODO: bug, controller is null if network is a comparison network
+            this.infoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
             this.tabs.addTab(INFO_TITLE, this.infoPanel);
             this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
         } else {
@@ -125,11 +127,11 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
-        this.pdmPanel.registerCallbacks(event.getTraceGraphController(), event.getTraceGraphController().getUiState());
+        this.pdmPanel.registerCallbacks(event.getTraceGraphController());
     }
 
     @Override
-    public void handleEvent(SetCurrentComparisonControllerEvent e) {
-        this.comparisonPanel.setComparisonController(e.getNetworkComparisonController());
+    public void handleEvent(SetCurrentComparisonControllerEvent event) {
+        this.comparisonPanel.setComparisonController(event.getNetworkComparisonController());
     }
 }

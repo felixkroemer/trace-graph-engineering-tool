@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -21,15 +20,12 @@ public class ShowTraceNodeTaskFactory extends AbstractNodeViewTaskFactory {
 
     @Override
     public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
-        var manager = this.reg.getService(TraceGraphManager.class);
-        var controller = manager.findControllerForNetwork(networkView.getModel());
-        if (controller != null) {
-            var selectedNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
-            if (selectedNodes.size() == 2) {
-                return Util.isTraceGraphNetwork(networkView.getModel());
-            }
+        var selectedNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
+        if (selectedNodes.size() == 2) {
+            return Util.isTraceGraphNetwork(networkView.getModel());
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override

@@ -4,11 +4,14 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Parameter {
     private String name;
     private List<Double> bins;
+    private Set<Integer> highlightedBins;
     private boolean enabled;
     private PropertyChangeSupport pcs;
     private ParameterDiscretizationModel pdm;
@@ -17,6 +20,10 @@ public class Parameter {
     public Parameter(ParameterDTO dto, ParameterDiscretizationModel pdm) {
         this.name = dto.getName();
         this.bins = dto.getBins();
+        this.highlightedBins = new HashSet<>();
+        for (int i = 0; i < bins.size(); i++) {
+            this.highlightedBins.add(i);
+        }
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
         this.pdm = pdm;
@@ -56,6 +63,16 @@ public class Parameter {
     public void addObserver(PropertyChangeListener l) {
         pcs.addPropertyChangeListener("enabled", l);
         pcs.addPropertyChangeListener("bins", l);
+        pcs.addPropertyChangeListener("highlightedBins", l);
+    }
+
+    public void highlightBins(Set<Integer> bins) {
+        this.highlightedBins = bins;
+        this.pcs.firePropertyChange("highlightedBins", null, this.highlightedBins);
+    }
+
+    public Set<Integer> getHighlightedBins() {
+        return this.highlightedBins;
     }
 
 }

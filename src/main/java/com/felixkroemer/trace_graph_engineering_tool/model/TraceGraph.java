@@ -28,7 +28,7 @@ public class TraceGraph {
         this.pdm = pdm;
         this.sourceTables = new HashSet<>();
         this.network = network;
-        
+
         // DEFAULT_ATTRS = Shared (root) + Local
         this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
         this.defaultEdgetable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
@@ -349,6 +349,14 @@ public class TraceGraph {
 
         }
         return shortestTrace;
+    }
+
+    public Map<String, String> getNodeInfo(CyNode node) {
+        HashMap<String, String> map = new HashMap<>();
+        var row = this.defaultNodeTable.getRow(node.getSUID());
+        map.put("Visits", "" + row.get(Columns.NODE_VISITS, Integer.class));
+        map.put("Frequency", "" + row.get(Columns.NODE_FREQUENCY, Integer.class));
+        return map;
     }
 
     public AuxiliaryInformation getNodeAux(CyNode node) {

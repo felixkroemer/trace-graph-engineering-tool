@@ -20,6 +20,7 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -68,6 +69,11 @@ public class TraceGraphController extends NetworkController implements SetCurren
         taskManager.execute(iterator);
     }
 
+    @Override
+    public Map<String, String> getNodeInfo(CyNode node) {
+        return this.traceGraph.getNodeInfo(node);
+    }
+
     private void hideUnneededColumns() {
         var tableViewManager = registrar.getService(CyTableViewManager.class);
         var nodeTableView = tableViewManager.getTableView(this.traceGraph.getNetwork().getDefaultNodeTable());
@@ -105,7 +111,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     public SelectBinsController createSelectBinsController(Parameter parameter) {
         //TODO: support multiple traces per tg
-        return new SelectBinsController(parameter, this.uiState, this.traceGraph.getSourceTables().iterator().next());
+        return new SelectBinsController(parameter, this.traceGraph.getSourceTables().iterator().next());
     }
 
     @Override
