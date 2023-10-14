@@ -39,8 +39,6 @@ public class PDMPanel extends JPanel {
             controller.getTraceGraph().getPDM().forEach(parameter -> {
                 ParameterCell cell = new ParameterCell(reg, parameter, controller);
                 parameter.addObserver(cell);
-                //TODO: move highlighting back to main model
-                //uiState.addHighlightObserver(parameter, cell);
                 this.innerPanel.add(cell);
             });
         });

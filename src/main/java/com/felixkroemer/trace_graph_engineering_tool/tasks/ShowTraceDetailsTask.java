@@ -28,7 +28,7 @@ public class ShowTraceDetailsTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = this.registrar.getService(TraceGraphManager.class);
-        manager.showTraceDetailsNetwork(networkView.getModel());
+        manager.showTraceDetailsNetwork();
     }
 
 }

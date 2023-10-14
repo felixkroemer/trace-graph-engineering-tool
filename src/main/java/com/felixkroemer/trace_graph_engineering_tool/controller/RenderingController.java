@@ -6,7 +6,6 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListen
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyNetwork;
@@ -41,13 +40,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private CyNetworkView view;
     private AbstractDisplayController displayManager;
     private TraceGraph traceGraph;
-    private UIState uiState;
     private String mode;
 
-    public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
+    public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         this.registrar = registrar;
         this.traceGraph = traceGraph;
-        this.uiState = uiState;
         this.defaultStyle = createDefaultVisualStyle();
 
         // NetworkViewRenderer gets added to manager on registration, mapped to id
@@ -168,8 +165,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.setDisplayManager(new FollowDisplayController(registrar, view, this.traceGraph));
             }
             case RENDERING_MODE_TRACES -> {
-                this.setDisplayManager(new TracesDisplayController(this.registrar, view, this.traceGraph, 2,
-                        this.uiState));
+                this.setDisplayManager(new TracesDisplayController(this.registrar, view, this.traceGraph, 2));
             }
         }
     }

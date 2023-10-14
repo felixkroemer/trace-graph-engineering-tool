@@ -5,7 +5,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
@@ -66,8 +65,7 @@ public class LoadTraceTask extends AbstractTask {
             this.networkTableManager.setTable(subNetwork, CyNode.class, traceFile.getName(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);
-            UIState uiState = new UIState(pdm);
-            TraceGraphController controller = new TraceGraphController(registrar, traceGraph, uiState);
+            TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
             manager.registerTraceGraph(pdm, controller);
         } else {
             throw new Error("No matching PDM was found.");

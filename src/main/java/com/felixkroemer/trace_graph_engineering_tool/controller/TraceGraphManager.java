@@ -133,6 +133,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
                 networkManager.destroyNetwork(controller.getNetwork());
             }
         }
+        traceDetailsController.destroy();
         CyNetwork traceDetailsNetwork;
         if ((traceDetailsNetwork = traceDetailsController.getNetwork()) != null) {
             networkManager.destroyNetwork(traceDetailsNetwork);
@@ -155,12 +156,10 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         return null;
     }
 
-    public void showTraceDetailsNetwork(CyNetwork network) {
-        var controller = this.findControllerForNetwork(network);
+    public void showTraceDetailsNetwork() {
+        traceDetailsController.update();
         var manager = this.registrar.getService(CyApplicationManager.class);
         manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
-        this.traceDetailsController.setUiState(controller.getUiState());
-        this.traceDetailsController.update();
     }
 
     public void focusNode(CyNode node) {

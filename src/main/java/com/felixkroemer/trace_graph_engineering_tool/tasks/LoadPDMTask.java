@@ -5,7 +5,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
@@ -72,8 +71,7 @@ public class LoadPDMTask extends AbstractTask {
             this.networkTableManager.setTable(subNetwork, CyNode.class, csv, sourceTable);
             traceGraph.init(sourceTable);
         }
-        UIState uiState = new UIState(pdm);
-        TraceGraphController controller = new TraceGraphController(registrar, traceGraph, uiState);
+        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);
     }
 

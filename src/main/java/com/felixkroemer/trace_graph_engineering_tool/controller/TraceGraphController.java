@@ -3,7 +3,6 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
@@ -32,14 +31,12 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
 
     private final TraceGraph traceGraph;
-    private final UIState uiState;
     private final RenderingController renderingController;
 
-    public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph, UIState uiState) {
+    public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         super(registrar, traceGraph.getNetwork());
         this.traceGraph = traceGraph;
-        this.uiState = uiState;
-        this.renderingController = new RenderingController(registrar, traceGraph, uiState);
+        this.renderingController = new RenderingController(registrar, traceGraph);
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
     }
@@ -93,10 +90,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     public TraceGraph getTraceGraph() {
         return this.traceGraph;
-    }
-
-    public UIState getUiState() {
-        return this.uiState;
     }
 
     @Override

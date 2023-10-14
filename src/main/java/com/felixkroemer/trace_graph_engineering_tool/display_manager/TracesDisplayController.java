@@ -1,9 +1,10 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_manager;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceSetEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.model.UIState;
 import org.cytoscape.application.CyUserLog;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -29,10 +30,9 @@ public class TracesDisplayController extends AbstractDisplayController {
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
     private boolean enableVisitWidth;
-    private UIState uiState;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                   int length, UIState uiState) {
+                                   int length) {
         super(registrar, view, traceGraph);
         this.registrar = registrar;
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -40,7 +40,6 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
         this.enableVisitWidth = false;
-        this.uiState = uiState;
 
         this.hideAllEdges();
         var selectedNodes = CyTableUtil.getNodesInState(view.getModel(), CyNetwork.SELECTED, true);
@@ -156,15 +155,15 @@ public class TracesDisplayController extends AbstractDisplayController {
         if (selectedEdges.size() == 1) {
             traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
         }
-        this.uiState.setTraceSet(traces, network);
         if (traces != null) {
             drawTraces(traces);
+            CyEventHelper helper = registrar.getService(CyEventHelper.class);
+            helper.fireEvent(new ShowTraceSetEvent(this, traces, network));
         }
     }
 
     @Override
     public void disable() {
-        this.uiState.setTraceSet(null, null);
     }
 
     public void drawTraces(Set<TraceExtension> traces) {
