@@ -28,14 +28,22 @@ import java.util.Properties;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class NetworkComparisonController extends NetworkController implements SetCurrentNetworkListener {
+
+    public static final String BO = "BO";
+    public static final String DO = "DO";
+    public static final String BD = "BD";
+
     private CyNetwork networkA;
     private CyNetwork networkB;
     private CySubNetwork network;
     private CyNetworkView view;
 
-    private boolean baseOnlyVisible;
-    private boolean deltaOnlyVisible;
-    private boolean baseDeltaVisible;
+    private boolean nodesBaseOnlyVisible;
+    private boolean nodesDeltaOnlyVisible;
+    private boolean nodesBaseDeltaVisible;
+    private boolean edgesBaseOnlyVisible;
+    private boolean edgesDeltaOnlyVisible;
+    private boolean edgesBaseDeltaVisible;
 
 
     private VisualStyle defaultVisualStyle;
@@ -46,9 +54,12 @@ public class NetworkComparisonController extends NetworkController implements Se
         this.networkA = networkA;
         this.networkB = networkB;
         this.network = network;
-        this.baseOnlyVisible = true;
-        this.deltaOnlyVisible = true;
-        this.baseDeltaVisible = true;
+        this.nodesBaseOnlyVisible = true;
+        this.nodesDeltaOnlyVisible = true;
+        this.nodesBaseDeltaVisible = true;
+        this.edgesBaseOnlyVisible = true;
+        this.edgesDeltaOnlyVisible = true;
+        this.edgesBaseDeltaVisible = true;
         this.defaultVisualStyle = createDefaultVisualStyle();
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
@@ -74,13 +85,13 @@ public class NetworkComparisonController extends NetworkController implements Se
             boolean base = this.networkA.containsNode(node);
             boolean delta = this.networkB.containsNode(node);
             var row = defaultNodeTable.getRow(node.getSUID());
-            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, base && delta ? 2 : (base ? 0 : 1));
+            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
         }
         for (CyEdge edge : this.network.getEdgeList()) {
             boolean base = this.networkA.containsEdge(edge);
             boolean delta = this.networkB.containsEdge(edge);
             var row = defaultEdgeTable.getRow(edge.getSUID());
-            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, base && delta ? 2 : (base ? 0 : 1));
+            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
         }
 
         this.initView();
@@ -152,24 +163,34 @@ public class NetworkComparisonController extends NetworkController implements Se
         this.view = networkViewFactory.createNetworkView(this.network);
     }
 
-    public void hideBO() {
-        this.baseOnlyVisible = false;
-        this.updateVisibility();
-    }
-
     public void updateVisibility() {
         for (var nodeView : this.view.getNodeViews()) {
             var node = nodeView.getModel();
             var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
             switch (group) {
                 case 2 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, baseDeltaVisible);
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseDeltaVisible);
                 }
                 case 1 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, deltaOnlyVisible);
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesDeltaOnlyVisible);
                 }
                 case 0 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, baseOnlyVisible);
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseOnlyVisible);
+                }
+            }
+        }
+        for (var edgeView : this.view.getEdgeViews()) {
+            var edge = edgeView.getModel();
+            var group = this.network.getRow(edge).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
+            switch (group) {
+                case 2 -> {
+                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseDeltaVisible);
+                }
+                case 1 -> {
+                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesDeltaOnlyVisible);
+                }
+                case 0 -> {
+                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseOnlyVisible);
                 }
             }
         }
@@ -188,5 +209,32 @@ public class NetworkComparisonController extends NetworkController implements Se
             var eventHelper = this.registrar.getService(CyEventHelper.class);
             eventHelper.fireEvent(new SetCurrentComparisonControllerEvent(this, this));
         }
+    }
+
+    public void setGroupVisibiliy(String group, boolean node, boolean visible) {
+        switch (group) {
+            case BO -> {
+                if (node) {
+                    this.nodesBaseOnlyVisible = visible;
+                } else {
+                    this.nodesBaseOnlyVisible = visible;
+                }
+            }
+            case DO -> {
+                if (node) {
+                    this.nodesDeltaOnlyVisible = visible;
+                } else {
+                    this.nodesDeltaOnlyVisible = visible;
+                }
+            }
+            case BD -> {
+                if (node) {
+                    this.nodesBaseDeltaVisible = visible;
+                } else {
+                    this.nodesBaseDeltaVisible = visible;
+                }
+            }
+        }
+        this.updateVisibility();
     }
 }

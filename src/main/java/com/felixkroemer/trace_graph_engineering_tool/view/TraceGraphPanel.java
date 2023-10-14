@@ -46,7 +46,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.pdmPanel = new PDMPanel(reg);
         this.tracesPanel = new TracesPanel(reg);
         this.infoPanel = new InfoPanel(reg);
-        this.comparisonPanel = new ComparisonPanel(reg);
+        this.comparisonPanel = new ComparisonPanel();
         this.reg = reg;
 
         this.reg.registerService(this, SelectedNodesAndEdgesListener.class, new Properties());
