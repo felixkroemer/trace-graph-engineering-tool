@@ -27,8 +27,7 @@ public class CompareTraceGraphsTask extends AbstractNetworkCollectionTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = this.registrar.getService(TraceGraphManager.class);
-        var controller = manager.findControllerForNetwork(this.networkA);
-        var pdm = controller.getTraceGraph().getPDM();
+        var pdm = manager.findPDMForNetwork(networkA);
         var rootNetwork = pdm.getRootNetwork();
         var subNetwork = rootNetwork.addSubNetwork();
 

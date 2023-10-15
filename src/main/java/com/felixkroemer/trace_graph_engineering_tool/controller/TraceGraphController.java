@@ -96,15 +96,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void destroy() {
         this.renderingController.destroy();
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
-    }
-
-    public void focusNode(CyNode node) {
-        this.renderingController.focusNode(node);
-    }
-
-    public SelectBinsController createSelectBinsController(Parameter parameter) {
-        //TODO: support multiple traces per tg
-        return new SelectBinsController(parameter, this.traceGraph.getSourceTables().iterator().next());
+        this.getPDM().getSourceTables().removeAll(this.traceGraph.getSourceTables());
     }
 
     @Override

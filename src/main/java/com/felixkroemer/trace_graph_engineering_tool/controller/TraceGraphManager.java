@@ -91,7 +91,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         NetworkController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
             controller.destroy();
-            var pdm = findPDMForNetwork(controller.getNetwork());
+            var pdm = controller.getPDM();
             this.controllers.get(pdm).remove(controller);
             if (controllers.get(pdm).isEmpty()) {
                 controllers.remove(pdm);
@@ -102,11 +102,11 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         }
     }
 
-    public TraceGraphController findControllerForNetwork(CyNetwork network) {
+    public NetworkController findControllerForNetwork(CyNetwork network) {
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
-                if (controller instanceof TraceGraphController tgc && controller.getNetwork() == network) {
-                    return tgc;
+                if (controller.getNetwork() == network) {
+                    return controller;
                 }
             }
         }
@@ -171,6 +171,10 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
             controller.focusNode(defaultNetworkNode);
         }
+    }
+
+    public static SelectBinsController createSelectBinsController(Parameter parameter) {
+        return new SelectBinsController(parameter);
     }
 
 }

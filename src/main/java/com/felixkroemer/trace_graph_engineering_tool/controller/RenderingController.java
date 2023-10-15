@@ -9,7 +9,6 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
@@ -185,11 +184,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (event.getNetwork() == this.traceGraph.getNetwork()) {
             this.displayManager.handleNodesSelected(event);
         }
-    }
-
-    public void focusNode(CyNode node) {
-        view.setVisualProperty(NETWORK_CENTER_X_LOCATION, view.getNodeView(node).getVisualProperty(NODE_X_LOCATION));
-        view.setVisualProperty(NETWORK_CENTER_Y_LOCATION, view.getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
     }
 
     public void destroy() {

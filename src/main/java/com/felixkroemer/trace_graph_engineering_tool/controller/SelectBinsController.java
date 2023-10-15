@@ -8,11 +8,9 @@ import java.util.Set;
 
 public class SelectBinsController {
     private Parameter parameter;
-    private CyTable sourceTable;
 
-    public SelectBinsController(Parameter parameter, CyTable sourceTable) {
+    public SelectBinsController(Parameter parameter) {
         this.parameter = parameter;
-        this.sourceTable = sourceTable;
     }
 
     public Parameter getParameter() {
@@ -20,7 +18,7 @@ public class SelectBinsController {
     }
 
     public CyTable getSourceTable() {
-        return this.sourceTable;
+        return this.parameter.getPdm().getSourceTables().iterator().next();
     }
 
     public void setNewBins(List<Float> bins) {

@@ -50,6 +50,8 @@ public class TraceGraph {
     }
 
     public void init(CyTable sourceTable) {
+        var localNodeTable = this.network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+        var localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
         this.sourceTables.add(sourceTable);
         this.nodeMapping.put(sourceTable, new CyNode[sourceTable.getRowCount() + 1]);
 
@@ -74,13 +76,13 @@ public class TraceGraph {
             var rootNetwork = ((CySubNetwork) network).getRootNetwork();
             if (suid != null && (currentNode = rootNetwork.getNode(suid)) != null) { // node for the given state
                 // already exists, maybe only in root
-                currentRow = defaultNodeTable.getRow(currentNode.getSUID());
+                currentRow = localNodeTable.getRow(currentNode.getSUID());
                 currentNodeInfo = this.nodeInfo.get(currentNode);
                 // node exists in root network, but not here
                 if (!network.containsNode(currentNode)) {
                     // make node available from the default node table
                     ((CySubNetwork) network).addNode(currentNode);
-                    currentRow = defaultNodeTable.getRow(currentNode.getSUID());
+                    currentRow = localNodeTable.getRow(currentNode.getSUID());
                     currentRow.set(Columns.NODE_VISITS, 1);
                     currentRow.set(Columns.NODE_FREQUENCY, 1);
                     currentNodeInfo = new AuxiliaryInformation();
@@ -94,7 +96,7 @@ public class TraceGraph {
             } else { // node does not exist yet
                 currentNode = network.addNode();
                 suidHashMapping.put(hash, currentNode.getSUID());
-                currentRow = defaultNodeTable.getRow(currentNode.getSUID());
+                currentRow = localNodeTable.getRow(currentNode.getSUID());
                 for (int j = 0; j < this.pdm.getParameters().size(); j++) {
                     currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
@@ -113,7 +115,7 @@ public class TraceGraph {
                     edgeAux = new AuxiliaryInformation();
                     this.edgeInfo.put(edge, edgeAux);
                 } else {
-                    CyRow edgeRow = this.defaultEdgetable.getRow(edge.getSUID());
+                    CyRow edgeRow = localEdgeTable.getRow(edge.getSUID());
                     edgeRow.set(Columns.EDGE_TRAVERSALS, edgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class) + 1);
                     edgeAux = this.edgeInfo.get(edge);
                 }
@@ -353,7 +355,8 @@ public class TraceGraph {
 
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
-        var row = this.defaultNodeTable.getRow(node.getSUID());
+        var localNodeTable = this.network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+        var row = localNodeTable.getRow(node.getSUID());
         map.put("Visits", "" + row.get(Columns.NODE_VISITS, Integer.class));
         map.put("Frequency", "" + row.get(Columns.NODE_FREQUENCY, Integer.class));
         return map;

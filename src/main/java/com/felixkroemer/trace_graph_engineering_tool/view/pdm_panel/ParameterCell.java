@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
@@ -22,7 +23,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     private JButton editButton;
     private JLabel filterIndicator;
 
-    public ParameterCell(CyServiceRegistrar reg, Parameter parameter, TraceGraphController controller) {
+    public ParameterCell(CyServiceRegistrar reg, Parameter parameter, NetworkController controller) {
         IconManager iconManager = reg.getService(IconManager.class);
 
         setLayout(new BorderLayout());
@@ -45,7 +46,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             SwingUtilities.invokeLater(() -> {
                 SelectBinsDialog d = new SelectBinsDialog();
                 d.setTitle("Select Bins");
-                d.setContentPane(new SelectBinsPanel(controller.createSelectBinsController(parameter)));
+                d.setContentPane(new SelectBinsPanel(TraceGraphManager.createSelectBinsController(parameter)));
                 d.setModalityType(APPLICATION_MODAL);
                 d.showDialog();
             });

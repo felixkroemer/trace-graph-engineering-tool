@@ -20,7 +20,9 @@ public class RenderingModeTask extends AbstractNetworkViewTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = this.reg.getService(TraceGraphManager.class);
-        TraceGraphController controller = manager.findControllerForNetwork(view.getModel());
+        //TODO: find better solution
+        //must be true, otherwise action can not be created
+        TraceGraphController controller = (TraceGraphController) manager.findControllerForNetwork(view.getModel());
         controller.setMode(this.renderingMode);
     }
 

@@ -31,16 +31,9 @@ public class CompareTraceGraphsTaskFactory implements NetworkCollectionTaskFacto
         var iterator = networks.iterator();
         var networkA = iterator.next();
         var networkB = iterator.next();
-        var controllerA = manager.findControllerForNetwork(networkA);
-        var controllerB = manager.findControllerForNetwork(networkB);
+        var pdmA = manager.findPDMForNetwork(networkA);
+        var pdmB = manager.findPDMForNetwork(networkB);
 
-        if (controllerA == null || controllerB == null) {
-            return false;
-        } else {
-            if (controllerA.getTraceGraph().getPDM() != controllerB.getTraceGraph().getPDM()) {
-                return false;
-            }
-        }
-        return true;
+        return pdmA != null && pdmB != null && pdmA == pdmB;
     }
 }

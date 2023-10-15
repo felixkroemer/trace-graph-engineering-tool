@@ -5,7 +5,6 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparison
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
-import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
@@ -64,7 +63,6 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     public void init() {
         this.tabs.addTab(PDM_TITLE, this.pdmPanel);
-        this.tabs.addTab(COMPARISON_TITLE, this.comparisonPanel);
         this.add(this.tabs, BorderLayout.CENTER);
     }
 
@@ -120,18 +118,27 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
-        if (e.getNetwork() == null || !Util.isTraceGraphNetwork(e.getNetwork())) {
+        var network = e.getNetwork();
+        if (network == null) {
             this.pdmPanel.clear();
+            return;
+        }
+        var manager = reg.getService(TraceGraphManager.class);
+        var controller = manager.findControllerForNetwork(network);
+        if (controller != null) {
+            this.pdmPanel.registerCallbacks(controller);
         }
     }
 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
-        this.pdmPanel.registerCallbacks(event.getTraceGraphController());
+        this.tabs.setSelectedIndex(getPanelIndex(PDM_TITLE));
     }
 
     @Override
     public void handleEvent(SetCurrentComparisonControllerEvent event) {
         this.comparisonPanel.setComparisonController(event.getNetworkComparisonController());
+        this.tabs.addTab(COMPARISON_TITLE, this.comparisonPanel);
+        this.tabs.setSelectedIndex(getPanelIndex(COMPARISON_TITLE));
     }
 }
