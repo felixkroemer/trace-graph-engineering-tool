@@ -8,10 +8,13 @@ import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ParameterDiscretizationModel {
+public class ParameterDiscretizationModel implements PropertyChangeListener {
 
     private final Logger logger;
 
@@ -22,6 +25,8 @@ public class ParameterDiscretizationModel {
     private Map<Long, Long> suidHashMapping;
     private Set<CyTable> sourceTables;
     private CyRootNetwork rootNetwork;
+    private boolean filtered;
+    private PropertyChangeSupport pcs;
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
@@ -29,11 +34,15 @@ public class ParameterDiscretizationModel {
         this.version = dto.getVersion();
         this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
-        for (ParameterDTO param : dto.getParameters()) {
-            this.parameters.add(new Parameter(param, this));
+        for (ParameterDTO paramDto : dto.getParameters()) {
+            Parameter parameter = new Parameter(paramDto, this);
+            parameter.addObserver(this);
+            this.parameters.add(parameter);
         }
         this.suidHashMapping = new HashMap<>();
         this.sourceTables = new HashSet<>();
+        this.filtered = false;
+        this.pcs = new PropertyChangeSupport(this);
     }
 
     public List<Parameter> getParameters() {
@@ -83,6 +92,27 @@ public class ParameterDiscretizationModel {
 
     public Set<CyTable> getSourceTables() {
         return this.sourceTables;
+    }
+
+    public void addObserver(PropertyChangeListener l) {
+        pcs.addPropertyChangeListener("filtered", l);
+    }
+
+    public void removeObserver(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener(l);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+            case "visibleBins" -> {
+                boolean filtered = !this.parameters.stream().allMatch(p -> p.getVisibleBins().isEmpty());
+                if (filtered != this.filtered) {
+                    this.filtered = filtered;
+                    pcs.firePropertyChange("filtered", null, filtered);
+                }
+            }
+        }
     }
 }
 

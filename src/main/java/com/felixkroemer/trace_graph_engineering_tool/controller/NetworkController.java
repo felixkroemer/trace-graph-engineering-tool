@@ -35,11 +35,15 @@ public abstract class NetworkController {
     public abstract VisualStyle getVisualStyle();
 
     public TaskIterator createLayoutTask() {
+        return createLayoutTask(registrar, this.getView());
+    }
+
+    public static TaskIterator createLayoutTask(CyServiceRegistrar registrar, CyNetworkView view) {
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         Object context = layoutFactory.getDefaultLayoutContext();
-        return layoutFactory.createTaskIterator(this.getView(), context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+        return layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
     }
 
     public void registerNetwork() {

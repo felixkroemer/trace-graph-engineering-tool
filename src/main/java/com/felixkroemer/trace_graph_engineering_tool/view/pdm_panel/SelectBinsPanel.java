@@ -99,7 +99,6 @@ public class SelectBinsPanel extends JPanel {
             if (!visible.equals(param.getVisibleBins())) {
                 this.controller.setVisibleBins(visible);
             }
-            controller.setVisibleBins(visible);
         });
 
         this.cancelButton.addActionListener(e -> {

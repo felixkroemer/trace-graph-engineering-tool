@@ -58,7 +58,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 parameter.disable();
             }
         });
-        this.filterIndicator.setText(" ");
+        this.setHighlightIndicator(parameter.getVisibleBins());
 
         this.label.setEnabled(parameter.isEnabled());
         this.editButton.setEnabled(parameter.isEnabled());
@@ -82,9 +82,12 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             case "bins" -> {
             }
             case "visibleBins" -> {
-                Set<Integer> bins = (Set<Integer>) evt.getNewValue();
-                this.filterIndicator.setText(bins.isEmpty() ? " " : "⬤");
+                this.setHighlightIndicator((Set<Integer>) evt.getNewValue());
             }
         }
+    }
+
+    public void setHighlightIndicator(Set<Integer> bins) {
+        this.filterIndicator.setText(bins.isEmpty() ? " " : "⬤");
     }
 }

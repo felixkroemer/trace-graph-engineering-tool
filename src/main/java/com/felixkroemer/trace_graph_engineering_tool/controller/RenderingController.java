@@ -16,6 +16,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
+import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -32,14 +33,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
     public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
-    public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
 
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
     private AbstractDisplayController displayManager;
     private TraceGraph traceGraph;
-    private String mode;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         this.registrar = registrar;
@@ -56,7 +55,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.displayManager = new FollowDisplayController(registrar, this.view, this.traceGraph);
-        this.mode = RENDERING_MODE_FOLLOW;
 
         this.traceGraph.getPDM().forEach(p -> {
             p.addObserver(this);
@@ -104,6 +102,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             //UIState
             case "visibleBins" -> {
                 this.hideNodes();
+                var taskManager = registrar.getService(TaskManager.class);
+                taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
             }
         }
     }
