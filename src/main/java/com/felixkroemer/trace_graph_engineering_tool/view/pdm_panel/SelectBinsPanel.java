@@ -2,12 +2,9 @@ package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.SelectBinsController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.CyTable;
 import org.jdesktop.swingx.JXMultiThumbSlider;
 import org.jdesktop.swingx.multislider.Thumb;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,11 +17,6 @@ import java.util.*;
 
 public class SelectBinsPanel extends JPanel {
 
-    public static final String TOGGLE_RESET = "Click to reset";
-    public static final String TOGGLE_PLACE_OR_CANCEL = "Pick range or click to disable";
-    public static final String TOGGLE_SELECT = "Select Highlight range";
-
-    private final Logger logger;
 
     private SelectBinsController controller;
     private JXMultiThumbSlider<Void> slider;
@@ -33,17 +25,15 @@ public class SelectBinsPanel extends JPanel {
     private JButton confirmButton;
     private JButton cancelButton;
     private List<Float> bins;
-    private List<Boolean> highlightedBins;
+    private List<Boolean> visibleBins;
     private float minimum;
     private float maximum;
-    private DiscreteTrackRenderer trackRenderer;
 
     private JPopupMenu popupMenu;
     private JMenuItem toggleHiddenStateMenuItem;
     private int clickXPosition;
 
     public SelectBinsPanel(SelectBinsController controller) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.class);
         this.controller = controller;
 
         setLayout(new BorderLayout());
@@ -54,7 +44,7 @@ public class SelectBinsPanel extends JPanel {
         this.buttonPanel = new JPanel();
 
         this.popupMenu = new JPopupMenu();
-        this.toggleHiddenStateMenuItem = new JMenuItem("Toggle Hidden");
+        this.toggleHiddenStateMenuItem = new JMenuItem("Toggle Visible");
         popupMenu.add(this.toggleHiddenStateMenuItem);
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
@@ -65,13 +55,13 @@ public class SelectBinsPanel extends JPanel {
         this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> {
             return o.get(parameter.getName(), Double.class);
         })).get().get(parameter.getName(), Double.class).floatValue();
-        this.highlightedBins = new ArrayList<>();
+        this.visibleBins = new ArrayList<>();
         for (int i = 0; i < parameter.getBins().size() + 1; i++) {
-            this.highlightedBins.add(false);
+            this.visibleBins.add(false);
         }
         for (int i = 0; i < parameter.getBins().size() + 1; i++) {
-            if (parameter.getHighlightedBins().contains(i)) {
-                this.highlightedBins.set(i, true);
+            if (parameter.getVisibleBins().contains(i)) {
+                this.visibleBins.set(i, true);
             }
         }
 
@@ -100,16 +90,16 @@ public class SelectBinsPanel extends JPanel {
                 controller.setNewBins(newBuckets);
             }
 
-            Set<Integer> highlighted = new HashSet<>();
-            for (int i = 0; i < this.highlightedBins.size(); i++) {
-                if (highlightedBins.get(i)) {
-                    highlighted.add(i);
+            Set<Integer> visible = new HashSet<>();
+            for (int i = 0; i < this.visibleBins.size(); i++) {
+                if (visibleBins.get(i)) {
+                    visible.add(i);
                 }
             }
-            if (!highlighted.equals(param.getHighlightedBins())) {
-                this.controller.setNewHighlightedBins(highlighted);
+            if (!visible.equals(param.getVisibleBins())) {
+                this.controller.setVisibleBins(visible);
             }
-            controller.setNewHighlightedBins(highlighted);
+            controller.setVisibleBins(visible);
         });
 
         this.cancelButton.addActionListener(e -> {
@@ -131,7 +121,7 @@ public class SelectBinsPanel extends JPanel {
                     i++;
                 }
                 slider.getModel().removeThumb(slider.getSelectedIndex());
-                highlightedBins.remove(i + 1);
+                visibleBins.remove(i + 1);
             }
         });
 
@@ -142,8 +132,8 @@ public class SelectBinsPanel extends JPanel {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
-        this.trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(), sourceTable,
-                this.highlightedBins);
+        DiscreteTrackRenderer trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(),
+                sourceTable, this.visibleBins);
         this.slider.setTrackRenderer(trackRenderer);
         this.add(slider, BorderLayout.CENTER);
 
@@ -152,7 +142,7 @@ public class SelectBinsPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int index = getIndex(e.getX());
-                    highlightedBins.add(index + 1, highlightedBins.get(index));
+                    visibleBins.add(index + 1, visibleBins.get(index));
                     float position = (float) (e.getX() * 1.0 / slider.getWidth());
                     slider.getModel().addThumb(position, null);
                 }
@@ -179,10 +169,10 @@ public class SelectBinsPanel extends JPanel {
 
         this.toggleHiddenStateMenuItem.addActionListener(e -> {
             int index = getIndex(clickXPosition);
-            if (highlightedBins.get(index)) {
-                highlightedBins.set(index, false);
+            if (visibleBins.get(index)) {
+                visibleBins.set(index, false);
             } else {
-                highlightedBins.set(index, true);
+                visibleBins.set(index, true);
             }
             slider.repaint();
         });

@@ -11,7 +11,8 @@ import java.util.Set;
 public class Parameter {
     private String name;
     private List<Double> bins;
-    private Set<Integer> highlightedBins;
+    // set of bins that are visible, if empty all bins are displayed
+    private Set<Integer> visibleBins;
     private boolean enabled;
     private PropertyChangeSupport pcs;
     private ParameterDiscretizationModel pdm;
@@ -20,7 +21,7 @@ public class Parameter {
     public Parameter(ParameterDTO dto, ParameterDiscretizationModel pdm) {
         this.name = dto.getName();
         this.bins = dto.getBins();
-        this.highlightedBins = new HashSet<>();
+        this.visibleBins = new HashSet<>();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
         this.pdm = pdm;
@@ -60,16 +61,16 @@ public class Parameter {
     public void addObserver(PropertyChangeListener l) {
         pcs.addPropertyChangeListener("enabled", l);
         pcs.addPropertyChangeListener("bins", l);
-        pcs.addPropertyChangeListener("highlightedBins", l);
+        pcs.addPropertyChangeListener("visibleBins", l);
     }
 
-    public void highlightBins(Set<Integer> bins) {
-        this.highlightedBins = bins;
-        this.pcs.firePropertyChange("highlightedBins", null, this.highlightedBins);
+    public void setVisibleBins(Set<Integer> bins) {
+        this.visibleBins = bins;
+        this.pcs.firePropertyChange("visibleBins", null, this.visibleBins);
     }
 
-    public Set<Integer> getHighlightedBins() {
-        return this.highlightedBins;
+    public Set<Integer> getVisibleBins() {
+        return this.visibleBins;
     }
 
 }

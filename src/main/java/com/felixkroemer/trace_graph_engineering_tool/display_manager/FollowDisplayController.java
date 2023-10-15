@@ -20,7 +20,7 @@ public class FollowDisplayController extends AbstractDisplayController {
     public FollowDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         super(registrar, view, traceGraph);
         this.hideAllEdges();
-        showEdgesOfHighlightedNodes();
+        showEdgesOfSelectedNodes();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class FollowDisplayController extends AbstractDisplayController {
         } else {
             if (event.getSelectedNodes().size() == 1) {
                 this.previousNode = event.getSelectedNodes().iterator().next();
-                showEdgesOfHighlightedNodes();
+                showEdgesOfSelectedNodes();
             } else {
                 this.hideAllEdges();
             }
@@ -48,7 +48,7 @@ public class FollowDisplayController extends AbstractDisplayController {
     public void disable() {
     }
 
-    private void showEdgesOfHighlightedNodes() {
+    private void showEdgesOfSelectedNodes() {
         this.hideAllEdges();
         CyNetwork network = networkView.getModel();
         var selectedNodes = CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true);

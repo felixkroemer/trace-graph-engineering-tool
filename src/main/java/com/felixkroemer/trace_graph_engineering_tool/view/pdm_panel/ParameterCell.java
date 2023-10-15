@@ -20,7 +20,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     private JCheckBox checkBox;
     private JLabel label;
     private JButton editButton;
-    private JLabel highlightIndicator;
+    private JLabel filterIndicator;
 
     public ParameterCell(CyServiceRegistrar reg, Parameter parameter, TraceGraphController controller) {
         IconManager iconManager = reg.getService(IconManager.class);
@@ -34,8 +34,8 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.label.setHorizontalAlignment(JLabel.CENTER);
 
         var containerPanel = new JPanel();
-        this.highlightIndicator = new JLabel();
-        containerPanel.add(highlightIndicator);
+        this.filterIndicator = new JLabel();
+        containerPanel.add(filterIndicator);
         this.editButton = new JButton(ICON_EDIT);
         containerPanel.add(this.editButton);
         this.add(containerPanel, BorderLayout.EAST);
@@ -57,7 +57,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
                 parameter.disable();
             }
         });
-        this.highlightIndicator.setText(" ");
+        this.filterIndicator.setText(" ");
 
         this.label.setEnabled(parameter.isEnabled());
         this.editButton.setEnabled(parameter.isEnabled());
@@ -80,9 +80,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             }
             case "bins" -> {
             }
-            case "highlightedBins" -> {
+            case "visibleBins" -> {
                 Set<Integer> bins = (Set<Integer>) evt.getNewValue();
-                this.highlightIndicator.setText(bins.isEmpty() ? " " : "⬤");
+                this.filterIndicator.setText(bins.isEmpty() ? " " : "⬤");
             }
         }
     }

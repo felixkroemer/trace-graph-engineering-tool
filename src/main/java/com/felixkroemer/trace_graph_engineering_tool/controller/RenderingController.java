@@ -103,19 +103,19 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             //UIState
-            case "highlightedBins" -> {
+            case "visibleBins" -> {
                 this.hideNodes();
             }
         }
     }
 
     public void hideNodes() {
-        Map<Parameter, Set<Integer>> highlightedBins = new HashMap<>();
+        Map<Parameter, Set<Integer>> visibleBins = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
-            highlightedBins.put(param, param.getHighlightedBins());
+            visibleBins.put(param, param.getVisibleBins());
         }
         // do not hide any nodes if no bins are selected
-        if (highlightedBins.values().stream().allMatch(Set::isEmpty)) {
+        if (visibleBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);
             }
@@ -123,7 +123,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
         for (var node : traceGraph.getNetwork().getNodeList()) {
-            boolean match = highlightedBins.entrySet().stream().allMatch(entry -> {
+            boolean match = visibleBins.entrySet().stream().allMatch(entry -> {
                 if (entry.getValue().isEmpty()) {
                     return true;
                 } else {

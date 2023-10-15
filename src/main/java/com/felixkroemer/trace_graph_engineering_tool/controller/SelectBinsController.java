@@ -27,12 +27,8 @@ public class SelectBinsController {
         this.parameter.setBins(bins.stream().map(f -> (double) f).toList());
     }
 
-    public void setNewHighlightedBins(Set<Integer> highlightedBins) {
-        this.parameter.highlightBins(highlightedBins);
-    }
-
-    public Set<Integer> getHighlightedBins() {
-        return this.parameter.getHighlightedBins();
+    public void setVisibleBins(Set<Integer> visibleBins) {
+        this.parameter.setVisibleBins(visibleBins);
     }
 
 }

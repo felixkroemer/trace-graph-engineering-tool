@@ -25,7 +25,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     private float minValue;
     private float maxValue;
-    private List<Boolean> highlightedBins;
+    private List<Boolean> visibleBins;
     private String name;
     private CyTable sourceTable;
     private BufferedImage heatMap;
@@ -35,10 +35,10 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     private JXMultiThumbSlider<Void> slider;
 
     public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable,
-                                 List<Boolean> highlightedBins) {
+                                 List<Boolean> visibleBins) {
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.highlightedBins = highlightedBins;
+        this.visibleBins = visibleBins;
         this.name = name;
         this.sourceTable = sourceTable;
 
@@ -213,14 +213,14 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         positions.add(0, 0f);
         positions.add(positions.size(), 1f);
         g.setColor(this.highlightColor);
-        for (int i = 0; i < highlightedBins.size(); i++) {
-            if (highlightedBins.get(i)) {
+        for (int i = 0; i < visibleBins.size(); i++) {
+            if (visibleBins.get(i)) {
                 int from = (int) (trackWidth * positions.get(i));
                 int to = (int) (trackWidth * positions.get(i + 1));
                 g.fillRect(from, 5, to - from, trackHeight);
             }
         }
-        
+
 
         g.setColor(BORDER_COLOR);
         g.setStroke(new BasicStroke(1.5f));
