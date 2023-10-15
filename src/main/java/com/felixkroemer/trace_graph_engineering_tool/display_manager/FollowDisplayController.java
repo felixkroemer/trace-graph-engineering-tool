@@ -9,7 +9,6 @@ import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.presentation.property.LabelBackgroundShapeVisualProperty;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -62,19 +61,14 @@ public class FollowDisplayController extends AbstractDisplayController {
                     var sourceValue = nodeTable.getRow(edge.getSource().getSUID()).get(param.getName(), Integer.class);
                     var targetValue = nodeTable.getRow(edge.getTarget().getSUID()).get(param.getName(), Integer.class);
                     if (sourceValue != targetValue) {
-                        sb.append(param.getName()).append(" : ").append(sourceValue - targetValue).append(", ");
+                        sb.append(param.getName()).append(" : ").append(sourceValue - targetValue).append("\n");
                     }
                 }
                 /*                sb.deleteCharAt(sb.length() - 1);*/
                 var edgeView = networkView.getEdgeView(edge);
                 edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
                 edgeView.setVisualProperty(EDGE_VISIBLE, true);
-                edgeView.setVisualProperty(EDGE_LABEL, sb.toString());
-                edgeView.setVisualProperty(EDGE_LABEL_BACKGROUND_SHAPE,
-                        LabelBackgroundShapeVisualProperty.ROUND_RECTANGLE);
-                edgeView.setVisualProperty(EDGE_LABEL_BACKGROUND_TRANSPARENCY, 127);
-                edgeView.setVisualProperty(EDGE_LABEL_AUTOROTATE, true);
-                edgeView.setVisualProperty(EDGE_LABEL_FONT_SIZE, 5.0);
+                edgeView.setVisualProperty(EDGE_TOOLTIP, sb.toString());
             }
         }
     }

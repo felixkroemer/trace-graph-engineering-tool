@@ -131,43 +131,6 @@ public final class GraphRenderer {
                     continue;
                 }
 
-                Point2D center = null;
-                Point2D innerPoint = null;
-                Point2D firstIntersection = null;
-                Point2D secondIntersection = null;
-
-                float x1;
-                float y1;
-                float x2;
-                float y2;
-                // if there is one intersection, mark the node that is inside the view area
-                for (int i = 0; i < 4; i++) {
-                    x1 = area.x + (i == 3 ? area.width : 0);
-                    x2 = area.x + (i != 2 ? area.width : 0);
-                    y1 = area.y + (i == 1 ? area.height : 0);
-                    y2 = area.y + (i != 0 ? area.height : 0);
-                    var intersection = getLineIntersection(line, new Line2D.Float(x1, y1, x2, y2));
-                    if (intersection != null) {
-                        if (firstIntersection == null) {
-                            firstIntersection = intersection;
-                            if (area.contains(line.x1, line.y1)) {
-                                innerPoint = new Point2D.Float(line.x1, line.y1);
-                            } else if (area.contains(line.x2, line.y2)) {
-                                innerPoint = new Point2D.Float(line.x2, line.y2);
-                            }
-                        } else {
-                            secondIntersection = intersection;
-                            center = new Point2D.Double((firstIntersection.getX() + secondIntersection.getX()) / 2,
-                                    (firstIntersection.getY() + secondIntersection.getY()) / 2);
-                            break;
-                        }
-                    }
-                }
-                if (innerPoint != null && secondIntersection == null) {
-                    center = new Point2D.Double((firstIntersection.getX() + innerPoint.getX()) / 2,
-                            (firstIntersection.getY() + innerPoint.getY()) / 2);
-                }
-
                 SnapshotEdgeInfo edgeInfo = netView.getEdgeInfo(edge);
                 final long srcSuid = edgeInfo.getSourceViewSUID();
                 final long trgSuid = edgeInfo.getTargetViewSUID();
@@ -275,15 +238,8 @@ public final class GraphRenderer {
                         getEdgeLabelPosition(edge, edgeDetails, flags, labelInfo, floatBuff3, floatBuff4, anchors,
                                 offsetBuff, doubleBuff1);
 
-                        double textXCenter;
-                        double textYCenter;
-                        if (center != null) {
-                            textXCenter = center.getX();
-                            textYCenter = center.getY();
-                        } else {
-                            textXCenter = doubleBuff1[0];
-                            textYCenter = doubleBuff1[1];
-                        }
+                        double textXCenter = doubleBuff1[0];
+                        double textYCenter = doubleBuff1[1];
 
                         final Justification justify = edgeDetails.getLabelJustify(edge);
 
