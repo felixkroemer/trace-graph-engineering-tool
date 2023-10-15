@@ -10,6 +10,7 @@ import org.jdesktop.swingx.multislider.TrackRenderer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,39 +22,27 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     static final BasicStroke STROKE1 = new BasicStroke(1.0f);
     static final Color BORDER_COLOR = Color.BLACK;
     static final Color LABEL_COLOR = Color.BLACK;
-    static final Color BACKGROUND_COLOR = Color.WHITE;
 
     private float minValue;
     private float maxValue;
+    private List<Boolean> highlightedBins;
     private String name;
     private CyTable sourceTable;
     private BufferedImage heatMap;
 
-    private boolean highlight;
-    // thumb indexed
-    private int highlightFrom;
-    private int highlightTo;
     private Color highlightColor;
 
     private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable, int lowerBound,
-                                 int upperBound) {
+    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable,
+                                 List<Boolean> highlightedBins) {
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.highlightedBins = highlightedBins;
         this.name = name;
         this.sourceTable = sourceTable;
 
         this.highlightColor = new Color(0, 255, 0, 127);
-        if (lowerBound != -1 && upperBound != -1) {
-            this.highlight = true;
-            this.highlightFrom = lowerBound - 1;
-            this.highlightTo = upperBound;
-        } else {
-            this.highlight = false;
-            this.highlightFrom = 0;
-            this.highlightTo = 0;
-        }
 
         this.initHeatMap();
     }
@@ -150,7 +139,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.setColor(LABEL_COLOR);
         g.setStroke(STROKE1);
 
-        var positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
+        var positions = new ArrayList<>(slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList());
         var newDist =
                 getDistribution(positions.stream().map(f -> f * (this.maxValue * 1.0 - this.minValue) + this.minValue).toList());
 
@@ -221,22 +210,17 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
             g.fillOval(x - 3, arrowBarYPosition - 3, 6, 6);
         }
 
-        if (highlight) {
-            int from;
-            if (this.highlightFrom == -1 || stops.isEmpty()) {
-                from = 0;
-            } else {
-                from = (int) (trackWidth * stops.get(this.highlightFrom).getPosition());
+        positions.add(0, 0f);
+        positions.add(positions.size(), 1f);
+        g.setColor(this.highlightColor);
+        for (int i = 0; i < highlightedBins.size(); i++) {
+            if (highlightedBins.get(i)) {
+                int from = (int) (trackWidth * positions.get(i));
+                int to = (int) (trackWidth * positions.get(i + 1));
+                g.fillRect(from, 5, to - from, trackHeight);
             }
-            int to;
-            if (this.highlightTo == stops.size() || stops.isEmpty()) {
-                to = trackWidth;
-            } else {
-                to = (int) (trackWidth * stops.get(this.highlightTo).getPosition());
-            }
-            g.setColor(this.highlightColor);
-            g.fillRect(from, 5, to - from, trackHeight);
         }
+        
 
         g.setColor(BORDER_COLOR);
         g.setStroke(new BasicStroke(1.5f));
@@ -249,16 +233,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     public JComponent getRendererComponent(JXMultiThumbSlider slider) {
         this.slider = slider;
         return this;
-    }
-
-    public void highlight(int from, int to) {
-        this.highlightFrom = from;
-        this.highlightTo = to;
-        this.highlight = true;
-    }
-
-    public void disableHighlight() {
-        this.highlight = false;
     }
 
 }

@@ -21,9 +21,6 @@ public class Parameter {
         this.name = dto.getName();
         this.bins = dto.getBins();
         this.highlightedBins = new HashSet<>();
-        for (int i = 0; i < bins.size(); i++) {
-            this.highlightedBins.add(i);
-        }
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;
         this.pdm = pdm;

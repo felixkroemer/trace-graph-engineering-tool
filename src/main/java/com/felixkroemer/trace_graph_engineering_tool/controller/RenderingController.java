@@ -114,6 +114,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
             highlightedBins.put(param, param.getHighlightedBins());
         }
+        // do not hide any nodes if no bins are selected
         if (highlightedBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {
                 nodeView.setVisualProperty(NODE_VISIBLE, true);

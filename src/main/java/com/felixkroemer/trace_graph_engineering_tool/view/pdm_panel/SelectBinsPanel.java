@@ -33,14 +33,14 @@ public class SelectBinsPanel extends JPanel {
     private JButton confirmButton;
     private JButton cancelButton;
     private List<Float> bins;
+    private List<Boolean> highlightedBins;
     private float minimum;
     private float maximum;
     private DiscreteTrackRenderer trackRenderer;
 
-    private JButton toggleHighlightButton;
-    private boolean selectHighlight;
-    private int highlightFrom;
-    private int highlightTo;
+    private JPopupMenu popupMenu;
+    private JMenuItem toggleHiddenStateMenuItem;
+    private int clickXPosition;
 
     public SelectBinsPanel(SelectBinsController controller) {
         this.logger = LoggerFactory.getLogger(CyUserLog.class);
@@ -51,10 +51,11 @@ public class SelectBinsPanel extends JPanel {
         this.setBorder(new EmptyBorder(20, 20, 10, 20));
         this.confirmButton = new JButton("Confirm");
         this.cancelButton = new JButton("Cancel");
-        this.toggleHighlightButton = new JButton();
-        this.highlightFrom = -1;
-        this.highlightTo = -1;
         this.buttonPanel = new JPanel();
+
+        this.popupMenu = new JPopupMenu();
+        this.toggleHiddenStateMenuItem = new JMenuItem("Toggle Hidden");
+        popupMenu.add(this.toggleHiddenStateMenuItem);
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
         var parameter = controller.getParameter();
@@ -64,6 +65,15 @@ public class SelectBinsPanel extends JPanel {
         this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> {
             return o.get(parameter.getName(), Double.class);
         })).get().get(parameter.getName(), Double.class).floatValue();
+        this.highlightedBins = new ArrayList<>();
+        for (int i = 0; i < parameter.getBins().size() + 1; i++) {
+            this.highlightedBins.add(false);
+        }
+        for (int i = 0; i < parameter.getBins().size() + 1; i++) {
+            if (parameter.getHighlightedBins().contains(i)) {
+                this.highlightedBins.set(i, true);
+            }
+        }
 
         this.slider = new JXMultiThumbSlider<>();
         initButtons(controller.getParameter());
@@ -78,7 +88,7 @@ public class SelectBinsPanel extends JPanel {
         buttonPanel.add(Box.createRigidArea(new Dimension(20, 0)));
         buttonPanel.add(cancelButton);
         buttonPanel.add(Box.createHorizontalGlue());
-        buttonPanel.add(toggleHighlightButton);
+
         this.buttonPanel.setBorder(new EmptyBorder(20, 20, 10, 20));
 
         this.confirmButton.addActionListener(e -> {
@@ -89,50 +99,21 @@ public class SelectBinsPanel extends JPanel {
             if (!newBuckets.equals(this.bins)) {
                 controller.setNewBins(newBuckets);
             }
-            var highlightedBins = new HashSet<Integer>();
-            if (this.highlightRangeIsSet()) {
-                for (int i = this.highlightFrom; i <= this.highlightTo; i++) {
-                    highlightedBins.add(i);
+
+            Set<Integer> highlighted = new HashSet<>();
+            for (int i = 0; i < this.highlightedBins.size(); i++) {
+                if (highlightedBins.get(i)) {
+                    highlighted.add(i);
                 }
             }
-            controller.setNewHighlightedBins(highlightedBins);
+            if (!highlighted.equals(param.getHighlightedBins())) {
+                this.controller.setNewHighlightedBins(highlighted);
+            }
+            controller.setNewHighlightedBins(highlighted);
         });
 
         this.cancelButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
-        });
-
-        if (!controller.getHighlightedBins().isEmpty()) {
-            this.selectHighlight = true;
-            this.highlightFrom = Collections.min(controller.getHighlightedBins());
-            this.highlightTo = Collections.max(controller.getHighlightedBins());
-            toggleHighlightButton.setText(TOGGLE_RESET);
-        } else {
-            this.selectHighlight = false;
-            this.highlightFrom = -1;
-            this.highlightTo = -1;
-            toggleHighlightButton.setText(TOGGLE_SELECT);
-        }
-
-        this.toggleHighlightButton.addActionListener(e -> {
-            if (this.highlightRangeIsSet()) {
-                this.trackRenderer.disableHighlight();
-                this.slider.repaint();
-                this.selectHighlight = false;
-                this.toggleHighlightButton.setText(TOGGLE_SELECT);
-                this.highlightFrom = -1;
-                this.highlightTo = -1;
-            } else {
-                selectHighlight = !selectHighlight;
-                if (selectHighlight) {
-                    this.trackRenderer.disableHighlight();
-                    this.toggleHighlightButton.setText(TOGGLE_RESET);
-                } else {
-                    this.toggleHighlightButton.setText(TOGGLE_SELECT);
-                    this.highlightFrom = -1;
-                    this.highlightTo = -1;
-                }
-            }
         });
 
         String key = "removeSelectedThumb";
@@ -140,24 +121,29 @@ public class SelectBinsPanel extends JPanel {
         this.getActionMap().put(key, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                trackRenderer.disableHighlight();
+                var index = slider.getSelectedIndex();
+                var thumbs = slider.getModel().getSortedThumbs();
+                int i = 0;
+                for (var thumb : thumbs) {
+                    if (thumb == slider.getModel().getThumbAt(index)) {
+                        break;
+                    }
+                    i++;
+                }
                 slider.getModel().removeThumb(slider.getSelectedIndex());
+                highlightedBins.remove(i + 1);
             }
         });
 
         this.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private boolean highlightRangeIsSet() {
-        return this.highlightFrom != -1 && this.highlightTo != -1;
-    }
-
     public void initSlider(Parameter param, CyTable sourceTable) {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
-        this.trackRenderer = new DiscreteTrackRenderer((float) this.minimum, (float) this.maximum, param.getName(),
-                sourceTable, this.highlightFrom, this.highlightTo);
+        this.trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(), sourceTable,
+                this.highlightedBins);
         this.slider.setTrackRenderer(trackRenderer);
         this.add(slider, BorderLayout.CENTER);
 
@@ -165,30 +151,40 @@ public class SelectBinsPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
+                    int index = getIndex(e.getX());
+                    highlightedBins.add(index + 1, highlightedBins.get(index));
                     float position = (float) (e.getX() * 1.0 / slider.getWidth());
-                    slider.getModel().addThumb((float) position, null);
-                } else if (e.getClickCount() == 1) {
-                    if (selectHighlight) {
-                        // bin index
-                        int index = getIndex(e);
+                    slider.getModel().addThumb(position, null);
+                }
+            }
 
-                        if (highlightFrom == -1) {
-                            highlightFrom = index;
-                            trackRenderer.highlight(index - 1, index);
-                        } else if (highlightTo == -1) {
-                            highlightTo = index;
-                            trackRenderer.highlight(highlightFrom - 1, index);
-                            toggleHighlightButton.setText(TOGGLE_RESET);
-                        }
-                        slider.repaint();
-                    }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mousePressed(e);
+                if (e.isPopupTrigger()) {
+                    clickXPosition = e.getX();
+                    popupMenu.show(slider, e.getX(), e.getY());
                 }
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+                if (e.isPopupTrigger()) {
+                    clickXPosition = e.getX();
+                    popupMenu.show(slider, e.getX(), e.getY());
+                }
             }
+        });
+
+        this.toggleHiddenStateMenuItem.addActionListener(e -> {
+            int index = getIndex(clickXPosition);
+            if (highlightedBins.get(index)) {
+                highlightedBins.set(index, false);
+            } else {
+                highlightedBins.set(index, true);
+            }
+            slider.repaint();
         });
 
         for (double bin : param.getBins()) {
@@ -198,12 +194,12 @@ public class SelectBinsPanel extends JPanel {
         this.bins = positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum).toList();
     }
 
-    private int getIndex(MouseEvent e) {
+    private int getIndex(int clickX) {
         int index = -1;
         var thumbs = slider.getModel().getSortedThumbs();
         for (int i = 0; i < thumbs.size(); i++) {
             var x = (int) (slider.getWidth() * 1.0 * thumbs.get(i).getPosition());
-            if (e.getX() < x) {
+            if (clickX < x) {
                 index = i;
                 break;
             }

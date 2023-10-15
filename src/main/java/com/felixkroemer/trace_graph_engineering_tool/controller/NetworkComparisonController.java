@@ -87,9 +87,11 @@ public class NetworkComparisonController extends NetworkController implements Se
             var row = defaultNodeTable.getRow(node.getSUID());
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
         }
+        // edges are not unique, they are not defined by their source, target, multiedges are possible
+        //TODO: fix: edges 
         for (CyEdge edge : this.network.getEdgeList()) {
-            boolean base = this.networkA.containsEdge(edge);
-            boolean delta = this.networkB.containsEdge(edge);
+            boolean base = this.networkA.containsEdge(edge.getSource(), edge.getTarget());
+            boolean delta = this.networkB.containsEdge(edge.getSource(), edge.getTarget());
             var row = defaultEdgeTable.getRow(edge.getSUID());
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
         }
