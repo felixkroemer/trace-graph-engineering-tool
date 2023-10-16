@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.display_manager;
+package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;

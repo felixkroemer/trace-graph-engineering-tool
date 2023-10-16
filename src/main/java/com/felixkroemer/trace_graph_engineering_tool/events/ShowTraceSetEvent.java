@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.events;
 
 
-import com.felixkroemer.trace_graph_engineering_tool.display_manager.TracesDisplayController;
+import com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import org.cytoscape.event.AbstractCyEvent;
 import org.cytoscape.model.CyNetwork;

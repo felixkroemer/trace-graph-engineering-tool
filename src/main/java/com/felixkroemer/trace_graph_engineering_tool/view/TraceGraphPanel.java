@@ -133,6 +133,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
         this.tabs.setSelectedIndex(getPanelIndex(PDM_TITLE));
+        this.hidePanel(COMPARISON_TITLE);
     }
 
     @Override
