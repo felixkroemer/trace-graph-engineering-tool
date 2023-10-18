@@ -166,21 +166,6 @@ public class NetworkComparisonController extends NetworkController implements Se
     }
 
     public void updateVisibility() {
-        for (var nodeView : this.view.getNodeViews()) {
-            var node = nodeView.getModel();
-            var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
-            switch (group) {
-                case 2 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseDeltaVisible);
-                }
-                case 1 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesDeltaOnlyVisible);
-                }
-                case 0 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseOnlyVisible);
-                }
-            }
-        }
         for (var edgeView : this.view.getEdgeViews()) {
             var edge = edgeView.getModel();
             var group = this.network.getRow(edge).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
@@ -193,6 +178,21 @@ public class NetworkComparisonController extends NetworkController implements Se
                 }
                 case 0 -> {
                     edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseOnlyVisible);
+                }
+            }
+        }
+        for (var nodeView : this.view.getNodeViews()) {
+            var node = nodeView.getModel();
+            var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
+            switch (group) {
+                case 2 -> {
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseDeltaVisible);
+                }
+                case 1 -> {
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesDeltaOnlyVisible);
+                }
+                case 0 -> {
+                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseOnlyVisible);
                 }
             }
         }
@@ -219,21 +219,21 @@ public class NetworkComparisonController extends NetworkController implements Se
                 if (node) {
                     this.nodesBaseOnlyVisible = visible;
                 } else {
-                    this.nodesBaseOnlyVisible = visible;
+                    this.edgesBaseOnlyVisible = visible;
                 }
             }
             case DO -> {
                 if (node) {
                     this.nodesDeltaOnlyVisible = visible;
                 } else {
-                    this.nodesDeltaOnlyVisible = visible;
+                    this.edgesDeltaOnlyVisible = visible;
                 }
             }
             case BD -> {
                 if (node) {
                     this.nodesBaseDeltaVisible = visible;
                 } else {
-                    this.nodesBaseDeltaVisible = visible;
+                    this.edgesBaseDeltaVisible = visible;
                 }
             }
         }
