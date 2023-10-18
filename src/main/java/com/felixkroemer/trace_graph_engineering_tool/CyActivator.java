@@ -96,6 +96,10 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, compareTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class,
                 Util.genProperties(Map.of(TITLE, "Compare Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
 
+        var splitTraceGraphTaskFactory = new SplitTraceGraphTaskFactory(reg);
+        registerService(bundleContext, splitTraceGraphTaskFactory, NetworkCollectionTaskFactory.class,
+                Util.genProperties(Map.of(TITLE, "Split Trace Graph", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
+
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
 
     }

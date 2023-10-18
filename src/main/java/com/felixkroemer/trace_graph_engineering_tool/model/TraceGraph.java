@@ -125,6 +125,16 @@ public class TraceGraph {
         }
     }
 
+    public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTables) {
+        TraceGraph traceGraph = new TraceGraph(newNetwork, this.pdm);
+        for (CyTable table : sourceTables) {
+            if (!this.sourceTables.contains(table)) {
+                throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
+            }
+        }
+        return traceGraph;
+    }
+
     public CyEdge getEdge(CyNode source, CyNode target) {
         List<CyEdge> edges = this.network.getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
         for (CyEdge edge : edges) {
@@ -142,6 +152,7 @@ public class TraceGraph {
             }
         }
         return param.getBins().size();
+
     }
 
     /*
