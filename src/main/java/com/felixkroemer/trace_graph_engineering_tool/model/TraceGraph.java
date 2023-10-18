@@ -163,6 +163,7 @@ public class TraceGraph {
         return arr == null ? null : arr[sourceTableIndex];
     }
 
+
     public CyNetwork getNetwork() {
         return this.network;
     }
@@ -213,6 +214,8 @@ public class TraceGraph {
                 while (iterator.hasNext()) {
                     var j = iterator.next();
                     visited[j] = true;
+                    oldNodeRow.set(Columns.NODE_VISITS, 1);
+                    oldNodeRow.set(Columns.NODE_FREQUENCY, 1);
 
                     var sourceRow = sourceTable.getRow((long) j);
                     double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
@@ -261,9 +264,8 @@ public class TraceGraph {
                         }
                         // TODO: adjust NODE_VISITS
                         // TODO: adjust NODE_FREQUENCY
-                        // move source row index from old to new, remove old edge if traversals is 0
-                        //oldNodeAux.getSourceRows(this.sourceTable).remove((Object) j);
                         iterator.remove();
+                        oldNodeAux.getSourceRows(sourceTable).remove((Object) j);
                         newNodeAux.addSourceRow(sourceTable, j);
                         this.nodeMapping.get(sourceTable)[j] = newNode;
                     }
@@ -292,10 +294,12 @@ public class TraceGraph {
     public void generateEdges() {
         CyNode prevNode = null;
         CyNode currentNode;
+        CyRow currentNodeRow;
         for (CyTable sourceTable : this.sourceTables) {
             for (CyRow sourceRow : sourceTable.getAllRows()) {
                 currentNode =
                         this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
+                currentNodeRow = defaultNodeTable.getRow(currentNode.getSUID());
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     CyRow edgeRow;
@@ -310,6 +314,11 @@ public class TraceGraph {
                         edgeAux = this.edgeInfo.get(edge);
                     }
                     edgeAux.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+
+                    currentNodeRow.set(Columns.NODE_VISITS, currentNodeRow.get(Columns.NODE_VISITS, Integer.class) + 1);
+                } else {
+                    currentNodeRow.set(Columns.NODE_FREQUENCY, currentNodeRow.get(Columns.NODE_FREQUENCY,
+                            Integer.class) + 1);
                 }
                 prevNode = currentNode;
             }
