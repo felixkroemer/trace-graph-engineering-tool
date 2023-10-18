@@ -27,12 +27,14 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
     private final TraceGraphPanel panel;
     private final TraceDetailsController traceDetailsController;
+    private boolean destroying;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
         this.panel = new TraceGraphPanel(registrar, this);
         this.controllers = new HashMap<>();
         this.traceDetailsController = new TraceDetailsController(registrar);
+        this.destroying = false;
     }
 
     public void registerTraceGraph(ParameterDiscretizationModel pdm, NetworkController controller) {
@@ -88,6 +90,9 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     @Override
     public void handleEvent(NetworkAboutToBeDestroyedEvent e) {
+        if (this.destroying) {
+            return;
+        }
         NetworkController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
             controller.destroy();
@@ -126,19 +131,23 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     // call to destroy networks, everything else is handled in
     // handleEvent(NetworkAboutToBeDestroyedEvent e)
-    public void clearTraceGraphs() {
+    public void destroy() {
+        this.destroying = true;
         var networkManager = registrar.getService(CyNetworkManager.class);
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
                 networkManager.destroyNetwork(controller.getNetwork());
+                controller.destroy();
             }
         }
+        this.controllers.clear();
         traceDetailsController.destroy();
         CyNetwork traceDetailsNetwork;
         if ((traceDetailsNetwork = traceDetailsController.getNetwork()) != null) {
             networkManager.destroyNetwork(traceDetailsNetwork);
         }
-        this.controllers.clear();
+        this.registrar.unregisterService(this.panel, CytoPanelComponent.class);
+        this.panel.destroy();
     }
 
     public ParameterDiscretizationModel findPDM(List<String> params) {

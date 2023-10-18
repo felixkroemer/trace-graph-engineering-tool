@@ -27,9 +27,6 @@ import static org.cytoscape.view.presentation.property.table.BasicTableVisualLex
 
 public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener {
 
-    public static final String NETWORK_TYPE_DEFAULT = "NETWORK_TYPE_DEFAULT";
-    public static final String NETWORK_TYPE_TRACE_DETAILS = "NETWORK_TYPE_TRACE_DETAILS";
-
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;
 

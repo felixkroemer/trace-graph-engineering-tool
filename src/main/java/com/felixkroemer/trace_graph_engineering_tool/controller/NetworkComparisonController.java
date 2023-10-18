@@ -33,8 +33,8 @@ public class NetworkComparisonController extends NetworkController implements Se
     public static final String DO = "DO";
     public static final String BD = "BD";
 
-    private CyNetwork networkA;
-    private CyNetwork networkB;
+    private CyNetwork base;
+    private CyNetwork delta;
     private CySubNetwork network;
     private CyNetworkView view;
 
@@ -45,14 +45,13 @@ public class NetworkComparisonController extends NetworkController implements Se
     private boolean edgesDeltaOnlyVisible;
     private boolean edgesBaseDeltaVisible;
 
-
     private VisualStyle defaultVisualStyle;
 
-    public NetworkComparisonController(CyNetwork networkA, CyNetwork networkB, CySubNetwork network,
+    public NetworkComparisonController(CyNetwork base, CyNetwork delta, CySubNetwork network,
                                        CyServiceRegistrar registrar) {
         super(registrar, network);
-        this.networkA = networkA;
-        this.networkB = networkB;
+        this.base = base;
+        this.delta = delta;
         this.network = network;
         this.nodesBaseOnlyVisible = true;
         this.nodesDeltaOnlyVisible = true;
@@ -66,34 +65,34 @@ public class NetworkComparisonController extends NetworkController implements Se
 
         this.initTables();
         //TODO: maybe add more efficient batching version
-        for (CyNode node : this.networkA.getNodeList()) {
+        for (CyNode node : this.base.getNodeList()) {
             this.network.addNode(node);
         }
-        for (CyEdge edge : this.networkA.getEdgeList()) {
+        for (CyEdge edge : this.base.getEdgeList()) {
             this.network.addEdge(edge);
         }
-        for (CyNode node : this.networkB.getNodeList()) {
+        for (CyNode node : this.delta.getNodeList()) {
             this.network.addNode(node);
         }
-        for (CyEdge edge : this.networkB.getEdgeList()) {
+        for (CyEdge edge : this.delta.getEdgeList()) {
             if (!this.network.containsEdge(edge.getSource(), edge.getTarget())) this.network.addEdge(edge);
         }
 
         var defaultNodeTable = this.network.getDefaultNodeTable();
         var defaultEdgeTable = this.network.getDefaultEdgeTable();
         for (CyNode node : this.network.getNodeList()) {
-            boolean base = this.networkA.containsNode(node);
-            boolean delta = this.networkB.containsNode(node);
+            boolean inBase = this.base.containsNode(node);
+            boolean inDelta = this.delta.containsNode(node);
             var row = defaultNodeTable.getRow(node.getSUID());
-            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
+            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
         // edges are not unique, they are not defined by their source, target, multiedges are possible
         //TODO: fix: edges 
         for (CyEdge edge : this.network.getEdgeList()) {
-            boolean base = this.networkA.containsEdge(edge.getSource(), edge.getTarget());
-            boolean delta = this.networkB.containsEdge(edge.getSource(), edge.getTarget());
+            boolean inBase = this.base.containsEdge(edge.getSource(), edge.getTarget());
+            boolean inDelta = this.delta.containsEdge(edge.getSource(), edge.getTarget());
             var row = defaultEdgeTable.getRow(edge.getSUID());
-            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (base && delta) ? 2 : (base ? 0 : 1));
+            row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
 
         this.initView();

@@ -66,6 +66,13 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.add(this.tabs, BorderLayout.CENTER);
     }
 
+    public void destroy() {
+        this.reg.unregisterService(this, SelectedNodesAndEdgesListener.class);
+        this.reg.unregisterService(this, SetCurrentNetworkListener.class);
+        this.reg.unregisterService(this, SetCurrentTraceGraphControllerListener.class);
+        this.reg.unregisterService(this, SetCurrentComparisonControllerListener.class);
+    }
+
     @Override
     public CytoPanelName getCytoPanelName() {
         return CytoPanelName.WEST;

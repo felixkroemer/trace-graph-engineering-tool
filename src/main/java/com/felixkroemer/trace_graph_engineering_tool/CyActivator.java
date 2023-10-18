@@ -28,6 +28,7 @@ import static org.cytoscape.work.ServiceProperties.*;
 public class CyActivator extends AbstractCyActivator {
 
     private Logger logger;
+    private TraceGraphManager manager;
 
     public CyActivator() {
         super();
@@ -39,7 +40,7 @@ public class CyActivator extends AbstractCyActivator {
 
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
-        TraceGraphManager manager = new TraceGraphManager(reg);
+        this.manager = new TraceGraphManager(reg);
 
         registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
@@ -86,9 +87,6 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, viewDefaultViewNodeTaskFactory, NodeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Return to selected node")));
 
-        registerServiceListener(bundleContext, this, "handleControllerRegistration", "handleControllerDeregistration"
-                , TraceGraphManager.class);
-
         var showTraceNodeTaskFactory = new ShowTraceNodeTaskFactory(reg);
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));
@@ -102,11 +100,9 @@ public class CyActivator extends AbstractCyActivator {
 
     }
 
-    public void handleControllerDeregistration(TraceGraphManager manager, Map<Object, Object> serviceProps) {
-        manager.clearTraceGraphs();
-    }
-
-    public void handleControllerRegistration(TraceGraphManager manager, Map<Object, Object> serviceProps) {
+    @Override
+    public void shutDown() {
+        this.manager.destroy();
     }
 
 }

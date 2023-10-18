@@ -187,6 +187,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void destroy() {
+        if (this.displayController != null) {
+            this.displayController.disable();
+        }
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
     }
