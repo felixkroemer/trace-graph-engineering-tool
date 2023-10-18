@@ -4,11 +4,13 @@ import com.felixkroemer.trace_graph_engineering_tool.display_controller.*;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
@@ -79,9 +81,18 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                         "(mapping" + ".type" + "=tooltip)");
         tooltipMappingFunctionFactory.setTraceGraph(this.traceGraph);
 
-        VisualMappingFunction<Integer, Double> sizeMapping = Mappings.createSizeMapping(1, 2000,
+        int maxFrequency = -1;
+        int maxVisits = -1;
+        for (CyRow row : this.traceGraph.getNetwork().getTable(CyNode.class, CyNetwork.LOCAL_ATTRS).getAllRows()) {
+            int frequency = row.get(Columns.NODE_FREQUENCY, Integer.class);
+            if (frequency > maxFrequency) maxFrequency = frequency;
+            int visits = row.get(Columns.NODE_VISITS, Integer.class);
+            if (visits > maxVisits) maxVisits = visits;
+        }
+
+        VisualMappingFunction<Integer, Double> sizeMapping = Mappings.createSizeMapping(1, maxVisits,
                 visualMappingFunctionFactory);
-        VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, 1600,
+        VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, maxFrequency,
                 visualMappingFunctionFactory);
         VisualMappingFunction<CyRow, String> tooltipMapping =
                 Mappings.createTooltipMapping(tooltipMappingFunctionFactory);
@@ -106,6 +117,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
             }
         }
+    }
+
+    public void updateVisualStyle() {
+        this.defaultStyle = createDefaultVisualStyle();
     }
 
     public void hideNodes() {

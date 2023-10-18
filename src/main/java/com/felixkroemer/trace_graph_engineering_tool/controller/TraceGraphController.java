@@ -57,6 +57,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 traceGraph.reinit(changedParameter);
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
                 helper.flushPayloadEvents();
+                renderingController.updateVisualStyle();
             }
         });
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
