@@ -9,8 +9,7 @@ import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
-import org.cytoscape.application.swing.CytoPanelComponent2;
-import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.swing.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -90,7 +89,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public String getIdentifier() {
-        return "TraceGraphPanel";
+        return "com.felixkroemer.TraceGraphPanel";
     }
 
     private int getPanelIndex(String title) {
@@ -118,6 +117,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
             this.infoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
             this.tabs.addTab(INFO_TITLE, this.infoPanel);
             this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
+            this.showPanel();
         } else {
             this.hidePanel(INFO_TITLE);
         }
@@ -134,6 +134,7 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         var controller = manager.findControllerForNetwork(network);
         if (controller != null) {
             this.pdmPanel.registerCallbacks(controller);
+            this.showPanel();
         }
     }
 
@@ -148,5 +149,14 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         this.comparisonPanel.setComparisonController(event.getNetworkComparisonController());
         this.tabs.addTab(COMPARISON_TITLE, this.comparisonPanel);
         this.tabs.setSelectedIndex(getPanelIndex(COMPARISON_TITLE));
+    }
+
+    public void showPanel() {
+        CySwingApplication swingApplication = reg.getService(CySwingApplication.class);
+        CytoPanel cytoPanel = swingApplication.getCytoPanel(CytoPanelName.WEST);
+        if (cytoPanel.getState() == CytoPanelState.HIDE) {
+            cytoPanel.setState(CytoPanelState.DOCK);
+        }
+        cytoPanel.setSelectedIndex(cytoPanel.indexOfComponent("com.felixkroemer.TraceGraphPanel"));
     }
 }
