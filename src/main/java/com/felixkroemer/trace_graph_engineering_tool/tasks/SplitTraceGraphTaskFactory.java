@@ -30,7 +30,7 @@ public class SplitTraceGraphTaskFactory implements NetworkCollectionTaskFactory 
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networks.iterator().next());
 
-        if (controller.getPDM().getSourceTables().size() <= 1) {
+        if (manager.getSourceTables(controller.getPDM()).size() <= 1) {
             return false;
         }
 

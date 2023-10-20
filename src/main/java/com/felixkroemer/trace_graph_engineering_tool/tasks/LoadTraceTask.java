@@ -58,7 +58,6 @@ public class LoadTraceTask extends AbstractTask {
             this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);
-            pdm.addSourceTable(sourceTable);
             TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
             manager.registerTraceGraph(pdm, controller);
         } else {

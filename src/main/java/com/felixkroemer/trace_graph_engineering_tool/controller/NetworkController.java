@@ -89,4 +89,8 @@ public abstract class NetworkController {
         getView().setVisualProperty(NETWORK_CENTER_Y_LOCATION,
                 getView().getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
     }
+
+    public SelectBinsController createSelectBinsController(Parameter parameter) {
+        return new SelectBinsController(parameter, registrar);
+    }
 }

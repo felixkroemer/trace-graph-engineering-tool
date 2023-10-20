@@ -68,9 +68,8 @@ public class LoadPDMTask extends AbstractTask {
             var sourceTable = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
             Util.parseCSV(sourceTable, path);
             this.tableManager.addTable(sourceTable);
-            this.networkTableManager.setTable(subNetwork, CyNode.class, csv, sourceTable);
+            this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             traceGraph.init(sourceTable);
-            pdm.addSourceTable(sourceTable);
         }
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);

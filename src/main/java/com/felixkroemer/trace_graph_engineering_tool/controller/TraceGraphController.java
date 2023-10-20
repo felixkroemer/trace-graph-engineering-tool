@@ -7,10 +7,7 @@ import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyColumn;
-import org.cytoscape.model.CyNetworkTableManager;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.*;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -94,7 +91,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void destroy() {
         this.renderingController.destroy();
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
-        this.getPDM().getSourceTables().removeAll(this.traceGraph.getSourceTables());
     }
 
     @Override
@@ -114,5 +110,20 @@ public class TraceGraphController extends NetworkController implements SetCurren
         }
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
         return new TraceGraphController(registrar, newTg);
+    }
+
+    public void combineTraceGraph(TraceGraphController controller) {
+        var networkManager = registrar.getService(CyNetworkManager.class);
+        var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
+        var network = controller.getNetwork();
+        networkManager.destroyNetwork(network);
+        for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
+            networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + sourceTable.hashCode(), sourceTable);
+            this.traceGraph.init(sourceTable);
+        }
+        CyEventHelper helper = registrar.getService(CyEventHelper.class);
+        helper.flushPayloadEvents();
+        this.renderingController.updateVisualStyle();
+        this.applyStyleAndLayout();
     }
 }

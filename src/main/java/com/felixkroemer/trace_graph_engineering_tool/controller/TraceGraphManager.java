@@ -10,6 +10,7 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -95,6 +96,12 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         }
         NetworkController controller = findControllerForNetwork(e.getNetwork());
         if (controller != null) {
+            destroyNetwork(controller);
+        }
+    }
+
+    public void destroyNetwork(NetworkController controller) {
+        if (controller != null) {
             controller.destroy();
             var pdm = controller.getPDM();
             this.controllers.get(pdm).remove(controller);
@@ -137,7 +144,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
                 networkManager.destroyNetwork(controller.getNetwork());
-                controller.destroy();
             }
         }
         this.controllers.clear();
@@ -182,8 +188,15 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         }
     }
 
-    public static SelectBinsController createSelectBinsController(Parameter parameter) {
-        return new SelectBinsController(parameter);
+    public Set<CyTable> getSourceTables(ParameterDiscretizationModel pdm) {
+        Set<CyTable> tables = new HashSet<>();
+        var controllers = this.controllers.get(pdm);
+        for (var controller : controllers) {
+            if (controller instanceof TraceGraphController tgc) {
+                tables.addAll(tgc.getTraceGraph().getSourceTables());
+            }
+        }
+        return tables;
     }
 
 }
