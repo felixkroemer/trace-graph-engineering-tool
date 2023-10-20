@@ -24,10 +24,12 @@ public abstract class NetworkController {
 
     protected CyServiceRegistrar registrar;
     protected CyNetwork network;
+    protected ParameterDiscretizationModel pdm;
 
-    public NetworkController(CyServiceRegistrar registrar, CyNetwork network) {
+    public NetworkController(CyServiceRegistrar registrar, CyNetwork network, ParameterDiscretizationModel pdm) {
         this.registrar = registrar;
         this.network = network;
+        this.pdm = pdm;
     }
 
     public abstract CyNetworkView getView();
@@ -74,9 +76,7 @@ public abstract class NetworkController {
     }
 
     public ParameterDiscretizationModel getPDM() {
-        //TODO: maybe add direct reference to pdm
-        var manager = registrar.getService(TraceGraphManager.class);
-        return manager.findPDMForNetwork(this.network);
+        return this.pdm;
     }
 
     public abstract void updateNetwork(Parameter parameter);

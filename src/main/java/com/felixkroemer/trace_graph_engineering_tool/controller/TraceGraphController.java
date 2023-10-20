@@ -28,7 +28,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     private final RenderingController renderingController;
 
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
-        super(registrar, traceGraph.getNetwork());
+        super(registrar, traceGraph.getNetwork(), traceGraph.getPDM());
         this.traceGraph = traceGraph;
         this.renderingController = new RenderingController(registrar, traceGraph);
 

@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -48,8 +49,8 @@ public class NetworkComparisonController extends NetworkController implements Se
     private VisualStyle defaultVisualStyle;
 
     public NetworkComparisonController(CyNetwork base, CyNetwork delta, CySubNetwork network,
-                                       CyServiceRegistrar registrar) {
-        super(registrar, network);
+                                       ParameterDiscretizationModel pdm, CyServiceRegistrar registrar) {
+        super(registrar, network, pdm);
         this.base = base;
         this.delta = delta;
         this.network = network;

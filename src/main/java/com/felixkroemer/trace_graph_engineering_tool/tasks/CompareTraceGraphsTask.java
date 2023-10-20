@@ -35,7 +35,7 @@ public class CompareTraceGraphsTask extends AbstractNetworkCollectionTask {
         localNetworkTable.createColumn(Columns.NETWORK_COMPARISON_MARKER, Integer.class, true);
 
         NetworkComparisonController networkComparisonController = new NetworkComparisonController(networkA, networkB,
-                subNetwork, registrar);
+                subNetwork, pdm, registrar);
         manager.registerTraceGraph(pdm, networkComparisonController);
     }
 }
