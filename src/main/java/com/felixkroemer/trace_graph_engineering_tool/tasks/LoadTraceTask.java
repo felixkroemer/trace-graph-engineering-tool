@@ -54,15 +54,8 @@ public class LoadTraceTask extends AbstractTask {
         ParameterDiscretizationModel pdm = manager.findPDM(params);
         if (pdm != null) {
             this.tableManager.addTable(sourceTable);
-            var root = pdm.getRootNetwork();
-            var subNetwork = root.addSubNetwork();
-
-            var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
-            localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
-
-            subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
-
-            this.networkTableManager.setTable(subNetwork, CyNode.class, traceFile.getName(), sourceTable);
+            var subNetwork = Util.createSubNetwork(pdm);
+            this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);
             pdm.addSourceTable(sourceTable);

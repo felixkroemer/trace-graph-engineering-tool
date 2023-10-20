@@ -37,7 +37,7 @@ public class SplitTraceGraphTask extends AbstractNetworkCollectionTask {
             SelectBinsDialog d = new SelectBinsDialog();
             d.setTitle("Split TraceGraph");
             d.setPreferredSize(new Dimension(600, 600));
-            d.setContentPane(new SplitTraceGraphDialog(controller));
+            d.setContentPane(new SplitTraceGraphDialog(controller, registrar));
             d.setModalityType(APPLICATION_MODAL);
             d.showDialog();
         });

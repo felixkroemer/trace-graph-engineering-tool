@@ -1,5 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.util;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.opencsv.CSVReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
@@ -56,6 +58,17 @@ public class Util {
                 }
             }
         }
+    }
+
+    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm) {
+        var root = pdm.getRootNetwork();
+        var subNetwork = root.addSubNetwork();
+
+        var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+        localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+
+        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
+        return subNetwork;
     }
 
 }

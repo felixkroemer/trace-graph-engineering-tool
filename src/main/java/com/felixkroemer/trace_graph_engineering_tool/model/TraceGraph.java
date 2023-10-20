@@ -130,7 +130,35 @@ public class TraceGraph {
         for (CyTable table : sourceTables) {
             if (!this.sourceTables.contains(table)) {
                 throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
+            } else {
+                this.sourceTables.remove(table);
             }
+        }
+
+        Set<CyNode> nodesToRemove = new HashSet<>();
+        Set<CyEdge> edgesToRemove = new HashSet<>();
+
+        for (CyNode node : this.network.getNodeList()) {
+            var info = this.nodeInfo.get(node);
+            if (sourceTables.containsAll(info.getSourceTables())) {
+                nodesToRemove.add(node);
+                nodeInfo.remove(node);
+            }
+        }
+
+        for (CyEdge edge : this.network.getEdgeList()) {
+            var info = this.edgeInfo.get(edge);
+            if (sourceTables.containsAll(info.getSourceTables())) {
+                edgesToRemove.add(edge);
+                edgeInfo.remove(edge);
+            }
+        }
+
+        this.network.removeNodes(nodesToRemove);
+        this.network.removeEdges(edgesToRemove);
+
+        for (CyTable table : sourceTables) {
+            traceGraph.init(table);
         }
         return traceGraph;
     }

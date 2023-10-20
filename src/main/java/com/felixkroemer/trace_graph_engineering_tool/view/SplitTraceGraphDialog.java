@@ -1,17 +1,28 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskMonitor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplitTraceGraphDialog extends JPanel {
-    private DefaultListModel<String> leftListModel;
-    private DefaultListModel<String> rightListModel;
 
-    private JList<String> leftList;
-    private JList<String> rightList;
+    private CyServiceRegistrar registrar;
+
+    private DefaultListModel<CyTable> leftListModel;
+    private DefaultListModel<CyTable> rightListModel;
+
+    private JList<CyTable> leftList;
+    private JList<CyTable> rightList;
     private JButton leftToRightButton;
     private JButton rightToLeftButton;
     private JButton confirmButton;
@@ -19,7 +30,8 @@ public class SplitTraceGraphDialog extends JPanel {
 
     private TraceGraphController controller;
 
-    public SplitTraceGraphDialog(TraceGraphController controller) {
+    public SplitTraceGraphDialog(TraceGraphController controller, CyServiceRegistrar registrar) {
+        this.registrar = registrar;
         this.controller = controller;
 
         this.leftListModel = new DefaultListModel<>();
@@ -34,7 +46,7 @@ public class SplitTraceGraphDialog extends JPanel {
         init();
 
         leftToRightButton.addActionListener(e -> {
-            String selectedValue = leftList.getSelectedValue();
+            CyTable selectedValue = leftList.getSelectedValue();
             if (selectedValue != null) {
                 leftListModel.removeElement(selectedValue);
                 rightListModel.addElement(selectedValue);
@@ -42,7 +54,7 @@ public class SplitTraceGraphDialog extends JPanel {
         });
 
         rightToLeftButton.addActionListener(e -> {
-            String selectedValue = rightList.getSelectedValue();
+            CyTable selectedValue = rightList.getSelectedValue();
             if (selectedValue != null) {
                 rightListModel.removeElement(selectedValue);
                 leftListModel.addElement(selectedValue);
@@ -50,14 +62,29 @@ public class SplitTraceGraphDialog extends JPanel {
         });
 
         this.confirmButton.addActionListener(e -> {
+            List<CyTable> toRemove = new ArrayList<>(rightListModel.size());
+            for (int i = 0; i < rightListModel.size(); i++) {
+                toRemove.add(rightListModel.get(i));
+            }
+            ((Window) getRootPane().getParent()).dispose();
+            var taskManager = registrar.getService(TaskManager.class);
+            taskManager.execute(new TaskIterator(new AbstractTask() {
+                @Override
+                public void run(TaskMonitor taskMonitor) throws Exception {
+                    var newController = controller.splitTraceGraph(toRemove);
+                    var manager = registrar.getService(TraceGraphManager.class);
+                    manager.registerTraceGraph(controller.getPDM(), newController);
+                }
+            }));
         });
 
         this.cancelButton.addActionListener(e -> {
+            ((Window) getRootPane().getParent()).dispose();
         });
 
         var sourceTables = controller.getTraceGraph().getSourceTables();
         for (CyTable table : sourceTables) {
-            this.leftListModel.addElement(table.getTitle());
+            this.leftListModel.addElement(table);
         }
     }
 

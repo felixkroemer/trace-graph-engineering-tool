@@ -1,12 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -24,17 +20,22 @@ public class AuxiliaryInformation {
         this.source_rows.get(sourceTable).add(index);
     }
 
+    public void removeSourceRows(CyTable table) {
+        this.source_rows.remove(table);
+    }
+
     public List<Integer> getSourceRows(CyTable sourceTable) {
         return this.source_rows.get(sourceTable);
     }
 
     public boolean hasNoSourceRows() {
-        this.source_rows = this.source_rows.entrySet()
-                .stream()
-                .filter(entry -> !entry.getValue().isEmpty())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.source_rows =
+                this.source_rows.entrySet().stream().filter(entry -> !entry.getValue().isEmpty()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return this.source_rows.isEmpty();
     }
 
+    public Set<CyTable> getSourceTables() {
+        return this.source_rows.keySet();
+    }
 
 }

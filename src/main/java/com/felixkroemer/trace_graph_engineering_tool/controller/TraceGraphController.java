@@ -3,11 +3,14 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -18,10 +21,7 @@ import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
@@ -103,5 +103,16 @@ public class TraceGraphController extends NetworkController implements SetCurren
             var eventHelper = this.registrar.getService(CyEventHelper.class);
             eventHelper.fireEvent(new SetCurrentTraceGraphControllerEvent(this, this));
         }
+    }
+
+    public TraceGraphController splitTraceGraph(List<CyTable> tables) {
+        var subNetwork = Util.createSubNetwork(this.getPDM());
+        var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
+        for (CyTable table : tables) {
+            networkTableManager.removeTable(this.traceGraph.getNetwork(), CyNode.class, "" + table.hashCode());
+            networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
+        }
+        TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
+        return new TraceGraphController(registrar, newTg);
     }
 }
