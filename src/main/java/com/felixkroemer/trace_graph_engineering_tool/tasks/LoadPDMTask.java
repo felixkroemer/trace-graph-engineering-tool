@@ -60,17 +60,21 @@ public class LoadPDMTask extends AbstractTask {
         var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
         localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
 
-        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
+        rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, pdm.getName());
 
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {
             var path = new File(traceFile.getParentFile(), csv);
             var sourceTable = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
+            sourceTable.setTitle(csv);
             Util.parseCSV(sourceTable, path);
             this.tableManager.addTable(sourceTable);
             this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             traceGraph.init(sourceTable);
         }
+
+        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, Util.getSubNetworkName(traceGraph.getSourceTables()));
+
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);
     }

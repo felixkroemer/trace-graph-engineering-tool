@@ -64,7 +64,6 @@ public class FollowDisplayController extends AbstractDisplayController {
                         sb.append(param.getName()).append(" : ").append(sourceValue - targetValue).append("\n");
                     }
                 }
-                /*                sb.deleteCharAt(sb.length() - 1);*/
                 var edgeView = networkView.getEdgeView(edge);
                 edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
                 edgeView.setVisualProperty(EDGE_VISIBLE, true);

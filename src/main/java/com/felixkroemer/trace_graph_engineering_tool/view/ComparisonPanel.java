@@ -6,8 +6,8 @@ import org.javatuples.Pair;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.HashMap;
 
 import static com.felixkroemer.trace_graph_engineering_tool.controller.NetworkComparisonController.*;
@@ -102,6 +102,7 @@ public class ComparisonPanel extends JPanel {
         togglePanel.add(createCenteredJLabel("Edges"), gbc);
 
         gbc.weightx = 1.0 / 3.0;
+
         gbc.ipadx = 0;
 
         gbc.gridx = 1;
@@ -134,9 +135,12 @@ public class ComparisonPanel extends JPanel {
         buttons.put(edgesDOButton, new Pair<>(DO, false));
         buttons.put(edgesBDButton, new Pair<>(BD, false));
         for (var entry : buttons.entrySet()) {
-            for (ActionListener al : entry.getKey().getActionListeners()) {
-                entry.getKey().removeActionListener(al);
+            // remove old listeners before settings toggle state
+            for (ItemListener al : entry.getKey().getItemListeners()) {
+                entry.getKey().removeItemListener(al);
             }
+            entry.getKey().setSelected(controller.getGroupVisibility(entry.getValue().getValue0(),
+                    entry.getValue().getValue1()));
             entry.getKey().addItemListener(e -> {
                 controller.setGroupVisibiliy(entry.getValue().getValue0(), entry.getValue().getValue1(),
                         e.getStateChange() == ItemEvent.SELECTED);

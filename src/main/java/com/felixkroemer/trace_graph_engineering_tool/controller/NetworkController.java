@@ -85,6 +85,8 @@ public abstract class NetworkController {
 
     public abstract TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root);
 
+    public abstract TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root);
+
     public abstract Map<String, String> getNodeInfo(CyNode node);
 
     public void focusNode(CyNode node) {

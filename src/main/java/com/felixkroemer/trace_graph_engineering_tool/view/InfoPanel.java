@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -59,7 +60,7 @@ public class InfoPanel extends JPanel {
         this.add(infoTreeTable, BorderLayout.CENTER);
     }
 
-    public void setNode(NetworkController controller, CyNode node) {
+    public void updateInfoPanel(NetworkController controller, CyNode node) {
         this.nodeInfoTableModel.setRowCount(0);
         this.nodeInfoTableModel.addRow(new String[]{"SUID", node.getSUID().toString()});
         var edges = controller.getNetwork().getAdjacentEdgeList(node, CyEdge.Type.DIRECTED);
@@ -71,10 +72,17 @@ public class InfoPanel extends JPanel {
         for (var entry : info.entrySet()) {
             this.nodeInfoTableModel.addRow(new String[]{entry.getKey(), entry.getValue()});
         }
+    }
 
+    public void updateSourceRowPanel(NetworkController controller, CyNode node) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         var model = controller.createSourceRowTableModel(node, root);
         this.infoTreeTable.setModel(model);
+    }
+
+    public void setNode(NetworkController controller, CyNode node) {
+        this.updateInfoPanel(controller, node);
+        this.updateSourceRowPanel(controller, node);
     }
 
 }

@@ -4,6 +4,8 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraph
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableNode;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
@@ -75,7 +77,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             var aux = traceGraph.getNodeAux(node);
             var rows = aux.getSourceRows(table);
             if (rows != null) {
-                var tableNode = new DefaultMutableTreeTableNode("" + table.hashCode());
+                var tableNode = new DefaultMutableTreeTableNode(table.getTitle());
                 root.add(tableNode);
                 for (var i : rows) {
                     tableNode.add(new DefaultMutableTreeTableNode("" + i));
@@ -83,6 +85,23 @@ public class TraceGraphController extends NetworkController implements SetCurren
             }
         }
         return new DefaultTreeTableModel(root);
+    }
+
+    @Override
+    public TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root) {
+        root.add(new CustomTreeTableNode("Rows", this.network.getNodeCount()));
+        root.add(new CustomTreeTableNode("Edges", this.network.getEdgeCount()));
+
+        var sourceTablesNode = new CustomTreeTableNode("Source Tables", "");
+        for (CyTable sourceTable : this.traceGraph.getSourceTables()) {
+            var tableNode = new CustomTreeTableNode(sourceTable.getTitle(), "");
+            var rowsNode = new CustomTreeTableNode("Rows", sourceTable.getRowCount());
+            tableNode.add(rowsNode);
+            sourceTablesNode.add(tableNode);
+        }
+
+        root.add(sourceTablesNode);
+        return new CustomTreeTableModel(root);
     }
 
     private void hideUnneededColumns() {
@@ -121,17 +140,19 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     public TraceGraphController splitTraceGraph(List<CyTable> tables) {
-        var subNetwork = Util.createSubNetwork(this.getPDM());
+        var subNetwork = Util.createSubNetwork(this.getPDM(), Util.getSubNetworkName(tables));
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         for (CyTable table : tables) {
             networkTableManager.removeTable(this.traceGraph.getNetwork(), CyNode.class, "" + table.hashCode());
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
+        this.renderingController.updateVisualStyle();
+        this.applyStyleAndLayout();
         return new TraceGraphController(registrar, newTg);
     }
 
-    public void combineTraceGraph(TraceGraphController controller) {
+    public void merge(TraceGraphController controller) {
         var networkManager = registrar.getService(CyNetworkManager.class);
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         var network = controller.getNetwork();

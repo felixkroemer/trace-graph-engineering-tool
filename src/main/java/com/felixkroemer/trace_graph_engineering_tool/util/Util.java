@@ -60,15 +60,24 @@ public class Util {
         }
     }
 
-    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm) {
+    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm, String title) {
         var root = pdm.getRootNetwork();
         var subNetwork = root.addSubNetwork();
 
         var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
         localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
 
-        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, pdm.getName());
+        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, title);
         return subNetwork;
+    }
+
+    public static String getSubNetworkName(Collection<CyTable> tables) {
+        StringBuilder sb = new StringBuilder();
+        for (var table : tables) {
+            sb.append(table).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
 }

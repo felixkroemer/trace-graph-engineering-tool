@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class LoadTraceTask extends AbstractTask {
@@ -46,6 +47,7 @@ public class LoadTraceTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         CyTable sourceTable = tableFactory.createTable(traceFile.getName(), Columns.SOURCE_ID, Long.class, true, true);
+        sourceTable.setTitle(traceFile.getName());
         Util.parseCSV(sourceTable, traceFile);
         List<String> params = new ArrayList<>();
         sourceTable.getColumns().forEach(c -> {
@@ -54,8 +56,8 @@ public class LoadTraceTask extends AbstractTask {
         ParameterDiscretizationModel pdm = manager.findPDM(params);
         if (pdm != null) {
             this.tableManager.addTable(sourceTable);
-            var subNetwork = Util.createSubNetwork(pdm);
-            this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
+            var subNetwork = Util.createSubNetwork(pdm, Util.getSubNetworkName(Collections.singleton(sourceTable)));
+            this.networkTableManager.setTable(subNetwork, CyNode.class, sourceTable.getTitle(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);
             TraceGraphController controller = new TraceGraphController(registrar, traceGraph);

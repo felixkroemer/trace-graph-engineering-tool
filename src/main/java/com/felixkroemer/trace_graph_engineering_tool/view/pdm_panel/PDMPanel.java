@@ -1,9 +1,11 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.jdesktop.swingx.JXTreeTable;
+import org.cytoscape.util.swing.LookAndFeelUtil;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +19,9 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
 
     private Logger logger;
 
-    private JPanel infoPanel;
-    private JXTreeTable table;
+    private CustomTreeTable infoTreeTable;
 
-
-    private JScrollPane scrollPane;
-    private JPanel innerPanel;
+    private JPanel pdmPanel;
     private JPanel resetFilterPanel;
     private JButton resetFilterButton;
     private CyServiceRegistrar reg;
@@ -32,20 +31,32 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.reg = reg;
 
-        this.infoPanel = new JPanel();
-        this.innerPanel = new JPanel();
-        this.innerPanel.setLayout(new BoxLayout(this.innerPanel, BoxLayout.Y_AXIS));
-        this.scrollPane = new JScrollPane(this.innerPanel);
+        this.infoTreeTable = new CustomTreeTable();
+
+        this.pdmPanel = new JPanel();
+        this.pdmPanel.setLayout(new BoxLayout(this.pdmPanel, BoxLayout.Y_AXIS));
         this.resetFilterPanel = new JPanel();
         this.resetFilterButton = new JButton("Reset Filters");
         resetFilterPanel.add(this.resetFilterButton);
         this.init();
     }
 
+    private void initInfoPanel() {
+        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder("Network Information"));
+        this.add(this.infoTreeTable, BorderLayout.NORTH);
+    }
+
+    private void initPDMPanel() {
+        var scrollPane = new JScrollPane(this.pdmPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        this.add(scrollPane, BorderLayout.CENTER);
+    }
+
     private void init() {
         setLayout(new BorderLayout());
-        this.add(this.scrollPane, BorderLayout.CENTER);
-        this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        this.initInfoPanel();
+        this.initPDMPanel();
 
         this.resetFilterButton.addActionListener(e -> {
             this.controller.getPDM().getParameters().forEach(p -> {
@@ -60,21 +71,31 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
         if (this.controller != null) {
             this.controller.getPDM().removeObserver(this);
         }
-        controller.getPDM().addObserver(this);
-        SwingUtilities.invokeLater(() -> {
-            this.innerPanel.removeAll();
-            controller.getPDM().forEach(parameter -> {
-                ParameterCell cell = new ParameterCell(reg, parameter, controller);
-                parameter.addObserver(cell);
-                this.innerPanel.add(cell);
-            });
-        });
-        this.controller = controller;
 
+        this.updatePDMPanel(controller);
+        this.updateInfoTreeTable(controller);
+
+        this.controller = controller;
+        this.controller.getPDM().addObserver(this);
+    }
+
+    private void updatePDMPanel(NetworkController controller) {
+        this.pdmPanel.removeAll();
+        controller.getPDM().forEach(parameter -> {
+            ParameterCell cell = new ParameterCell(reg, parameter, controller);
+            parameter.addObserver(cell);
+            this.pdmPanel.add(cell);
+        });
+    }
+
+    private void updateInfoTreeTable(NetworkController controller) {
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
+        var model = controller.createNetworkTableModel(root);
+        this.infoTreeTable.setModel(model);
     }
 
     public void clear() {
-        this.innerPanel.removeAll();
+        this.pdmPanel.removeAll();
     }
 
     @Override

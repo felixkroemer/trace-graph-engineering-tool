@@ -90,7 +90,6 @@ public class NetworkComparisonController extends NetworkController implements Se
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
         // edges are not unique, they are not defined by their source, target, multiedges are possible
-        //TODO: fix: edges 
         for (CyEdge edge : this.network.getEdgeList()) {
             boolean inBase = this.base.containsEdge(edge.getSource(), edge.getTarget());
             boolean inDelta = this.delta.containsEdge(edge.getSource(), edge.getTarget());
@@ -134,6 +133,11 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     @Override
     public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
+        return null;
+    }
+
+    @Override
+    public TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root) {
         return null;
     }
 
@@ -219,6 +223,33 @@ public class NetworkComparisonController extends NetworkController implements Se
             var eventHelper = this.registrar.getService(CyEventHelper.class);
             eventHelper.fireEvent(new SetCurrentComparisonControllerEvent(this, this));
         }
+    }
+
+    public boolean getGroupVisibility(String group, boolean node) {
+        switch (group) {
+            case BO -> {
+                if (node) {
+                    return this.nodesBaseOnlyVisible;
+                } else {
+                    return this.edgesBaseOnlyVisible;
+                }
+            }
+            case DO -> {
+                if (node) {
+                    return this.nodesDeltaOnlyVisible;
+                } else {
+                    return this.edgesDeltaOnlyVisible;
+                }
+            }
+            case BD -> {
+                if (node) {
+                    return this.nodesBaseDeltaVisible;
+                } else {
+                    return this.edgesBaseDeltaVisible;
+                }
+            }
+        }
+        return true;
     }
 
     public void setGroupVisibiliy(String group, boolean node, boolean visible) {

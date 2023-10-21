@@ -1,4 +1,4 @@
-package com.felixkroemer.trace_graph_engineering_tool.view;
+package com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table;
 
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 

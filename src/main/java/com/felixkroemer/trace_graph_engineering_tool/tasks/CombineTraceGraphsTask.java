@@ -31,11 +31,11 @@ public class CombineTraceGraphsTask extends AbstractNetworkCollectionTask {
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = registrar.getService(CyApplicationManager.class);
         if (manager.getCurrentNetwork() == controllerA.getNetwork()) {
-            controllerA.combineTraceGraph(controllerB);
+            controllerA.merge(controllerB);
         } else if (manager.getCurrentNetwork() == controllerB.getNetwork()) {
-            controllerB.combineTraceGraph(controllerA);
+            controllerB.merge(controllerA);
         } else {
-            controllerA.combineTraceGraph(controllerB);
+            controllerA.merge(controllerB);
         }
     }
 }
