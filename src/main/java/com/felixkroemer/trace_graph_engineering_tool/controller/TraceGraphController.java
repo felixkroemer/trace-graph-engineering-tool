@@ -17,6 +17,9 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.util.*;
 
@@ -64,6 +67,22 @@ public class TraceGraphController extends NetworkController implements SetCurren
     @Override
     public Map<String, String> getNodeInfo(CyNode node) {
         return this.traceGraph.getNodeInfo(node);
+    }
+
+    @Override
+    public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
+        for (CyTable table : this.traceGraph.getSourceTables()) {
+            var aux = traceGraph.getNodeAux(node);
+            var rows = aux.getSourceRows(table);
+            if (rows != null) {
+                var tableNode = new DefaultMutableTreeTableNode("" + table.hashCode());
+                root.add(tableNode);
+                for (var i : rows) {
+                    tableNode.add(new DefaultMutableTreeTableNode("" + i));
+                }
+            }
+        }
+        return new DefaultTreeTableModel(root);
     }
 
     private void hideUnneededColumns() {

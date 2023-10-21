@@ -20,6 +20,8 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -130,6 +132,11 @@ public class NetworkComparisonController extends NetworkController implements Se
         //TODO
     }
 
+    @Override
+    public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
+        return null;
+    }
+
     private VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default-comparison");
@@ -198,6 +205,7 @@ public class NetworkComparisonController extends NetworkController implements Se
         }
     }
 
+    @Override
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
         var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);

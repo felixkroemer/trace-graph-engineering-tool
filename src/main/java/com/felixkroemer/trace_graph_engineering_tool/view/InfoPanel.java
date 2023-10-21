@@ -5,6 +5,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -14,20 +15,25 @@ import java.awt.*;
 public class InfoPanel extends JPanel {
 
     private CyServiceRegistrar reg;
+    private CyNode node;
+
+    private CustomTreeTable infoTreeTable;
+
     private JPanel nodeInfoPanel;
-    private JScrollPane nodeInfoScrollPane;
     private JTable nodeInfoTable;
     private DefaultTableModel nodeInfoTableModel;
-    private CyNode node;
 
 
     public InfoPanel(CyServiceRegistrar reg) {
         this.reg = reg;
         this.node = null;
+
         this.nodeInfoPanel = new JPanel();
         this.nodeInfoTableModel = new TableModel(0, 2);
         this.nodeInfoTable = new JTable(this.nodeInfoTableModel);
-        this.nodeInfoScrollPane = new JScrollPane(this.nodeInfoTable);
+
+        this.infoTreeTable = new CustomTreeTable();
+
         this.init();
     }
 
@@ -47,7 +53,10 @@ public class InfoPanel extends JPanel {
         this.nodeInfoPanel.setLayout(new BorderLayout());
         this.nodeInfoPanel.add(nodeInfoTable, BorderLayout.CENTER);
 
+        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder("Source Rows"));
+
         this.add(nodeInfoPanel, BorderLayout.NORTH);
+        this.add(infoTreeTable, BorderLayout.CENTER);
     }
 
     public void setNode(NetworkController controller, CyNode node) {
@@ -57,10 +66,15 @@ public class InfoPanel extends JPanel {
         var incoming = edges.stream().filter(edge -> edge.getSource() == node).count();
         this.nodeInfoTableModel.addRow(new String[]{"Incoming Edges", "" + incoming});
         this.nodeInfoTableModel.addRow(new String[]{"Outgoing Edges", "" + (edges.size() - incoming)});
+
         var info = controller.getNodeInfo(node);
         for (var entry : info.entrySet()) {
             this.nodeInfoTableModel.addRow(new String[]{entry.getKey(), entry.getValue()});
         }
+
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
+        var model = controller.createSourceRowTableModel(node, root);
+        this.infoTreeTable.setModel(model);
     }
 
 }

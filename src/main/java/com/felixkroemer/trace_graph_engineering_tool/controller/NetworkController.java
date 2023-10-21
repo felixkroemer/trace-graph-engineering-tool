@@ -15,6 +15,8 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.util.Map;
 
@@ -80,6 +82,8 @@ public abstract class NetworkController {
     }
 
     public abstract void updateNetwork(Parameter parameter);
+
+    public abstract TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root);
 
     public abstract Map<String, String> getNodeInfo(CyNode node);
 

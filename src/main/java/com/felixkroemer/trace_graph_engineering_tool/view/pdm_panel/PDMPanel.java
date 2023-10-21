@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.jdesktop.swingx.JXTreeTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,10 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
 
     private Logger logger;
 
+    private JPanel infoPanel;
+    private JXTreeTable table;
+
+
     private JScrollPane scrollPane;
     private JPanel innerPanel;
     private JPanel resetFilterPanel;
@@ -27,6 +32,7 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.reg = reg;
 
+        this.infoPanel = new JPanel();
         this.innerPanel = new JPanel();
         this.innerPanel.setLayout(new BoxLayout(this.innerPanel, BoxLayout.Y_AXIS));
         this.scrollPane = new JScrollPane(this.innerPanel);
