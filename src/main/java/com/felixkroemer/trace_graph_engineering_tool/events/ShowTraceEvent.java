@@ -1,28 +1,25 @@
 package com.felixkroemer.trace_graph_engineering_tool.events;
 
 
-import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceTask;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import org.cytoscape.event.AbstractCyEvent;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 
-import java.util.List;
+public final class ShowTraceEvent extends AbstractCyEvent<Object> {
 
-public final class ShowTraceEvent extends AbstractCyEvent<ShowTraceTask> {
-
-    private final List<CyNode> nodes;
+    private final TraceExtension trace;
 
     private final CyNetwork network;
 
 
-    public ShowTraceEvent(ShowTraceTask source, List<CyNode> nodes, CyNetwork network) {
+    public ShowTraceEvent(Object source, TraceExtension trace, CyNetwork network) {
         super(source, ShowTraceEventListener.class);
-        this.nodes = nodes;
+        this.trace = trace;
         this.network = network;
     }
 
-    public List<CyNode> getNodes() {
-        return this.nodes;
+    public TraceExtension getTrace() {
+        return this.trace;
     }
 
     public CyNetwork getNetwork() {

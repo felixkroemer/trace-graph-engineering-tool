@@ -17,6 +17,10 @@ public class DefaultDisplayController extends AbstractDisplayController {
     }
 
     @Override
+    public void init() {
+    }
+
+    @Override
     public void disable() {
     }
 }

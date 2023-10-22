@@ -4,6 +4,7 @@ import org.cytoscape.model.CyNode;
 import org.javatuples.Pair;
 
 import java.awt.*;
+import java.util.LinkedList;
 
 
 public class TraceExtension extends Trace {
@@ -16,6 +17,13 @@ public class TraceExtension extends Trace {
         this.node = node;
         this.color = color;
         this.sequence.add(new Pair<>(node, sourceIndex));
+    }
+
+    public TraceExtension(Trace trace) {
+        super();
+        this.node = null;
+        this.color = Color.BLACK;
+        this.sequence = (LinkedList<Pair<CyNode, Integer>>) trace.getSequence();
     }
 
     public Color getColor() {

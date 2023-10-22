@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceSetEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -26,9 +27,10 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     private int length;
     private static int colorIndex = 0;
-    private HashMap<CyEdge, Integer> edgeVisits;
     private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
+    private Set<CyEdge> multiEdges;
+    private Map<CyEdge, TraceExtension> traceMapping;
     private boolean enableVisitWidth;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
@@ -37,13 +39,10 @@ public class TracesDisplayController extends AbstractDisplayController {
         this.registrar = registrar;
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;
-        this.edgeVisits = new HashMap<>();
         this.pcs = new PropertyChangeSupport(this);
+        this.multiEdges = new HashSet<>();
+        this.traceMapping = new HashMap<>();
         this.enableVisitWidth = false;
-
-        this.hideAllEdges();
-        var selectedNodes = CyTableUtil.getNodesInState(view.getModel(), CyNetwork.SELECTED, true);
-        this.displayTraces(selectedNodes, Collections.emptyList(), view.getModel());
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -56,17 +55,7 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     private void colorEdge(CyEdge e, Color color) {
         networkView.getEdgeView(e).batch(v -> {
-            if (enableVisitWidth) {
-                Integer visits;
-                if ((visits = this.edgeVisits.get(e)) != null) {
-                    visits = visits + 1;
-                } else {
-                    visits = 1;
-                }
-                this.edgeVisits.put(e, visits);
-                // crashes if Integer is passed
-                v.setVisualProperty(EDGE_WIDTH, visits * 1.5);
-            }
+            v.setVisualProperty(EDGE_WIDTH, 2.0);
             v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
             v.setVisualProperty(EDGE_VISIBLE, true);
@@ -142,12 +131,30 @@ public class TracesDisplayController extends AbstractDisplayController {
     }
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
+        if (event.getSelectedNodes().size() == 1 && event.nodesChanged()) {
+            this.hideAllEdges();
+            this.displayTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
+        }
+        if (event.getSelectedEdges().size() == 1) {
+            var trace = this.traceMapping.get(event.getSelectedEdges().iterator().next());
+            if (trace != null) {
+                var eventHelper = registrar.getService(CyEventHelper.class);
+                eventHelper.fireEvent(new ShowTraceEvent(this, trace, networkView.getModel()));
+            }
+        }
+    }
+
+    @Override
+    public void init() {
         this.hideAllEdges();
-        this.displayTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
+        var selectedNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
+        this.displayTraces(selectedNodes, Collections.emptyList(), networkView.getModel());
     }
 
     public void displayTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
-        this.edgeVisits.clear();
+        network.removeEdges(this.multiEdges);
+        this.multiEdges.clear();
+        this.traceMapping.clear();
         Set<TraceExtension> traces = null;
         if (selectedNodes.size() == 1) {
             traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
@@ -164,17 +171,30 @@ public class TracesDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
+        networkView.getModel().removeEdges(this.multiEdges);
     }
 
     public void drawTraces(Set<TraceExtension> traces) {
         colorIndex = 0;
+        var usedEdges = new HashSet<CyEdge>();
+        var network = networkView.getModel();
         for (var trace : traces) {
             for (int i = 0; i < trace.getSequence().size() - 1; i++) {
-                CyEdge edge;
                 // is null if the edge is a self edge
-                if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
-                        trace.getSequence().get(i + 1).getValue0())) != null) {
-                    this.colorEdge(edge, trace.getColor());
+                CyEdge edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
+                        trace.getSequence().get(i + 1).getValue0());
+                if (edge != null) {
+                    if (usedEdges.contains(edge)) {
+                        edge = network.addEdge(edge.getSource(), edge.getTarget(), true);
+                        var eventHelper = registrar.getService(CyEventHelper.class);
+                        eventHelper.flushPayloadEvents();
+                        this.colorEdge(edge, trace.getColor());
+                        this.multiEdges.add(edge);
+                    } else {
+                        this.colorEdge(edge, trace.getColor());
+                    }
+                    usedEdges.add(edge);
+                    this.traceMapping.put(edge, trace);
                 }
             }
         }

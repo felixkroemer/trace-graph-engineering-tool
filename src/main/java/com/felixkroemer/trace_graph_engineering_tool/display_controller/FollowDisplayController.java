@@ -18,8 +18,6 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     public FollowDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         super(registrar, view, traceGraph);
-        this.hideAllEdges();
-        showEdgesOfSelectedNodes();
     }
 
     @Override
@@ -41,6 +39,12 @@ public class FollowDisplayController extends AbstractDisplayController {
                 this.hideAllEdges();
             }
         }
+    }
+
+    @Override
+    public void init() {
+        this.hideAllEdges();
+        showEdgesOfSelectedNodes();
     }
 
     @Override

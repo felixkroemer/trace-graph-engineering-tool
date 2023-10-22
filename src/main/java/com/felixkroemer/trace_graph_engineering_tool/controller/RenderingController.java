@@ -56,7 +56,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
-        this.displayController = new FollowDisplayController(registrar, this.view, this.traceGraph);
+        this.setMode(RENDERING_MODE_TRACES);
 
         this.traceGraph.getPDM().forEach(p -> {
             p.addObserver(this);
@@ -164,11 +164,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 return;
             } else {
                 this.displayController.disable();
+                this.defaultStyle.apply(this.view);
             }
         }
-        //this.deselectAll();
-        this.defaultStyle.apply(this.view);
         this.displayController = displayController;
+        this.displayController.init();
     }
 
     public void setMode(String mode) {
@@ -194,6 +194,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
+    //TODO: check why this is triggered twice
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getNetwork() == this.traceGraph.getNetwork()) {
@@ -215,7 +216,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             return;
         }
         if (!(this.displayController instanceof ShortestTraceDisplayController)) {
-            this.setDisplayController(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getNodes()));
+            this.setDisplayController(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getTrace()));
         }
     }
 }

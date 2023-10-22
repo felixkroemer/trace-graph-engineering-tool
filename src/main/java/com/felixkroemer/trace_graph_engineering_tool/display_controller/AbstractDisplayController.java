@@ -23,6 +23,8 @@ public abstract class AbstractDisplayController {
 
     public abstract void handleNodesSelected(SelectedNodesAndEdgesEvent event);
 
+    public abstract void init();
+
     /*
      * clear potential value locks, unregister listeners, etc.
      */

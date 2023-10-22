@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Trace {
-    protected final LinkedList<Pair<CyNode, Integer>> sequence;
+    protected LinkedList<Pair<CyNode, Integer>> sequence;
 
     public Trace() {
         this.sequence = new LinkedList<>();
