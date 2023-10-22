@@ -30,6 +30,6 @@ public class ShowTraceNodeTaskFactory extends AbstractNodeViewTaskFactory {
 
     @Override
     public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-        return new TaskIterator(new ShowTraceTask(reg, networkView));
+        return new TaskIterator(new ShowTraceTask(reg, networkView.getModel()));
     }
 }

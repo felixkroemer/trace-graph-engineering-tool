@@ -112,13 +112,13 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
         }
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(event.getNetwork());
-        if (event.getSelectedNodes().size() == 1) {
+        if (event.getSelectedNodes().size() == 1 && event.nodesChanged()) {
             this.nodeInfoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
             this.tabs.addTab(NODE_INFO_TITLE, this.nodeInfoPanel);
             this.tabs.setSelectedIndex(getPanelIndex(NODE_INFO_TITLE));
             this.showPanel();
-        } else if (event.getSelectedNodes().size() > 1 && event.getSelectedNodes().size() < 6) {
-            this.nodeComparisonPanel.setNodes(controller, event.getSelectedNodes());
+        } else if (event.getSelectedNodes().size() > 1 && event.getSelectedNodes().size() < 6 && event.nodesChanged()) {
+            this.nodeComparisonPanel.setNodes(controller, event.getSelectedNodes(), event.getNetwork());
             this.tabs.addTab(NODE_COMPARISON_TITLE, this.nodeComparisonPanel);
             this.tabs.setSelectedIndex(getPanelIndex(NODE_COMPARISON_TITLE));
             this.showPanel();

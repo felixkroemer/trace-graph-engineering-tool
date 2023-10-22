@@ -56,7 +56,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
-        this.setMode(RENDERING_MODE_TRACES);
+        this.setMode(RENDERING_MODE_FOLLOW);
 
         this.traceGraph.getPDM().forEach(p -> {
             p.addObserver(this);

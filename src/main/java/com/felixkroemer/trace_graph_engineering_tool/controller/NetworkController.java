@@ -12,8 +12,8 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
@@ -67,7 +67,7 @@ public abstract class NetworkController {
             }
         });
         iterator.append(this.createLayoutTask());
-        var taskManager = this.registrar.getService(SynchronousTaskManager.class);
+        var taskManager = this.registrar.getService(TaskManager.class);
         taskManager.execute(iterator);
     }
 

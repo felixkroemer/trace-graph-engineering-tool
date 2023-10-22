@@ -163,6 +163,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         }
         CyEventHelper helper = registrar.getService(CyEventHelper.class);
         helper.flushPayloadEvents();
+        this.renderingController.hideNodes();
         this.renderingController.updateVisualStyle();
         this.applyStyleAndLayout();
     }

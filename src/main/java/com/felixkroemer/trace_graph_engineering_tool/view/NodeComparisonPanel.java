@@ -2,26 +2,32 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceTask;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.jdesktop.swingx.JXTable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.Collection;
-import java.util.Set;
 
 public class NodeComparisonPanel extends JPanel {
 
     private CyServiceRegistrar reg;
-    private Set<CyNode> nodes;
 
+    private JPanel showTracePanel;
+    private JButton showTraceButton;
     private JXTable comparisonTable;
 
     public NodeComparisonPanel(CyServiceRegistrar reg) {
         this.reg = reg;
         this.comparisonTable = new JXTable();
+        this.showTracePanel = new JPanel();
+        this.showTraceButton = new JButton("Show Trace");
 
         this.init();
     }
@@ -40,9 +46,12 @@ public class NodeComparisonPanel extends JPanel {
         this.setBackground(UIManager.getColor("Panel.background"));
 
         this.add(new JScrollPane(comparisonTable), BorderLayout.CENTER);
+
+        showTracePanel.add(this.showTraceButton);
+        this.add(this.showTracePanel, BorderLayout.SOUTH);
     }
 
-    public void setNodes(NetworkController controller, Collection<CyNode> nodes) {
+    public void setNodes(NetworkController controller, Collection<CyNode> nodes, CyNetwork network) {
         var pdm = controller.getPDM();
         var model = new TableModel(nodes.size() + 1);
 
@@ -77,6 +86,19 @@ public class NodeComparisonPanel extends JPanel {
         }
 
         this.comparisonTable.packAll();
+
+
+        this.updateShowTraceButton(network);
+    }
+
+    private void updateShowTraceButton(CyNetwork network) {
+        for (var listener : this.showTraceButton.getActionListeners()) {
+            this.showTraceButton.removeActionListener(listener);
+        }
+        this.showTraceButton.addActionListener(e -> {
+            var taskManager = reg.getService(TaskManager.class);
+            taskManager.execute(new TaskIterator(new ShowTraceTask(reg, network)));
+        });
     }
 
 }
