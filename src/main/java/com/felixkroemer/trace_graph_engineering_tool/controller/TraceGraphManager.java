@@ -32,7 +32,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
-        this.panel = new TraceGraphPanel(registrar, this);
+        this.panel = new TraceGraphPanel(registrar);
         this.controllers = new HashMap<>();
         this.traceDetailsController = new TraceDetailsController(registrar);
         this.destroying = false;

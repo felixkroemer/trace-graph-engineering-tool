@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class InfoPanel extends JPanel {
+public class NodeInfoPanel extends JPanel {
 
     private CyServiceRegistrar reg;
     private CyNode node;
@@ -25,7 +25,7 @@ public class InfoPanel extends JPanel {
     private DefaultTableModel nodeInfoTableModel;
 
 
-    public InfoPanel(CyServiceRegistrar reg) {
+    public NodeInfoPanel(CyServiceRegistrar reg) {
         this.reg = reg;
         this.node = null;
 
@@ -85,15 +85,4 @@ public class InfoPanel extends JPanel {
         this.updateSourceRowPanel(controller, node);
     }
 
-}
-
-class TableModel extends DefaultTableModel {
-    public TableModel(int rows, int cols) {
-        super(rows, cols);
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int column) {
-        return false;
-    }
 }

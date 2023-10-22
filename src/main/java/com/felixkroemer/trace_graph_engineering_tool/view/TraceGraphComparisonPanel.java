@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import static com.felixkroemer.trace_graph_engineering_tool.controller.NetworkComparisonController.*;
 
-public class ComparisonPanel extends JPanel {
+public class TraceGraphComparisonPanel extends JPanel {
 
     private JToggleButton nodesBOButton;
     private JToggleButton nodesDOButton;
@@ -23,7 +23,7 @@ public class ComparisonPanel extends JPanel {
 
     private JPanel togglePanel;
 
-    public ComparisonPanel() {
+    public TraceGraphComparisonPanel() {
         this.nodesBOButton = new JToggleButton();
         this.nodesDOButton = new JToggleButton();
         this.nodesBDButton = new JToggleButton();
@@ -130,6 +130,7 @@ public class ComparisonPanel extends JPanel {
         var buttons = new HashMap<JToggleButton, Pair<String, Boolean>>();
         buttons.put(nodesBOButton, new Pair<>(BO, true));
         buttons.put(nodesDOButton, new Pair<>(DO, true));
+
         buttons.put(nodesBDButton, new Pair<>(BD, true));
         buttons.put(edgesBOButton, new Pair<>(BO, false));
         buttons.put(edgesDOButton, new Pair<>(DO, false));

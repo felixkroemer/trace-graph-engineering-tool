@@ -157,6 +157,10 @@ public class TraceGraph {
         this.network.removeNodes(nodesToRemove);
         this.network.removeEdges(edgesToRemove);
 
+        for (CyTable table : sourceTables) {
+            this.nodeMapping.remove(table);
+        }
+
         //TODO: improvement: do not use init, pass data directly
         for (CyTable table : sourceTables) {
             traceGraph.init(table);

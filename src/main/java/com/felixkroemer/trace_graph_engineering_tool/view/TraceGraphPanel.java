@@ -5,16 +5,14 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparison
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerListener;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerListener;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,29 +21,28 @@ import java.util.Properties;
 public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener,
         SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener, SetCurrentComparisonControllerListener {
 
-    private Logger logger;
-    private TraceGraphManager manager;
-    private JTabbedPane tabs;
-    private PDMPanel pdmPanel;
-    private TracesPanel tracesPanel;
-    private InfoPanel infoPanel;
-    private ComparisonPanel comparisonPanel;
     private CyServiceRegistrar reg;
+    private JTabbedPane tabs;
+
+    private PDMPanel pdmPanel;
+    private NodeInfoPanel nodeInfoPanel;
+    private TraceGraphComparisonPanel traceGraphComparisonPanel;
+    private NodeComparisonPanel nodeComparisonPanel;
 
     private static String PDM_TITLE = "PDM";
-    private static String INFO_TITLE = "Info";
-    private static String COMPARISON_TITLE = "Comparison";
+    private static String NODE_INFO_TITLE = "Node Info";
+    private static String TRACE_GRAPH_COMPARISON_TITLE = "Comparison";
+    private static String NODE_COMPARISON_TITLE = "Node Comparison";
 
-    public TraceGraphPanel(CyServiceRegistrar reg, TraceGraphManager manager) {
+    public TraceGraphPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
-        this.manager = manager;
-        this.tabs = new JTabbedPane(JTabbedPane.BOTTOM);
-        this.pdmPanel = new PDMPanel(reg);
-        this.tracesPanel = new TracesPanel(reg);
-        this.infoPanel = new InfoPanel(reg);
-        this.comparisonPanel = new ComparisonPanel();
         this.reg = reg;
+        this.tabs = new JTabbedPane(JTabbedPane.BOTTOM);
+
+        this.pdmPanel = new PDMPanel(reg);
+        this.nodeInfoPanel = new NodeInfoPanel(reg);
+        this.traceGraphComparisonPanel = new TraceGraphComparisonPanel();
+        this.nodeComparisonPanel = new NodeComparisonPanel(reg);
 
         this.reg.registerService(this, SelectedNodesAndEdgesListener.class, new Properties());
         this.reg.registerService(this, SetCurrentNetworkListener.class, new Properties());
@@ -110,15 +107,24 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
 
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
+        if (!Util.isTraceGraphNetwork(event.getNetwork())) {
+            this.hidePanel(NODE_INFO_TITLE);
+        }
+        var manager = this.reg.getService(TraceGraphManager.class);
+        var controller = manager.findControllerForNetwork(event.getNetwork());
         if (event.getSelectedNodes().size() == 1) {
-            var manager = this.reg.getService(TraceGraphManager.class);
-            var controller = manager.findControllerForNetwork(event.getNetwork());
-            this.infoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
-            this.tabs.addTab(INFO_TITLE, this.infoPanel);
-            this.tabs.setSelectedIndex(getPanelIndex(INFO_TITLE));
+            this.nodeInfoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
+            this.tabs.addTab(NODE_INFO_TITLE, this.nodeInfoPanel);
+            this.tabs.setSelectedIndex(getPanelIndex(NODE_INFO_TITLE));
+            this.showPanel();
+        } else if (event.getSelectedNodes().size() > 1 && event.getSelectedNodes().size() < 6) {
+            this.nodeComparisonPanel.setNodes(controller, event.getSelectedNodes());
+            this.tabs.addTab(NODE_COMPARISON_TITLE, this.nodeComparisonPanel);
+            this.tabs.setSelectedIndex(getPanelIndex(NODE_COMPARISON_TITLE));
             this.showPanel();
         } else {
-            this.hidePanel(INFO_TITLE);
+            this.hidePanel(NODE_INFO_TITLE);
+            this.hidePanel(NODE_COMPARISON_TITLE);
         }
     }
 
@@ -140,14 +146,14 @@ public class TraceGraphPanel extends JPanel implements CytoPanelComponent2, Sele
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
         this.tabs.setSelectedIndex(getPanelIndex(PDM_TITLE));
-        this.hidePanel(COMPARISON_TITLE);
+        this.hidePanel(TRACE_GRAPH_COMPARISON_TITLE);
     }
 
     @Override
     public void handleEvent(SetCurrentComparisonControllerEvent event) {
-        this.comparisonPanel.setComparisonController(event.getNetworkComparisonController());
-        this.tabs.addTab(COMPARISON_TITLE, this.comparisonPanel);
-        this.tabs.setSelectedIndex(getPanelIndex(COMPARISON_TITLE));
+        this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
+        this.tabs.addTab(TRACE_GRAPH_COMPARISON_TITLE, this.traceGraphComparisonPanel);
+        this.tabs.setSelectedIndex(getPanelIndex(TRACE_GRAPH_COMPARISON_TITLE));
     }
 
     public void showPanel() {
