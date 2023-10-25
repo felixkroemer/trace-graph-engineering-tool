@@ -15,6 +15,8 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class ShortestTraceDisplayController extends AbstractDisplayController implements ShowTraceEventListener {
 
+    public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
+
     //TODO: find better way to pass initial trace
     private TraceExtension trace;
 
@@ -51,6 +53,11 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
         this.traceGraph.setTrace(null);
         var eventHelper = registrar.getService(CyEventHelper.class);
         eventHelper.fireEvent(new ClearTraceEvent(this, this.trace, networkView.getModel()));
+    }
+
+    @Override
+    public String getID() {
+        return RENDERING_MODE_SHORTEST_TRACE;
     }
 
     public void showTrace(TraceExtension trace) {

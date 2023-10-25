@@ -14,6 +14,8 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class FollowDisplayController extends AbstractDisplayController {
 
+    public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
+
     private CyNode previousNode;
 
     public FollowDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
@@ -49,6 +51,11 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
+    }
+
+    @Override
+    public String getID() {
+        return RENDERING_MODE_FOLLOW;
     }
 
     private void showEdgesOfSelectedNodes() {

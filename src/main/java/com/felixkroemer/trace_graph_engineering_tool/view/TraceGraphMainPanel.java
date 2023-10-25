@@ -188,6 +188,9 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
 
     @Override
     public void handleEvent(ShowTraceEvent e) {
+        var manager = reg.getService(TraceGraphManager.class);
+        var controller = manager.findControllerForNetwork(e.getNetwork());
+        this.tracePanel.updateTracePanel(controller, e.getTrace());
         this.showPanel(this.tracePanel);
     }
 

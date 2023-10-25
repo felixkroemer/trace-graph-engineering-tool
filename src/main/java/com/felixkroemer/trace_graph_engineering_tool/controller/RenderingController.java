@@ -27,25 +27,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultDisplayController.RENDERING_MODE_FULL;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowDisplayController.RENDERING_MODE_FOLLOW;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
         ShowTraceEventListener {
-
-    public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
-    public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
-    public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
 
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
     private AbstractDisplayController displayController;
     private TraceGraph traceGraph;
+    private String previousDisplayController;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         this.registrar = registrar;
         this.traceGraph = traceGraph;
         this.defaultStyle = createDefaultVisualStyle();
+        this.previousDisplayController = null;
 
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
@@ -210,6 +211,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         registrar.unregisterService(this, ShowTraceEventListener.class);
     }
 
+    public void restorePreviousDisplayController() {
+        if (this.previousDisplayController != null) {
+            this.setMode(this.previousDisplayController);
+        }
+    }
+
     @Override
     public void handleEvent(ShowTraceEvent e) {
         if (e.getNetwork() != this.traceGraph.getNetwork()) {
@@ -217,6 +224,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         if (!(this.displayController instanceof ShortestTraceDisplayController)) {
             this.traceGraph.setTrace(e.getTrace());
+            this.previousDisplayController = this.displayController.getID();
             this.setDisplayController(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getTrace()));
         }
     }

@@ -60,4 +60,6 @@ public abstract class AbstractDisplayController {
         return this.networkView;
     }
 
+    public abstract String getID();
+
 }

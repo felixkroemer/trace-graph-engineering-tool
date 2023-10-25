@@ -7,6 +7,8 @@ import org.cytoscape.view.model.CyNetworkView;
 
 public class DefaultDisplayController extends AbstractDisplayController {
 
+    public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
+
     public DefaultDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         super(registrar, view, traceGraph);
         this.showALlEdges();
@@ -22,5 +24,10 @@ public class DefaultDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
+    }
+
+    @Override
+    public String getID() {
+        return RENDERING_MODE_FULL;
     }
 }

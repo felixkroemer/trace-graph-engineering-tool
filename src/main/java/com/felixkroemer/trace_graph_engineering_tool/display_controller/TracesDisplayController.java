@@ -21,6 +21,7 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class TracesDisplayController extends AbstractDisplayController {
 
+    public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
     private static Color[] colors = generateColorList();
 
     private Logger logger;
@@ -172,6 +173,11 @@ public class TracesDisplayController extends AbstractDisplayController {
     @Override
     public void disable() {
         networkView.getModel().removeEdges(this.multiEdges);
+    }
+
+    @Override
+    public String getID() {
+        return RENDERING_MODE_TRACES;
     }
 
     public void drawTraces(Set<TraceExtension> traces) {

@@ -49,7 +49,6 @@ public class NodeInfoPanel extends TraceGraphPanel {
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
         this.nodeInfoTable.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
-
         this.nodeInfoPanel.setBorder(LookAndFeelUtil.createTitledBorder("Node Information"));
         this.nodeInfoPanel.setLayout(new BorderLayout());
         this.nodeInfoPanel.add(nodeInfoTable, BorderLayout.CENTER);

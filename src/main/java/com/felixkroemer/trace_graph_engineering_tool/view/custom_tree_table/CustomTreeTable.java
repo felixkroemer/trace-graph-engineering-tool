@@ -42,4 +42,7 @@ public class CustomTreeTable extends JPanel {
         this.scrollPane.setPreferredSize(new Dimension(d.width, table.getRowHeight() * table.getRowCount() + 10));
     }
 
+    public JXTreeTable getWrappedTreeTable() {
+        return this.table;
+    }
 }

@@ -167,4 +167,8 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.renderingController.updateVisualStyle();
         this.applyStyleAndLayout();
     }
+
+    public void restorePreviousDisplayController() {
+        this.renderingController.restorePreviousDisplayController();
+    }
 }
