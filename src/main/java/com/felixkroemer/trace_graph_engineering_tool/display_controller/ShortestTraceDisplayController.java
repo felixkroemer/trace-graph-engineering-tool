@@ -1,9 +1,11 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.ClearTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -46,6 +48,9 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
     @Override
     public void disable() {
         this.registrar.unregisterService(this, ShowTraceEventListener.class);
+        this.traceGraph.setTrace(null);
+        var eventHelper = registrar.getService(CyEventHelper.class);
+        eventHelper.fireEvent(new ClearTraceEvent(this, this.trace, networkView.getModel()));
     }
 
     public void showTrace(TraceExtension trace) {

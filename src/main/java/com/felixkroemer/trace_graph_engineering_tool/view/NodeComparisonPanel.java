@@ -9,13 +9,16 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.AbstractHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.Collection;
 
-public class NodeComparisonPanel extends JPanel {
+public class NodeComparisonPanel extends TraceGraphPanel {
 
     private CyServiceRegistrar reg;
 
@@ -43,6 +46,7 @@ public class NodeComparisonPanel extends JPanel {
         this.comparisonTable.setGridColor(Color.GRAY);
         this.comparisonTable.setTableHeader(null);
         this.comparisonTable.setBackground(UIManager.getColor("Panel.background"));
+        this.comparisonTable.setHighlighters(new DifferentValueRowHighlighter());
         this.setBackground(UIManager.getColor("Panel.background"));
 
         this.add(new JScrollPane(comparisonTable), BorderLayout.CENTER);
@@ -101,4 +105,34 @@ public class NodeComparisonPanel extends JPanel {
         });
     }
 
+    @Override
+    public String getTitle() {
+        return "Node Comparison";
+    }
+}
+
+class DifferentValueRowHighlighter extends AbstractHighlighter {
+
+    @Override
+    protected Component doHighlight(Component renderer, ComponentAdapter adapter) {
+
+        if (adapter.row == 0) {
+            return renderer;
+        }
+        renderer.setBackground(Color.GRAY);
+        return renderer;
+    }
+
+    @Override
+    public HighlightPredicate getHighlightPredicate() {
+        return (renderer, adapter) -> {
+            // Apply the highlighter to all rows
+            for (int i = 2; i < adapter.getColumnCount(); i++) {
+                if (!adapter.getValue(i).equals(adapter.getValue(i - 1))) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
 }

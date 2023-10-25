@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class NodeInfoPanel extends JPanel {
+public class NodeInfoPanel extends TraceGraphPanel {
 
     private CyServiceRegistrar reg;
     private CyNode node;
@@ -85,4 +85,8 @@ public class NodeInfoPanel extends JPanel {
         this.updateSourceRowPanel(controller, node);
     }
 
+    @Override
+    public String getTitle() {
+        return "Node Info";
+    }
 }

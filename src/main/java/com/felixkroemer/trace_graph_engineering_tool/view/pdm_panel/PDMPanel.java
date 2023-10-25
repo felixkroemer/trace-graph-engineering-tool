@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -15,7 +16,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 
-public class PDMPanel extends JPanel implements PropertyChangeListener {
+public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener {
 
     private Logger logger;
 
@@ -110,5 +111,10 @@ public class PDMPanel extends JPanel implements PropertyChangeListener {
                 this.revalidate();
             }
         }
+    }
+
+    @Override
+    public String getTitle() {
+        return "PDM";
     }
 }

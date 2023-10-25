@@ -13,6 +13,8 @@ public class TraceGraph {
     private Set<CyTable> sourceTables;
     private CyTable defaultNodeTable;
     private CyTable defaultEdgetable;
+    // the currently selected trace
+    private TraceExtension trace;
 
     // hash to node suid
     //TODO: map directly to node
@@ -28,6 +30,7 @@ public class TraceGraph {
         this.pdm = pdm;
         this.sourceTables = new HashSet<>();
         this.network = network;
+        this.trace = null;
 
         // DEFAULT_ATTRS = Shared (root) + Local
         this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
@@ -421,5 +424,13 @@ public class TraceGraph {
 
     public AuxiliaryInformation getEdgeAux(CyEdge edge) {
         return this.edgeInfo.get(edge);
+    }
+
+    public void setTrace(TraceExtension trace) {
+        this.trace = trace;
+    }
+
+    public TraceExtension getTrace() {
+        return this.trace;
     }
 }

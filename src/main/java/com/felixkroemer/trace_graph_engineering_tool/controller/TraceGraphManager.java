@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphMainPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
@@ -26,13 +26,13 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
-    private final TraceGraphPanel panel;
+    private final TraceGraphMainPanel panel;
     private final TraceDetailsController traceDetailsController;
     private boolean destroying;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
-        this.panel = new TraceGraphPanel(registrar);
+        this.panel = new TraceGraphMainPanel(registrar);
         this.controllers = new HashMap<>();
         this.traceDetailsController = new TraceDetailsController(registrar);
         this.destroying = false;

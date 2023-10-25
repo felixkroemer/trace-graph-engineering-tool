@@ -216,6 +216,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             return;
         }
         if (!(this.displayController instanceof ShortestTraceDisplayController)) {
+            this.traceGraph.setTrace(e.getTrace());
             this.setDisplayController(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getTrace()));
         }
     }

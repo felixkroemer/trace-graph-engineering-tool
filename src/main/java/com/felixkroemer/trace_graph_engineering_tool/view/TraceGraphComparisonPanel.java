@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import static com.felixkroemer.trace_graph_engineering_tool.controller.NetworkComparisonController.*;
 
-public class TraceGraphComparisonPanel extends JPanel {
+public class TraceGraphComparisonPanel extends TraceGraphPanel {
 
     private JToggleButton nodesBOButton;
     private JToggleButton nodesDOButton;
@@ -149,4 +149,8 @@ public class TraceGraphComparisonPanel extends JPanel {
         }
     }
 
+    @Override
+    public String getTitle() {
+        return "Trace Graph Comparison";
+    }
 }
