@@ -1,5 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import com.felixkroemer.trace_graph_engineering_tool.util.CustomLoader;
+import com.google.ortools.sat.*;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.javatuples.Pair;
@@ -359,6 +361,74 @@ public class TraceGraph {
                 prevNode = currentNode;
             }
         }
+    }
+
+    public Trace findTrace2(List<CyNode> nodes) {
+        Trace trace = null;
+
+        CustomLoader.loadNativeLibraries();
+
+        for (CyTable sourceTable : this.sourceTables) {
+
+            BoolVar[] vars = new BoolVar[sourceTable.getRowCount()];
+            BoolVar[] starts = new BoolVar[sourceTable.getRowCount()];
+
+            CpModel model = new CpModel();
+            for (int i = 0; i < sourceTable.getRowCount(); i++) {
+                vars[i] = model.newBoolVar("" + i);
+                starts[i] = model.newBoolVar("s" + i);
+            }
+
+            for (var node : nodes) {
+                var sources = this.nodeInfo.get(node).getSourceRows(sourceTable);
+                IntVar[] expressions = new IntVar[sources.size()];
+                int i = 0;
+                for (var x : sources) {
+                    expressions[i] = vars[x - 1];
+                    i = i + 1;
+                }
+                model.addGreaterOrEqual(LinearExpr.sum(expressions), 1);
+            }
+
+            for (int i = 1; i < vars.length; i++) {
+                model.addLessOrEqual(LinearExpr.weightedSum(new Literal[]{vars[i], vars[i - 1], starts[i]},
+                        new long[]{1, -1, -1}), 0);
+            }
+            model.addImplication(vars[0], starts[0]);
+
+            model.addLessOrEqual(LinearExpr.sum(starts), 1);
+
+            model.minimize(LinearExpr.sum(vars));
+
+            // Create a solver and solve the model.
+            CpSolver solver = new CpSolver();
+            CpSolverStatus status = solver.solve(model);
+
+            if (status == CpSolverStatus.OPTIMAL) {
+                for (var v : vars) {
+                    if (solver.value(v) == 1) {
+                        System.out.println("" + v + " = " + solver.value(v));
+                    }
+                }
+                for (var v : starts) {
+                    if (solver.value(v) == 1) {
+                        System.out.println("" + v + " = " + solver.value(v));
+                    }
+                }
+            } else {
+                System.out.println("No solution found.");
+            }
+
+            // Statistics.
+            System.out.println("Statistics");
+            System.out.printf("  conflicts: %d%n", solver.numConflicts());
+            System.out.printf("  branches : %d%n", solver.numBranches());
+            System.out.printf("  wall time: %f s%n", solver.wallTime());
+
+        }
+
+
+        return trace;
     }
 
     public Trace findTrace(List<CyNode> nodes) {

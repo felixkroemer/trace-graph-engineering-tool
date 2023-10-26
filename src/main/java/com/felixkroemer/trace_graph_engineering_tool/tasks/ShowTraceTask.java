@@ -34,7 +34,7 @@ public class ShowTraceTask extends AbstractTask {
         var controller = (TraceGraphController) manager.findControllerForNetwork(network);
 
         if (controller != null) {
-            var trace = controller.getTraceGraph().findTrace(nodes);
+            var trace = controller.getTraceGraph().findTrace2(nodes);
             if (trace != null) {
                 TraceExtension extension = new TraceExtension(trace);
                 helper.fireEvent(new ShowTraceEvent(this, extension, network));
