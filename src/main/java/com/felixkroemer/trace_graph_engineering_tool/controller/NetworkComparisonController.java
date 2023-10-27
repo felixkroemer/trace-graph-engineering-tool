@@ -124,6 +124,8 @@ public class NetworkComparisonController extends NetworkController implements Se
     @Override
     public void destroy() {
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
+        var visualMappingManager = registrar.getService(VisualMappingManager.class);
+        visualMappingManager.removeVisualStyle(this.defaultVisualStyle);
     }
 
     @Override
@@ -142,8 +144,8 @@ public class NetworkComparisonController extends NetworkController implements Se
     }
 
     private VisualStyle createDefaultVisualStyle() {
-        var VisualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
-        VisualStyle style = VisualStyleFactory.createVisualStyle("default-comparison");
+        var visualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
+        VisualStyle style = visualStyleFactory.createVisualStyle("default-comparison");
 
         VisualMappingFunctionFactory visualMappingFunctionFactory =
                 registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=discrete)");

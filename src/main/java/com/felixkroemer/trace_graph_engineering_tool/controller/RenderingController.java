@@ -73,7 +73,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
-        VisualStyle style = VisualStyleFactory.createVisualStyle("default");
+        VisualStyle style = VisualStyleFactory.createVisualStyle("default-tracegraph");
 
         VisualMappingFunctionFactory visualMappingFunctionFactory =
                 registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
@@ -115,7 +115,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void updateVisualStyle() {
-        this.defaultStyle = createDefaultVisualStyle();
+        var newStyle = createDefaultVisualStyle();
+        var visualMappingManager = registrar.getService(VisualMappingManager.class);
+        visualMappingManager.setVisualStyle(newStyle, this.view);
+        visualMappingManager.removeVisualStyle(this.defaultStyle);
+        this.defaultStyle = newStyle;
     }
 
     public void hideNodes() {
@@ -201,6 +205,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (this.displayController != null) {
             this.displayController.disable();
         }
+        var visualMappingManager = registrar.getService(VisualMappingManager.class);
+        visualMappingManager.removeVisualStyle(this.defaultStyle);
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
     }

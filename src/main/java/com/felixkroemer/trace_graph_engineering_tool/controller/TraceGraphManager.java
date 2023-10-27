@@ -144,6 +144,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
                 networkManager.destroyNetwork(controller.getNetwork());
+                controller.destroy();
             }
         }
         this.controllers.clear();
