@@ -68,14 +68,13 @@ public class Util {
         return null;
     }
 
-    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm, String title) {
+    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm) {
         var root = pdm.getRootNetwork();
         var subNetwork = root.addSubNetwork();
 
         var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
         localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
 
-        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, title);
         return subNetwork;
     }
 

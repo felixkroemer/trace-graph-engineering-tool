@@ -73,8 +73,6 @@ public class LoadPDMTask extends AbstractTask {
             traceGraph.init(sourceTable);
         }
 
-        subNetwork.getRow(subNetwork).set(CyNetwork.NAME, Util.getSubNetworkName(traceGraph.getSourceTables()));
-
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);
     }

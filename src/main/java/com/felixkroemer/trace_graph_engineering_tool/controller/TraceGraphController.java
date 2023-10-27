@@ -140,7 +140,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     public TraceGraphController splitTraceGraph(List<CyTable> tables) {
-        var subNetwork = Util.createSubNetwork(this.getPDM(), Util.getSubNetworkName(tables));
+        var subNetwork = Util.createSubNetwork(this.getPDM());
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         for (CyTable table : tables) {
             networkTableManager.removeTable(this.traceGraph.getNetwork(), CyNode.class, "" + table.hashCode());

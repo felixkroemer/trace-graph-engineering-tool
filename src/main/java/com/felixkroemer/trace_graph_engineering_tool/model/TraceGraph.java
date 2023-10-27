@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.util.CustomLoader;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.ortools.sat.*;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
@@ -37,7 +38,7 @@ public class TraceGraph {
         // DEFAULT_ATTRS = Shared (root) + Local
         this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
         this.defaultEdgetable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
-        this.suidHashMapping = this.pdm.getSuidHashMapping(); //TODO: find way to create nodes with specified SUID
+        this.suidHashMapping = this.pdm.getSuidHashMapping();
         this.nodeMapping = new HashMap<>();
         this.nodeInfo = new HashMap<>();
         this.edgeInfo = new HashMap<>();
@@ -128,6 +129,15 @@ public class TraceGraph {
             }
             prevNode = currentNode;
         }
+
+        this.fixNetworkName();
+    }
+
+    /**
+     * Called when a trace is added to or extracted from this Trace Graph.
+     */
+    public void fixNetworkName() {
+        network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(sourceTables));
     }
 
     public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTables) {
@@ -170,6 +180,9 @@ public class TraceGraph {
         for (CyTable table : sourceTables) {
             traceGraph.init(table);
         }
+
+        fixNetworkName();
+
         return traceGraph;
     }
 
@@ -363,12 +376,28 @@ public class TraceGraph {
         }
     }
 
-    public Trace findTrace2(List<CyNode> nodes) {
+    private boolean isFeasible(List<CyNode> nodes, CyTable sourceTable) {
+        for (var node : nodes) {
+            if (this.nodeInfo.get(node).getSourceRows(sourceTable) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Trace findTraceCPSat(List<CyNode> nodes) {
+        Trace shortestTrace = null;
         Trace trace = null;
 
         CustomLoader.loadNativeLibraries();
 
         for (CyTable sourceTable : this.sourceTables) {
+
+            if (!isFeasible(nodes, sourceTable)) {
+                continue;
+            }
+
+            trace = new Trace();
 
             BoolVar[] vars = new BoolVar[sourceTable.getRowCount()];
             BoolVar[] starts = new BoolVar[sourceTable.getRowCount()];
@@ -402,44 +431,61 @@ public class TraceGraph {
 
             // Create a solver and solve the model.
             CpSolver solver = new CpSolver();
+            solver.getParameters().setCpModelPresolve(false);
+            solver.getParameters().setLogSearchProgress(true);
             CpSolverStatus status = solver.solve(model);
 
+
             if (status == CpSolverStatus.OPTIMAL) {
-                for (var v : vars) {
-                    if (solver.value(v) == 1) {
-                        System.out.println("" + v + " = " + solver.value(v));
+                int start = -1;
+                int end = vars.length - 1;
+                for (int i = 0; i < vars.length; i++) {
+                    if (solver.value(vars[i]) == 1) {
+                        start = i;
+                        continue;
+                    }
+                    if (start != -1 && solver.value(vars[i]) == 0) {
+                        end = i - 1;
+                        break;
                     }
                 }
-                for (var v : starts) {
-                    if (solver.value(v) == 1) {
-                        System.out.println("" + v + " = " + solver.value(v));
-                    }
+
+                for (int i = start; i <= end; i++) {
+                    trace.addAfter(findNode(sourceTable, i), i);
                 }
+
+                if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {
+                    shortestTrace = trace;
+                }
+
             } else {
-                System.out.println("No solution found.");
+                return null;
             }
-
-            // Statistics.
-            System.out.println("Statistics");
-            System.out.printf("  conflicts: %d%n", solver.numConflicts());
-            System.out.printf("  branches : %d%n", solver.numBranches());
-            System.out.printf("  wall time: %f s%n", solver.wallTime());
-
         }
 
 
-        return trace;
+        return shortestTrace;
     }
 
     public Trace findTrace(List<CyNode> nodes) {
-        //TODO: support multiple traces per tg
+        if (nodes.size() == 2) {
+            return findTraceNaive(nodes);
+        } else {
+            return findTraceCPSat(nodes);
+        }
+    }
+
+    public Trace findTraceNaive(List<CyNode> nodes) {
         Trace shortestTrace = null;
         Trace trace = null;
         for (CyTable sourceTable : this.sourceTables) {
-            trace = new Trace();
-            if (nodes.size() != 2) {
-                return null;
+
+            if (!isFeasible(nodes, sourceTable)) {
+                continue;
             }
+
+            trace = new Trace();
+
             var nodeA = nodes.get(0);
             var nodeB = nodes.get(1);
 

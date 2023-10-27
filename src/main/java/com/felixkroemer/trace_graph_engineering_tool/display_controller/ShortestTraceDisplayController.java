@@ -24,7 +24,6 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
                                           TraceExtension trace) {
         super(registrar, view, traceGraph);
         this.trace = trace;
-        this.registrar.registerService(this, ShowTraceEventListener.class);
     }
 
     @Override
@@ -44,6 +43,8 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
 
     @Override
     public void init() {
+        this.registrar.registerService(this, ShowTraceEventListener.class);
+        this.hideAllEdges();
         this.showTrace(this.trace);
     }
 

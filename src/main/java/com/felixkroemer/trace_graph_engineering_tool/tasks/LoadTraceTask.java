@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class LoadTraceTask extends AbstractTask {
@@ -56,7 +55,7 @@ public class LoadTraceTask extends AbstractTask {
         ParameterDiscretizationModel pdm = manager.findPDM(params);
         if (pdm != null) {
             this.tableManager.addTable(sourceTable);
-            var subNetwork = Util.createSubNetwork(pdm, Util.getSubNetworkName(Collections.singleton(sourceTable)));
+            var subNetwork = Util.createSubNetwork(pdm);
             this.networkTableManager.setTable(subNetwork, CyNode.class, sourceTable.getTitle(), sourceTable);
             var traceGraph = new TraceGraph(subNetwork, pdm);
             traceGraph.init(sourceTable);

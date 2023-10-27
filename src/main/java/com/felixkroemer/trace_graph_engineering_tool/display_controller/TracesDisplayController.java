@@ -4,17 +4,13 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceSetEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.beans.PropertyChangeSupport;
 import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
@@ -22,28 +18,21 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 public class TracesDisplayController extends AbstractDisplayController {
 
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
-    private static Color[] colors = generateColorList();
-
-    private Logger logger;
-
+    private static final Color[] colors = generateColorList();
+    
     private int length;
     private static int colorIndex = 0;
-    private PropertyChangeSupport pcs;
     private CyServiceRegistrar registrar;
     private Set<CyEdge> multiEdges;
     private Map<CyEdge, TraceExtension> traceMapping;
-    private boolean enableVisitWidth;
 
     public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                    int length) {
         super(registrar, view, traceGraph);
         this.registrar = registrar;
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.length = length;
-        this.pcs = new PropertyChangeSupport(this);
         this.multiEdges = new HashSet<>();
         this.traceMapping = new HashMap<>();
-        this.enableVisitWidth = false;
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
