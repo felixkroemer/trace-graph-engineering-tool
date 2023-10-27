@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.*;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
-import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -77,10 +77,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         VisualMappingFunctionFactory visualMappingFunctionFactory =
                 registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
-        TooltipMappingFactory tooltipMappingFunctionFactory =
-                (TooltipMappingFactory) registrar.getService(VisualMappingFunctionFactory.class,
-                        "(mapping" + ".type" + "=tooltip)");
-        tooltipMappingFunctionFactory.setTraceGraph(this.traceGraph);
 
         int maxFrequency = -1;
         int maxVisits = -1;
@@ -95,12 +91,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 visualMappingFunctionFactory);
         VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, maxFrequency,
                 visualMappingFunctionFactory);
-        VisualMappingFunction<CyRow, String> tooltipMapping =
-                Mappings.createTooltipMapping(tooltipMappingFunctionFactory);
 
         style.addVisualMappingFunction(sizeMapping);
         style.addVisualMappingFunction(colorMapping);
-        style.addVisualMappingFunction(tooltipMapping);
+        style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         style.setDefaultValue(EDGE_VISIBLE, false);
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);

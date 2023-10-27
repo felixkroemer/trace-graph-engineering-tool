@@ -152,7 +152,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         return new TraceGraphController(registrar, newTg);
     }
 
-    public void merge(TraceGraphController controller) {
+    public void mergeTraceGraph(TraceGraphController controller) {
         var networkManager = registrar.getService(CyNetworkManager.class);
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         var network = controller.getNetwork();

@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
-import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMappingFactory;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.application.CyUserLog;
@@ -12,7 +11,6 @@ import org.cytoscape.task.EdgeViewTaskFactory;
 import org.cytoscape.task.NetworkCollectionTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.task.NodeViewTaskFactory;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -56,10 +54,6 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace",
                         INSERT_SEPARATOR_BEFORE, "true")));
-
-        TooltipMappingFactory tooltipMappingFactory = new TooltipMappingFactory(reg);
-        registerService(bundleContext, tooltipMappingFactory, VisualMappingFunctionFactory.class,
-                Util.genProperties(Map.of("service.type", "factory", "mapping.type", "tooltip")));
 
         RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
         registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class,
