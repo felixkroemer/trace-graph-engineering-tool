@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultDisplayController.RENDERING_MODE_FULL;
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowDisplayController.RENDERING_MODE_FOLLOW;
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesDisplayController.RENDERING_MODE_TRACES;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.work.ServiceProperties.*;
 
 

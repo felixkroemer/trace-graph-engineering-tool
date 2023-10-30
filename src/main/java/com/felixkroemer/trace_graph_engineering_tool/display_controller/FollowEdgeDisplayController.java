@@ -13,13 +13,13 @@ import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class FollowDisplayController extends AbstractDisplayController {
+public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
 
     private CyNode previousNode;
 
-    public FollowDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
+    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         super(registrar, view, traceGraph);
     }
 

@@ -27,9 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultDisplayController.RENDERING_MODE_FULL;
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowDisplayController.RENDERING_MODE_FOLLOW;
-import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesDisplayController.RENDERING_MODE_TRACES;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
+import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
@@ -38,7 +38,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private CyServiceRegistrar registrar;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
-    private AbstractDisplayController displayController;
+    private AbstractEdgeDisplayController displayController;
     private TraceGraph traceGraph;
     private String previousDisplayController;
 
@@ -158,7 +158,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         return this.defaultStyle;
     }
 
-    private void setDisplayController(AbstractDisplayController displayController) {
+    private void setDisplayController(AbstractEdgeDisplayController displayController) {
         if (this.displayController != null) {
             if (this.displayController.getClass() == displayController.getClass()) {
                 return;
@@ -183,13 +183,13 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void setMode(String mode) {
         switch (mode) {
             case RENDERING_MODE_FULL -> {
-                this.setDisplayController(new DefaultDisplayController(registrar, view, this.traceGraph));
+                this.setDisplayController(new DefaultEdgeDisplayController(registrar, view, this.traceGraph));
             }
             case RENDERING_MODE_FOLLOW -> {
-                this.setDisplayController(new FollowDisplayController(registrar, view, this.traceGraph));
+                this.setDisplayController(new FollowEdgeDisplayController(registrar, view, this.traceGraph));
             }
             case RENDERING_MODE_TRACES -> {
-                this.setDisplayController(new TracesDisplayController(this.registrar, view, this.traceGraph, 2));
+                this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2));
             }
         }
     }
@@ -232,10 +232,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (e.getNetwork() != this.traceGraph.getNetwork()) {
             return;
         }
-        if (!(this.displayController instanceof ShortestTraceDisplayController)) {
+        if (!(this.displayController instanceof ShortestTraceEdgeDisplayController)) {
             this.traceGraph.setTrace(e.getTrace());
             this.previousDisplayController = this.displayController.getID();
-            this.setDisplayController(new ShortestTraceDisplayController(registrar, view, traceGraph, e.getTrace()));
+            this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph, e.getTrace()));
         }
     }
 }

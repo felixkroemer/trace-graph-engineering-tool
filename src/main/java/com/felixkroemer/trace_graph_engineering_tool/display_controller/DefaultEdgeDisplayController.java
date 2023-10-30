@@ -13,11 +13,11 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 
-public class DefaultDisplayController extends AbstractDisplayController {
+public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
 
-    public DefaultDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
+    public DefaultEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         super(registrar, view, traceGraph);
         this.showALlEdges();
     }

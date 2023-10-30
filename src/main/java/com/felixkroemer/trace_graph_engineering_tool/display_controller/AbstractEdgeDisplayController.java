@@ -9,14 +9,14 @@ import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public abstract class AbstractDisplayController {
+public abstract class AbstractEdgeDisplayController {
 
     protected CyServiceRegistrar registrar;
     protected CyNetworkView networkView;
     protected TraceGraph traceGraph;
 
     // assumes the network has the default style applied (besides EDGE_VISIBLE / NODE_VISIBLE)
-    public AbstractDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
+    public AbstractEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
         this.registrar = registrar;
         this.networkView = view;
         this.traceGraph = traceGraph;

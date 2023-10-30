@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TracesDisplayController extends AbstractDisplayController {
+public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
     public static final int NUM_TRACES_TO_DRAW = 12;
@@ -29,8 +29,8 @@ public class TracesDisplayController extends AbstractDisplayController {
     private Set<CyEdge> multiEdges;
     private Map<CyEdge, TraceExtension> traceMapping;
 
-    public TracesDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                   int length) {
+    public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                       int length) {
         super(registrar, view, traceGraph);
         this.registrar = registrar;
         this.length = length;

@@ -14,15 +14,15 @@ import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class ShortestTraceDisplayController extends AbstractDisplayController implements ShowTraceEventListener {
+public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayController implements ShowTraceEventListener {
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
 
     //TODO: find better way to pass initial trace
     private TraceExtension trace;
 
-    public ShortestTraceDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                          TraceExtension trace) {
+    public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                              TraceExtension trace) {
         super(registrar, view, traceGraph);
         this.trace = trace;
     }
