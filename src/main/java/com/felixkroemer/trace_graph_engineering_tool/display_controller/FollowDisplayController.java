@@ -9,6 +9,7 @@ import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -51,6 +52,11 @@ public class FollowDisplayController extends AbstractDisplayController {
 
     @Override
     public void disable() {
+    }
+
+    @Override
+    public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
+        return defaultVisualStyle;
     }
 
     @Override

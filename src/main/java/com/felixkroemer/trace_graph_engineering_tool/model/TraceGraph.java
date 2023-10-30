@@ -94,7 +94,7 @@ public class TraceGraph {
                     currentNodeInfo = new AuxiliaryInformation();
                     this.nodeInfo.put(currentNode, currentNodeInfo);
                 }
-                if (prevNode == currentNode) { // prevNode cannot be null here
+                if (prevNode != currentNode) { // prevNode cannot be null here
                     currentRow.set(Columns.NODE_VISITS, currentRow.get(Columns.NODE_VISITS, Integer.class) + 1);
                 } else {
                     currentRow.set(Columns.NODE_FREQUENCY, currentRow.get(Columns.NODE_FREQUENCY, Integer.class) + 1);
@@ -203,7 +203,6 @@ public class TraceGraph {
             }
         }
         return param.getBins().size();
-
     }
 
     /*
@@ -227,15 +226,8 @@ public class TraceGraph {
         return this.pdm;
     }
 
-    public void clearNetwork() {
-        // also removes edges and clears all tables
-        this.network.removeNodes(this.network.getNodeList());
-        this.nodeInfo.clear();
-    }
-
     public void reinit(Parameter changedParameter) {
-        this.network.removeEdges(this.network.getEdgeList());
-        this.edgeInfo.clear();
+        clearEdges();
         int changedParameterIndex = -1;
         for (int j = 0; j < pdm.getParameterCount(); j++) {
             if (this.pdm.getParameters().get(j).equals(changedParameter)) {
@@ -265,8 +257,6 @@ public class TraceGraph {
                 while (iterator.hasNext()) {
                     var j = iterator.next();
                     visited[j] = true;
-                    oldNodeRow.set(Columns.NODE_VISITS, 1);
-                    oldNodeRow.set(Columns.NODE_FREQUENCY, 1);
 
                     var sourceRow = sourceTable.getRow((long) j);
                     double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
@@ -288,9 +278,6 @@ public class TraceGraph {
                         // may be null if suidHashMapping reference is stale; -> node may have been removed from all
                         // TraceGraphs of the pdm, reference is not cleaned up automatically
                         if (suid != null && (newNode = rootNetwork.getNode(suid)) != null) { // implies suid is not null
-                            // may be null
-                            newNodeRow = defaultNodeTable.getRow(newNode.getSUID());
-                            newNodeAux = this.nodeInfo.get(newNode);
                             // node exists in root network, but not here
                             if (!network.containsNode(newNode)) {
                                 // make node available from the default node table
@@ -300,6 +287,9 @@ public class TraceGraph {
                                 newNodeRow.set(Columns.NODE_FREQUENCY, 1);
                                 newNodeAux = new AuxiliaryInformation();
                                 this.nodeInfo.put(newNode, newNodeAux);
+                            } else {
+                                newNodeRow = defaultNodeTable.getRow(newNode.getSUID());
+                                newNodeAux = this.nodeInfo.get(newNode);
                             }
                         } else {
                             newNode = network.addNode();
@@ -313,8 +303,6 @@ public class TraceGraph {
                             newNodeAux = new AuxiliaryInformation();
                             this.nodeInfo.put(newNode, newNodeAux);
                         }
-                        // TODO: adjust NODE_VISITS
-                        // TODO: adjust NODE_FREQUENCY
                         iterator.remove();
                         oldNodeAux.getSourceRows(sourceTable).remove((Object) j);
                         newNodeAux.addSourceRow(sourceTable, j);
@@ -340,6 +328,15 @@ public class TraceGraph {
         // need to be removed in batches, otherwise events take forever
         // TODO: check problem with rendering timer concurrency (trying to render nodes that were already deleted)
         this.network.removeNodes(nodesToRemove);
+    }
+
+    public void clearEdges() {
+        this.network.removeEdges(this.network.getEdgeList());
+        this.edgeInfo.clear();
+        for(CyRow row : this.defaultNodeTable.getAllRows()) {
+            row.set(Columns.NODE_VISITS, 1);
+            row.set(Columns.NODE_FREQUENCY, 1);
+        }
     }
 
     public void generateEdges() {

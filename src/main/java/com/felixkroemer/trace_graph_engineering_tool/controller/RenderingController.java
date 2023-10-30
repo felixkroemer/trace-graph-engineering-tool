@@ -116,6 +116,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void updateVisualStyle() {
         var newStyle = createDefaultVisualStyle();
+        newStyle = displayController.adjustVisualStyle(newStyle);
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.setVisualStyle(newStyle, this.view);
         visualMappingManager.removeVisualStyle(this.defaultStyle);
@@ -167,6 +168,15 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
         }
         this.displayController = displayController;
+
+        var visualStyle = displayController.adjustVisualStyle(this.defaultStyle);
+        var mapper = registrar.getService(VisualMappingManager.class);
+        if(visualStyle != null) {
+            mapper.setVisualStyle(visualStyle, this.view);
+        } else {
+            mapper.setVisualStyle(createDefaultVisualStyle(), this.view);
+        }
+
         this.displayController.init();
     }
 

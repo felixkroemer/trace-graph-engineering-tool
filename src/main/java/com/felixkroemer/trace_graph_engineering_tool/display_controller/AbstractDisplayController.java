@@ -5,6 +5,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -41,6 +42,8 @@ public abstract class AbstractDisplayController {
             edgeView.setVisualProperty(EDGE_VISIBLE, false);
         }
     }
+
+    abstract public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle);
 
     protected CyNode findFartherNode(CyNode source, CyNode target) {
         var sourceX = networkView.getNodeView(source).getVisualProperty(NODE_X_LOCATION);

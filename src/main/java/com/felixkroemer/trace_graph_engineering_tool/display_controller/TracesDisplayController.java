@@ -9,6 +9,7 @@ import org.cytoscape.model.*;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.vizmap.VisualStyle;
 
 import java.awt.*;
 import java.util.*;
@@ -162,6 +163,11 @@ public class TracesDisplayController extends AbstractDisplayController {
     @Override
     public void disable() {
         networkView.getModel().removeEdges(this.multiEdges);
+    }
+
+    @Override
+    public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
+        return defaultVisualStyle;
     }
 
     @Override

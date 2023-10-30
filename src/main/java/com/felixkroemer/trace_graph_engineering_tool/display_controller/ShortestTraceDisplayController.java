@@ -10,6 +10,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.vizmap.VisualStyle;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -54,6 +55,11 @@ public class ShortestTraceDisplayController extends AbstractDisplayController im
         this.traceGraph.setTrace(null);
         var eventHelper = registrar.getService(CyEventHelper.class);
         eventHelper.fireEvent(new ClearTraceEvent(this, this.trace, networkView.getModel()));
+    }
+
+    @Override
+    public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
+        return defaultVisualStyle;
     }
 
     @Override
