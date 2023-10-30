@@ -8,8 +8,8 @@ import org.cytoscape.model.CyNetwork;
 public final class ShowTraceEvent extends AbstractCyEvent<Object> {
 
     private final TraceExtension trace;
-
     private final CyNetwork network;
+
 
 
     public ShowTraceEvent(Object source, TraceExtension trace, CyNetwork network) {

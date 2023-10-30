@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.javatuples.Pair;
 
@@ -11,19 +12,26 @@ public class TraceExtension extends Trace {
 
     private final CyNode node;
     private Color color;
+    private int weight;
+    private CyNetwork network;
 
-    public TraceExtension(CyNode node, int sourceIndex, Color color) {
+    public TraceExtension(CyNode node, CyNetwork network, int sourceIndex, Color color) {
         super();
         this.node = node;
         this.color = color;
+        this.weight = 0;
+        this.network = network;
         this.sequence.add(new Pair<>(node, sourceIndex));
     }
 
-    public TraceExtension(Trace trace) {
+    public TraceExtension(Trace trace, CyNetwork network) {
         super();
         this.node = null;
         this.color = Color.BLACK;
         this.sequence = (LinkedList<Pair<CyNode, Integer>>) trace.getSequence();
+        for(var node : trace.getSequence()) {
+            this.increaseWeight(node.getValue0());
+        }
     }
 
     public Color getColor() {
@@ -43,6 +51,29 @@ public class TraceExtension extends Trace {
         }
         return sb.toString();
     }
+
+    @Override
+    public void addBefore(CyNode node, int sourceIndex) {
+        super.addBefore(node, sourceIndex);
+        this.increaseWeight(node);
+    }
+
+    public void increaseWeight(CyNode node) {
+        var visits = this.network.getDefaultNodeTable().getRow(node.getSUID()).get(Columns.NODE_VISITS, Integer.class);
+        var frequency = this.network.getDefaultNodeTable().getRow(node.getSUID()).get(Columns.NODE_FREQUENCY, Integer.class);
+        this.weight += visits + frequency;
+    }
+
+    @Override
+    public void addAfter(CyNode node, int sourceIndex) {
+        super.addAfter(node, sourceIndex);
+        this.increaseWeight(node);
+    }
+
+    public int getWeight() {
+        return this.weight;
+    }
+
 
     public CyNode getNode() {
         return this.node;

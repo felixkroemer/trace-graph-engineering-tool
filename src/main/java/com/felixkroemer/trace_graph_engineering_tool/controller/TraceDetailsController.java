@@ -21,6 +21,7 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.TaskManager;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
     private CyNetwork network;
     private CyNetworkView networkView;
     private Map<CyNode, CyNode> nodeMapping;
-    private Set<TraceExtension> traces;
+    private Collection<TraceExtension> traces;
     private CyNetwork correspondingNetwork;
     boolean dirty = false;
 
@@ -73,7 +74,7 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
         return this.correspondingNetwork;
     }
 
-    public void updateTraces(Set<TraceExtension> traces) {
+    public void updateTraces(Collection<TraceExtension> traces) {
         this.nodeMapping.clear();
         this.network.removeNodes(this.network.getNodeList());
 
