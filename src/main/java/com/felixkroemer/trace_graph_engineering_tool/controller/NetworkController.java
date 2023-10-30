@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizati
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.opencl.layout.CLLayoutContext;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
@@ -46,7 +47,12 @@ public abstract class NetworkController {
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
-        Object context = layoutFactory.getDefaultLayoutContext();
+        var context = (CLLayoutContext) layoutFactory.getDefaultLayoutContext();
+        //context.numIterations = 300;
+        context.defaultSpringLength = 100;
+        //context.numIterationsEdgeRepulsive = 10;
+        context.defaultNodeMass = 10;
+
         return layoutFactory.createTaskIterator(view, context, CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
     }
 
