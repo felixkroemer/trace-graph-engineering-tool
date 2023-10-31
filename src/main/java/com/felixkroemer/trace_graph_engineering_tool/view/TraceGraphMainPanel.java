@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener,
         SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener, SetCurrentComparisonControllerListener,
-        ShowTraceEventListener, ClearTraceEventListener {
+        SetCurrentEdgeDisplayControllerEventListener {
 
     private CyServiceRegistrar reg;
     private JTabbedPane tabs;
@@ -25,7 +25,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     private NodeInfoPanel nodeInfoPanel;
     private TraceGraphComparisonPanel traceGraphComparisonPanel;
     private NodeComparisonPanel nodeComparisonPanel;
-    private TracePanel tracePanel;
+    private JPanel edgeDisplayControllerPanel;
 
     public TraceGraphMainPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
@@ -36,14 +36,13 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.nodeInfoPanel = new NodeInfoPanel(reg);
         this.traceGraphComparisonPanel = new TraceGraphComparisonPanel();
         this.nodeComparisonPanel = new NodeComparisonPanel(reg);
-        this.tracePanel = new TracePanel(reg);
+        this.edgeDisplayControllerPanel = null;
 
         this.reg.registerService(this, SelectedNodesAndEdgesListener.class, new Properties());
         this.reg.registerService(this, SetCurrentNetworkListener.class, new Properties());
         this.reg.registerService(this, SetCurrentTraceGraphControllerListener.class, new Properties());
         this.reg.registerService(this, SetCurrentComparisonControllerListener.class, new Properties());
-        this.reg.registerService(this, ShowTraceEventListener.class, new Properties());
-        this.reg.registerService(this, ClearTraceEventListener.class, new Properties());
+        this.reg.registerService(this, SetCurrentEdgeDisplayControllerEventListener.class, new Properties());
 
         init();
     }
@@ -63,8 +62,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.reg.unregisterService(this, SetCurrentNetworkListener.class);
         this.reg.unregisterService(this, SetCurrentTraceGraphControllerListener.class);
         this.reg.unregisterService(this, SetCurrentComparisonControllerListener.class);
-        this.reg.unregisterService(this, ShowTraceEventListener.class);
-        this.reg.unregisterService(this, ClearTraceEventListener.class);
+        this.reg.unregisterService(this, SetCurrentEdgeDisplayControllerEventListener.class);
     }
 
     @Override
@@ -142,20 +140,26 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
         this.showPanel(this.pdmPanel);
-        var trace = event.getTraceGraphController().getTraceGraph().getTrace();
-        if (trace == null) {
-            this.hidePanel(tracePanel);
-        } else {
-            this.showPanel(tracePanel);
-        }
+        var settingsPanel = event.getTraceGraphController().getRenderingController().getSettingsPanel();
+        this.replaceEdgeDisplayControllerPanel(settingsPanel);
         this.hidePanel(this.traceGraphComparisonPanel);
+    }
+
+    private void replaceEdgeDisplayControllerPanel(JPanel newPanel) {
+        BorderLayout layout = (BorderLayout) this.getLayout();
+        var oldPanel = layout.getLayoutComponent(BorderLayout.SOUTH);
+        if(oldPanel != null) {
+            this.remove(oldPanel);
+        }
+        if(newPanel != null) {
+            this.add(newPanel, BorderLayout.SOUTH);
+        }
     }
 
     @Override
     public void handleEvent(SetCurrentComparisonControllerEvent event) {
         this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
         this.showPanel(this.traceGraphComparisonPanel);
-        this.hidePanel(this.tracePanel);
     }
 
     public void showMainPanel() {
@@ -183,19 +187,12 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     private void hideControllerSpecificPanels() {
         this.hideTemporaryPanels();
         this.hidePanel(this.traceGraphComparisonPanel);
-        this.hidePanel(this.tracePanel);
     }
 
     @Override
-    public void handleEvent(ShowTraceEvent e) {
-        var manager = reg.getService(TraceGraphManager.class);
-        var controller = manager.findControllerForNetwork(e.getNetwork());
-        this.tracePanel.updateTracePanel(controller, e.getTrace());
-        this.showPanel(this.tracePanel);
-    }
-
-    @Override
-    public void handleEvent(ClearTraceEvent e) {
-        this.hidePanel(this.tracePanel);
+    public void handleEvent(SetCurrentEdgeDisplayControllerEvent e) {
+        var previous = e.getPreviousController();
+        var current = e.getCurrentController();
+        this.replaceEdgeDisplayControllerPanel(current.getSettingsPanel());
     }
 }

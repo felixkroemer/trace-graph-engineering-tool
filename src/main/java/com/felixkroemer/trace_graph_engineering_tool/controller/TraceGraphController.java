@@ -23,6 +23,7 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
+import javax.swing.*;
 import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
@@ -35,7 +36,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         super(registrar, traceGraph.getNetwork(), traceGraph.getPDM());
         this.traceGraph = traceGraph;
-        this.renderingController = new RenderingController(registrar, traceGraph);
+        this.renderingController = new RenderingController(registrar, this);
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
     }
@@ -168,7 +169,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.applyStyleAndLayout();
     }
 
-    public void restorePreviousDisplayController() {
-        this.renderingController.restorePreviousDisplayController();
+    public RenderingController getRenderingController() {
+        return this.renderingController;
     }
 }

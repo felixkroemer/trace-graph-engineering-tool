@@ -1,16 +1,19 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
-import com.felixkroemer.trace_graph_engineering_tool.events.ClearTraceEvent;
+import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.view.TracePanel;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualStyle;
+
+import javax.swing.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -22,8 +25,8 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
     private TraceExtension trace;
 
     public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                              TraceExtension trace) {
-        super(registrar, view, traceGraph);
+                                              TraceExtension trace, RenderingController renderingController) {
+        super(registrar, view, traceGraph, renderingController);
         this.trace = trace;
     }
 
@@ -52,9 +55,6 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
     @Override
     public void disable() {
         this.registrar.unregisterService(this, ShowTraceEventListener.class);
-        this.traceGraph.setTrace(null);
-        var eventHelper = registrar.getService(CyEventHelper.class);
-        eventHelper.fireEvent(new ClearTraceEvent(this, this.trace, networkView.getModel()));
     }
 
     @Override
@@ -89,5 +89,11 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
             return;
         }
         this.showTrace(e.getTrace());
+    }
+
+    public JPanel getSettingsPanel() {
+        var panel = new TracePanel(registrar);
+        panel.updateTracePanel(this.renderingController.getTraceGraphController(), this.trace);
+        return panel;
     }
 }

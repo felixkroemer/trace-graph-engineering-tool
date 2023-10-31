@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import org.cytoscape.model.CyEdge;
@@ -19,8 +20,8 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     private CyNode previousNode;
 
-    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
-        super(registrar, view, traceGraph);
+    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+        super(registrar, view, traceGraph, renderingController);
     }
 
     @Override

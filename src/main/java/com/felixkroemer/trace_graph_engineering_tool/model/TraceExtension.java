@@ -27,6 +27,7 @@ public class TraceExtension extends Trace {
     public TraceExtension(Trace trace, CyNetwork network) {
         super();
         this.node = null;
+        this.network = network;
         this.color = Color.BLACK;
         this.sequence = (LinkedList<Pair<CyNode, Integer>>) trace.getSequence();
         for(var node : trace.getSequence()) {

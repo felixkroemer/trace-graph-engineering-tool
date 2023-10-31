@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceSetEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
@@ -30,8 +31,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     private Map<CyEdge, TraceExtension> traceMapping;
 
     public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                       int length) {
-        super(registrar, view, traceGraph);
+                                       int length, RenderingController renderingController) {
+        super(registrar, view, traceGraph, renderingController);
         this.registrar = registrar;
         this.length = length;
         this.multiEdges = new HashSet<>();

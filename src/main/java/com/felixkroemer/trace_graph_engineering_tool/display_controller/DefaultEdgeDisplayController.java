@@ -1,5 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
+import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
@@ -17,8 +18,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
 
-    public DefaultEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph) {
-        super(registrar, view, traceGraph);
+    public DefaultEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+        super(registrar, view, traceGraph, renderingController);
         this.showALlEdges();
     }
 
