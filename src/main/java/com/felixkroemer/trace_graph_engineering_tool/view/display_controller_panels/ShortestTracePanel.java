@@ -1,8 +1,9 @@
-package com.felixkroemer.trace_graph_engineering_tool.view;
+package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 
-import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -14,19 +15,22 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class TracePanel extends TraceGraphPanel {
+public class ShortestTracePanel extends TraceGraphPanel implements PropertyChangeListener {
 
     private CyServiceRegistrar reg;
 
     private CustomTreeTable traceTreeTable;
-    private NetworkController controller;
+    private ShortestTraceEdgeDisplayController controller;
 
     private JPanel returnToPreviousModePanel;
     private JButton returnToPreviousModeButton;
 
-    public TracePanel(CyServiceRegistrar reg) {
+    public ShortestTracePanel(CyServiceRegistrar reg, ShortestTraceEdgeDisplayController controller, TraceExtension trace) {
         this.reg = reg;
+        this.controller = controller;
         this.traceTreeTable = new CustomTreeTable();
         this.returnToPreviousModePanel = new JPanel();
         this.returnToPreviousModeButton = new JButton("Restore previous mode");
@@ -34,6 +38,9 @@ public class TracePanel extends TraceGraphPanel {
         this.returnToPreviousModeButton.setEnabled(false);
 
         this.init();
+
+        this.updateTracePanel(trace);
+        controller.addObserver(this);
     }
 
     private void init() {
@@ -49,7 +56,8 @@ public class TracePanel extends TraceGraphPanel {
                     int row = traceTreeTable.getWrappedTreeTable().rowAtPoint(e.getPoint());
                     TreePath path = traceTreeTable.getWrappedTreeTable().getPathForRow(row);
                     var nodeNode = (CyNodeTreeTableNode) path.getLastPathComponent();
-                    controller.focusNode(nodeNode.getNode());
+                    var networkController = controller.getRenderingController().getTraceGraphController();
+                    networkController.focusNode(nodeNode.getNode());
                 }
             }
         });
@@ -58,8 +66,7 @@ public class TracePanel extends TraceGraphPanel {
         this.add(this.returnToPreviousModePanel, BorderLayout.SOUTH);
     }
 
-    public void updateTracePanel(NetworkController controller, TraceExtension trace) {
-        this.controller = controller;
+    private void updateTracePanel(TraceExtension trace) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         CyNode prevNode = null;
         for (var entry : trace.getSequence()) {
@@ -75,6 +82,15 @@ public class TracePanel extends TraceGraphPanel {
     @Override
     public String getTitle() {
         return "Trace";
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+            case "trace" -> {
+                this.updateTracePanel((TraceExtension) evt.getNewValue());
+            }
+        }
     }
 }
 

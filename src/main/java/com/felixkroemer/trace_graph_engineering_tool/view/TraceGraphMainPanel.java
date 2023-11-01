@@ -25,7 +25,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     private NodeInfoPanel nodeInfoPanel;
     private TraceGraphComparisonPanel traceGraphComparisonPanel;
     private NodeComparisonPanel nodeComparisonPanel;
-    private JPanel edgeDisplayControllerPanel;
+    private TraceGraphPanel edgeDisplayControllerPanel;
 
     public TraceGraphMainPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
@@ -145,14 +145,13 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.hidePanel(this.traceGraphComparisonPanel);
     }
 
-    private void replaceEdgeDisplayControllerPanel(JPanel newPanel) {
-        BorderLayout layout = (BorderLayout) this.getLayout();
-        var oldPanel = layout.getLayoutComponent(BorderLayout.SOUTH);
-        if(oldPanel != null) {
-            this.remove(oldPanel);
+    private void replaceEdgeDisplayControllerPanel(TraceGraphPanel newPanel) {
+        if(this.edgeDisplayControllerPanel != null) {
+            this.hidePanel(this.edgeDisplayControllerPanel);
         }
+        this.edgeDisplayControllerPanel = newPanel;
         if(newPanel != null) {
-            this.add(newPanel, BorderLayout.SOUTH);
+            this.showPanel(newPanel);
         }
     }
 
@@ -160,6 +159,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     public void handleEvent(SetCurrentComparisonControllerEvent event) {
         this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
         this.showPanel(this.traceGraphComparisonPanel);
+        this.hidePanel(this.edgeDisplayControllerPanel);
     }
 
     public void showMainPanel() {
@@ -187,6 +187,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     private void hideControllerSpecificPanels() {
         this.hideTemporaryPanels();
         this.hidePanel(this.traceGraphComparisonPanel);
+        this.hidePanel(this.edgeDisplayControllerPanel);
     }
 
     @Override

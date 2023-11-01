@@ -5,15 +5,16 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.view.TracePanel;
-import org.cytoscape.event.CyEventHelper;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.ShortestTracePanel;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualStyle;
 
-import javax.swing.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
@@ -88,12 +89,20 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
         if (e.getNetwork() != this.traceGraph.getNetwork()) {
             return;
         }
+        this.trace = e.getTrace();
         this.showTrace(e.getTrace());
+        pcs.firePropertyChange(new PropertyChangeEvent(this, "trace", null, e.getTrace()));
     }
 
-    public JPanel getSettingsPanel() {
-        var panel = new TracePanel(registrar);
-        panel.updateTracePanel(this.renderingController.getTraceGraphController(), this.trace);
-        return panel;
+    public TraceGraphPanel getSettingsPanel() {
+        return new ShortestTracePanel(registrar, this, this.trace);
+    }
+
+    public void addObserver(PropertyChangeListener l) {
+        this.pcs.addPropertyChangeListener("trace", l);
+    }
+
+    public void removeObserver(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener(l);
     }
 }

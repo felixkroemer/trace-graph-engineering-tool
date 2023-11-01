@@ -9,6 +9,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
@@ -247,7 +248,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    public JPanel getSettingsPanel() {
+    public TraceGraphPanel getSettingsPanel() {
         return this.displayController.getSettingsPanel();
     }
 
