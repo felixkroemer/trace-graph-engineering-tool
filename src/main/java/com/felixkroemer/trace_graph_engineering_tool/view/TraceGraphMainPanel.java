@@ -103,6 +103,9 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
 
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
+        if(!event.nodesChanged()) {
+            return;
+        }
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(event.getNetwork());
         if (controller == null) {

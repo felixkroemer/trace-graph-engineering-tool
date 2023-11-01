@@ -42,14 +42,17 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
         this.slider.setPaintTrack(true);
         this.slider.setPaintTicks(true);
         this.slider.setPaintLabels(true);
-        this.slider.setBorder(LookAndFeelUtil.createTitledBorder("Traces #"));
+        this.slider.setBorder(LookAndFeelUtil.createTitledBorder("Number of Traces"));
 
         this.slider.addChangeListener(e -> {
             var value = slider.getValue();
             controller.setDisplayRange(0, value);
         });
 
-        this.add(slider, BorderLayout.CENTER);
+        var panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(slider, BorderLayout.CENTER);
+        this.add(panel, BorderLayout.NORTH);
     }
 
     @Override

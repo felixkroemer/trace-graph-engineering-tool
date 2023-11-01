@@ -57,8 +57,10 @@ public class TraceGraphController extends NetworkController implements SetCurren
         iterator.append(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
-                traceGraph.reinit(changedParameter);
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
+                helper.silenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
+                traceGraph.reinit(changedParameter);
+                helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
                 renderingController.updateVisualStyle();
             }

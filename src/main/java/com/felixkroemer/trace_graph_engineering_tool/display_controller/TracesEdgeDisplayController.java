@@ -133,13 +133,13 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
-        if (event.getSelectedNodes().size() == 1 && event.nodesChanged()) {;
+        if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {;
             this.traces = this.calculateTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
             this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
             this.pcs.firePropertyChange(new PropertyChangeEvent(this, "traces", null, this.traces));
             drawTraces();
         }
-        if (event.getSelectedEdges().size() == 1) {
+        if (event.edgesChanged() && event.getSelectedEdges().size() == 1) {
             var trace = this.traceMapping.get(event.getSelectedEdges().iterator().next());
             if (trace != null) {
                 var eventHelper = registrar.getService(CyEventHelper.class);
