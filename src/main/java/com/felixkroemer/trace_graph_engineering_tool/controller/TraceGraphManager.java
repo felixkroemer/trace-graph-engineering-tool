@@ -143,8 +143,8 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         var networkManager = registrar.getService(CyNetworkManager.class);
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
-                networkManager.destroyNetwork(controller.getNetwork());
                 controller.destroy();
+                networkManager.destroyNetwork(controller.getNetwork());
             }
         }
         this.controllers.clear();
