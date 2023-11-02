@@ -102,7 +102,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         style.addVisualMappingFunction(colorMapping);
         style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
-        style.setDefaultValue(EDGE_VISIBLE, false);
+        // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
+        // visible is only set in fireViewChangedEvent in response to setVisualProperty
+        // setVisualProperty is never called when applying default values of a style
+        // => hide edges manually
+        // style.setDefaultValue(EDGE_VISIBLE, false);
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
 
         return style;

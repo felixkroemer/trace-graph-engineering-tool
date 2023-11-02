@@ -26,7 +26,7 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     @Override
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
-        if (event.getSelectedEdges().size() == 1 && this.previousNode != null) {
+        if (event.edgesChanged() && event.getSelectedEdges().size() == 1 && this.previousNode != null) {
             CyEdge edge = event.getSelectedEdges().iterator().next();
             CyNode neighbor = edge.getTarget() == previousNode ? edge.getSource() : edge.getTarget();
             traceGraph.getNetwork().getRow(edge).set(CyNetwork.SELECTED, false);
@@ -35,13 +35,11 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
                     networkView.getNodeView(neighbor).getVisualProperty(NODE_X_LOCATION));
             networkView.setVisualProperty(NETWORK_CENTER_Y_LOCATION,
                     networkView.getNodeView(neighbor).getVisualProperty(NODE_Y_LOCATION));
-        } else {
-            if (event.getSelectedNodes().size() == 1) {
-                this.previousNode = event.getSelectedNodes().iterator().next();
-                showEdgesOfSelectedNodes();
-            } else {
-                this.hideAllEdges();
-            }
+        }
+        if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
+            this.hideAllEdges();
+            this.previousNode = event.getSelectedNodes().iterator().next();
+            showEdgesOfSelectedNodes();
         }
     }
 

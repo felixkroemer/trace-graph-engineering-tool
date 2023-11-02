@@ -12,10 +12,7 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.*;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -64,14 +61,18 @@ public abstract class NetworkController {
         this.applyStyleAndLayout();
     }
 
-    public void applyStyleAndLayout() {
-        TaskIterator iterator = new TaskIterator();
-        iterator.append(new AbstractTask() {
+    public Task getApplyStyleTask() {
+        return new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
                 getVisualStyle().apply(getView());
             }
-        });
+        };
+    }
+
+    public void applyStyleAndLayout() {
+        TaskIterator iterator = new TaskIterator();
+        iterator.append(getApplyStyleTask());
         iterator.append(this.createLayoutTask());
         var taskManager = this.registrar.getService(TaskManager.class);
         taskManager.execute(iterator);

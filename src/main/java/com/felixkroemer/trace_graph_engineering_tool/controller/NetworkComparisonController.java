@@ -165,7 +165,6 @@ public class NetworkComparisonController extends NetworkController implements Se
         style.addVisualMappingFunction(edgeColorMapping);
 
         style.setDefaultValue(NODE_SIZE, 10.0);
-        style.setDefaultValue(EDGE_VISIBLE, false);
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
 
         return style;

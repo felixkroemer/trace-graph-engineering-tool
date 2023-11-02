@@ -100,6 +100,12 @@
         </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
+            <artifactId>vizmap-impl</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
             <artifactId>event-impl</artifactId>
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>
@@ -108,6 +114,12 @@
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>event-api</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>viewmodel-impl</artifactId>
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>
         </dependency>
