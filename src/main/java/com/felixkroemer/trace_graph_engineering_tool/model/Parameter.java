@@ -64,6 +64,12 @@ public class Parameter {
         pcs.addPropertyChangeListener("visibleBins", l);
     }
 
+    public void removeObserver(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener("enabled", l);
+        pcs.removePropertyChangeListener("bins", l);
+        pcs.removePropertyChangeListener("visibleBins", l);
+    }
+
     public void setVisibleBins(Set<Integer> bins) {
         this.visibleBins = bins;
         this.pcs.firePropertyChange("visibleBins", null, this.visibleBins);

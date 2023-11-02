@@ -63,15 +63,14 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 traceGraph.reinit(changedParameter);
                 helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
+                renderingController.hideNodes();
                 renderingController.updateVisualStyle();
+
             }
         });
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
         taskManager.execute(iterator);
         applyStyleAndLayout();
-        for (var edgeView : getView().getEdgeViews()) {
-            edgeView.setVisualProperty(EDGE_VISIBLE, false);
-        }
     }
 
     @Override
@@ -163,6 +162,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void mergeTraceGraph(TraceGraphController controller) {
         var networkManager = registrar.getService(CyNetworkManager.class);
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
+        controller.destroy();
         var network = controller.getNetwork();
         networkManager.destroyNetwork(network);
         for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
@@ -178,5 +178,19 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     public RenderingController getRenderingController() {
         return this.renderingController;
+    }
+
+    @Override
+    public TaskIterator getApplyStyleTask() {
+        var iter = super.getApplyStyleTask();
+        iter.append(new AbstractTask() {
+            @Override
+            public void run(TaskMonitor taskMonitor) throws Exception {
+                for (var edgeView : getView().getEdgeViews()) {
+                    edgeView.setVisualProperty(EDGE_VISIBLE, false);
+                }
+            }
+        });
+        return iter;
     }
 }

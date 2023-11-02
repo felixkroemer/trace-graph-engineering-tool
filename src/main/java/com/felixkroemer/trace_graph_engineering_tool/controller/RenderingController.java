@@ -233,6 +233,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         visualMappingManager.removeVisualStyle(this.defaultStyle);
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
+        this.traceGraph.getPDM().forEach(p -> {
+            p.removeObserver(this);
+        });
     }
 
     public void restorePreviousDisplayController() {

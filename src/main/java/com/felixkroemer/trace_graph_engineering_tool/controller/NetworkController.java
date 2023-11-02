@@ -61,13 +61,13 @@ public abstract class NetworkController {
         this.applyStyleAndLayout();
     }
 
-    public Task getApplyStyleTask() {
-        return new AbstractTask() {
+    public TaskIterator getApplyStyleTask() {
+        return new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
                 getVisualStyle().apply(getView());
             }
-        };
+        });
     }
 
     public void applyStyleAndLayout() {
