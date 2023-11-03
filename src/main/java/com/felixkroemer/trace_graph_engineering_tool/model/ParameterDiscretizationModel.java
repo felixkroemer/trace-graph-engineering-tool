@@ -42,8 +42,6 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
         this.binsFiltered = false;
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
-
-        this.setPercentile(Columns.NODE_VISITS, 50);
     }
 
     public List<Parameter> getParameters() {
@@ -89,10 +87,12 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
 
     public void addObserver(PropertyChangeListener l) {
         pcs.addPropertyChangeListener("filtered", l);
+        pcs.addPropertyChangeListener("percentileFilter", l);
     }
 
     public void removeObserver(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener(l);
+        pcs.removePropertyChangeListener("filtered", l);
+        pcs.removePropertyChangeListener("percentileFilter", l);
     }
 
     @Override
@@ -110,6 +110,7 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
 
     public void setPercentile(String column, double percentile) {
         this.percentile = new Pair<>(column, percentile);
+        this.pcs.firePropertyChange("percentileFilter", null, this.percentile);
     }
 
     public Pair<String, Double> getPercentile() {

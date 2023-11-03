@@ -68,6 +68,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.setMode(RENDERING_MODE_FOLLOW);
 
+        this.traceGraph.getPDM().addObserver(this);
         this.traceGraph.getPDM().forEach(p -> {
             p.addObserver(this);
         });
@@ -121,7 +122,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             //UIState
-            case "visibleBins" -> {
+            case "visibleBins", "percentileFilter" -> {
                 this.hideNodes();
                 var taskManager = registrar.getService(TaskManager.class);
                 taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
@@ -267,6 +268,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         visualMappingManager.removeVisualStyle(this.defaultStyle);
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
+        this.traceGraph.getPDM().removeObserver(this);
         this.traceGraph.getPDM().forEach(p -> {
             p.removeObserver(this);
         });
