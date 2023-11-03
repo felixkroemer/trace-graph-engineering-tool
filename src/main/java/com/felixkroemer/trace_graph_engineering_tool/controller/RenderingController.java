@@ -10,8 +10,10 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import it.unimi.dsi.fastutil.Hash;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -22,14 +24,15 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.vizmap.*;
 import org.cytoscape.work.TaskManager;
+import org.javatuples.Pair;
 
-import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
@@ -74,6 +77,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
+
+        this.hideNodes();
     }
 
 
@@ -133,7 +138,36 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.defaultStyle = newStyle;
     }
 
+    public void hideNodesUsingPercentiles() {
+        var percentile = traceGraph.getPDM().getPercentile();
+        var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
+        var suids = nodeTable.getColumn("SUID").getValues(Long.class);
+        var values = nodeTable.getColumn(percentile.getValue0()).getValues(Integer.class);
+        var cutOff = values.stream().mapToInt(Integer::intValue).sum() * percentile.getValue1() / 100;
+        List<Pair<Long, Integer>> pairs = new ArrayList<>(suids.size());
+        for (int i = 0; i < suids.size(); i++) {
+            pairs.add(new Pair<>(suids.get(i), values.get(i)));
+        }
+        pairs.sort(Comparator.comparing(Pair::getValue1));
+        Collections.reverse(pairs);
+        var network = traceGraph.getNetwork();
+        var sum = 0;
+        for (var pair : pairs) {
+            var node = network.getNode(pair.getValue0());
+            view.getNodeView(node).setVisualProperty(NODE_VISIBLE, sum <= cutOff);
+            sum += pair.getValue1();
+        }
+    }
+
     public void hideNodes() {
+        if (traceGraph.getPDM().getPercentile() != null) {
+            this.hideNodesUsingPercentiles();
+        } else {
+            this.hideNodesUsingBins();
+        }
+    }
+
+    public void hideNodesUsingBins() {
         Map<Parameter, Set<Integer>> visibleBins = new HashMap<>();
         for (Parameter param : this.traceGraph.getPDM().getParameters()) {
             visibleBins.put(param, param.getVisibleBins());

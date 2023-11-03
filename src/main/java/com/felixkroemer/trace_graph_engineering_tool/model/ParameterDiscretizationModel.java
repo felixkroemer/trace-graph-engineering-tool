@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,20 +21,17 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
 
     private final Logger logger;
     private PropertyChangeSupport pcs;
-
     private String name;
-    private String version;
-    private String description;
     private List<Parameter> parameters;
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
-    private boolean filtered;
+    private boolean binsFiltered;
+    private Pair<String, Double> percentile;
+
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
         this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.name = dto.getName();
-        this.version = dto.getVersion();
-        this.description = dto.getDescription();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
             Parameter parameter = new Parameter(paramDto, this);
@@ -41,8 +39,11 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
             this.parameters.add(parameter);
         }
         this.suidHashMapping = new HashMap<>();
-        this.filtered = false;
+        this.binsFiltered = false;
+        this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
+
+        this.setPercentile(Columns.NODE_VISITS, 50);
     }
 
     public List<Parameter> getParameters() {
@@ -99,12 +100,20 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
         switch (evt.getPropertyName()) {
             case "visibleBins" -> {
                 boolean filtered = !this.parameters.stream().allMatch(p -> p.getVisibleBins().isEmpty());
-                if (filtered != this.filtered) {
-                    this.filtered = filtered;
+                if (filtered != this.binsFiltered) {
+                    this.binsFiltered = filtered;
                     pcs.firePropertyChange("filtered", null, filtered);
                 }
             }
         }
+    }
+
+    public void setPercentile(String column, double percentile) {
+        this.percentile = new Pair<>(column, percentile);
+    }
+
+    public Pair<String, Double> getPercentile() {
+        return this.percentile;
     }
 }
 
