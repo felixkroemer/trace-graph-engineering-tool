@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.opencsv.CSVReader;
 import org.cytoscape.model.*;
+import org.cytoscape.view.model.CyNetworkView;
 
 import java.io.File;
 import java.io.FileReader;
@@ -85,6 +86,15 @@ public class Util {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    public static void deselectAll(CyNetworkView view) {
+        for (var edgeView : view.getEdgeViews()) {
+            view.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
+        }
+        for (var nodeView : view.getNodeViews()) {
+            view.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
+        }
     }
 
 }

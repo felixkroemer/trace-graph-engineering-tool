@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
@@ -12,7 +13,10 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.*;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskMonitor;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -101,6 +105,8 @@ public abstract class NetworkController {
                 getView().getNodeView(node).getVisualProperty(NODE_X_LOCATION));
         getView().setVisualProperty(NETWORK_CENTER_Y_LOCATION,
                 getView().getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
+        Util.deselectAll(getView());
+        getView().getModel().getRow(node).set(CyNetwork.SELECTED, true);
     }
 
     public SelectBinsController createSelectBinsController(Parameter parameter) {

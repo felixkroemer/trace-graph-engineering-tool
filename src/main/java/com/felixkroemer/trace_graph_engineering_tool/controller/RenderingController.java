@@ -10,10 +10,8 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
-import it.unimi.dsi.fastutil.Hash;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -29,15 +27,14 @@ import org.javatuples.Pair;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.*;
 
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_VISIBLE;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
         ShowTraceEventListener {
@@ -226,7 +223,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         this.displayController.init();
         var eventHelper = registrar.getService(CyEventHelper.class);
-        eventHelper.fireEvent(new SetCurrentEdgeDisplayControllerEvent(this, previousDisplayController, this.displayController));
+        eventHelper.fireEvent(new SetCurrentEdgeDisplayControllerEvent(this, previousDisplayController,
+                this.displayController));
     }
 
     public void setMode(String mode) {
@@ -238,17 +236,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 this.setDisplayController(new FollowEdgeDisplayController(registrar, view, this.traceGraph, this));
             }
             case RENDERING_MODE_TRACES -> {
-                this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2, this));
+                this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2,
+                        this));
             }
-        }
-    }
-
-    private void deselectAll() {
-        for (var edgeView : this.view.getEdgeViews()) {
-            this.view.getModel().getRow(edgeView.getModel()).set(CyNetwork.SELECTED, false);
-        }
-        for (var nodeView : this.view.getNodeViews()) {
-            this.view.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
     }
 
@@ -287,7 +277,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         if (!(this.displayController instanceof ShortestTraceEdgeDisplayController)) {
             this.previousDisplayController = this.displayController.getID();
-            this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph, e.getTrace(), this));
+            this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph,
+                    e.getTrace(), this));
         }
     }
 
