@@ -2,35 +2,27 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.javatuples.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class ParameterDiscretizationModel implements PropertyChangeListener {
 
-    private final Logger logger;
     private PropertyChangeSupport pcs;
     private String name;
     private List<Parameter> parameters;
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
-    private boolean binsFiltered;
+    private boolean filtered;
     private Pair<String, Double> percentile;
 
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.name = dto.getName();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
@@ -39,7 +31,7 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
             this.parameters.add(parameter);
         }
         this.suidHashMapping = new HashMap<>();
-        this.binsFiltered = false;
+        this.filtered = false;
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
     }
@@ -99,11 +91,7 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case "visibleBins" -> {
-                boolean filtered = !this.parameters.stream().allMatch(p -> p.getVisibleBins().isEmpty());
-                if (filtered != this.binsFiltered) {
-                    this.binsFiltered = filtered;
-                    pcs.firePropertyChange("filtered", null, filtered);
-                }
+                this.updateFilteredState();
             }
         }
     }
@@ -111,10 +99,42 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
     public void setPercentile(String column, double percentile) {
         this.percentile = new Pair<>(column, percentile);
         this.pcs.firePropertyChange("percentileFilter", null, this.percentile);
+        this.updateFilteredState();
+    }
+
+    public void resetPercentile() {
+        this.percentile = null;
+        this.pcs.firePropertyChange("percentileFilter", null, null);
+        this.updateFilteredState();
     }
 
     public Pair<String, Double> getPercentile() {
         return this.percentile;
+    }
+
+    private void updateFilteredState() {
+        boolean parameterFiltered = !this.parameters.stream().allMatch(p -> p.getVisibleBins().isEmpty());
+        boolean percentileFiltered = this.percentile != null;
+        boolean filtered = parameterFiltered || percentileFiltered;
+        if (filtered != this.filtered) {
+            this.filtered = filtered;
+            pcs.firePropertyChange("filtered", null, this.filtered);
+        }
+    }
+
+    public boolean isFiltered() {
+        return this.filtered;
+    }
+
+    public void resetFilters() {
+        forEach(p -> {
+            if (!p.getVisibleBins().isEmpty()) {
+                p.setVisibleBins(Collections.emptySet());
+            }
+        });
+        if (this.percentile != null) {
+            this.resetPercentile();
+        }
     }
 }
 

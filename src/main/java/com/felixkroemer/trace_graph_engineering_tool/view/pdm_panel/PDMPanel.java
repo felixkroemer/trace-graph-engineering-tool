@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collections;
 
 public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener {
 
@@ -60,11 +59,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
         this.initPDMPanel();
 
         this.resetFilterButton.addActionListener(e -> {
-            this.controller.getPDM().getParameters().forEach(p -> {
-                if (!p.getVisibleBins().isEmpty()) {
-                    p.setVisibleBins(Collections.emptySet());
-                }
-            });
+            this.controller.getPDM().resetFilters();
         });
     }
 
@@ -75,6 +70,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
 
         this.updatePDMPanel(controller);
         this.updateInfoTreeTable(controller);
+        this.updateResetPanel(controller);
 
         this.controller = controller;
         this.controller.getPDM().addObserver(this);
@@ -95,6 +91,15 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
         this.infoTreeTable.setModel(model);
     }
 
+    private void updateResetPanel(NetworkController controller) {
+        if (controller.getPDM().isFiltered()) {
+            this.add(this.resetFilterPanel, BorderLayout.SOUTH);
+        } else {
+            this.remove(this.resetFilterPanel);
+        }
+        this.revalidate();
+    }
+
     public void clear() {
         this.pdmPanel.removeAll();
     }
@@ -103,12 +108,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case "filtered" -> {
-                if ((boolean) evt.getNewValue()) {
-                    this.add(this.resetFilterPanel, BorderLayout.SOUTH);
-                } else {
-                    this.remove(this.resetFilterPanel);
-                }
-                this.revalidate();
+                this.updateResetPanel(this.controller);
             }
         }
     }

@@ -158,6 +158,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void hideNodes() {
+        // percentile takes precedence for now
         if (traceGraph.getPDM().getPercentile() != null) {
             this.hideNodesUsingPercentiles();
         } else {
