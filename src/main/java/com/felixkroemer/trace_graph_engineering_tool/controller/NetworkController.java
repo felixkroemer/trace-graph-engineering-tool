@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import org.cytoscape.model.CyDisposable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
@@ -24,7 +25,7 @@ import java.util.Map;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public abstract class NetworkController {
+public abstract class NetworkController implements CyDisposable {
 
     protected CyServiceRegistrar registrar;
     protected CyNetwork network;
@@ -82,7 +83,8 @@ public abstract class NetworkController {
         taskManager.execute(iterator);
     }
 
-    public abstract void destroy();
+    @Override
+    public abstract void dispose();
 
     public CyNetwork getNetwork() {
         return this.network;

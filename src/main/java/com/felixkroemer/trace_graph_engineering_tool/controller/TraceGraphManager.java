@@ -7,10 +7,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.*;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -19,10 +16,11 @@ import org.cytoscape.view.model.table.CyTableViewManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, PropertyChangeListener {
+public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, PropertyChangeListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
@@ -55,7 +53,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     public void propertyChange(PropertyChangeEvent evt) {
         ParameterDiscretizationModel pdm = ((Parameter) evt.getSource()).getPdm();
         switch (evt.getPropertyName()) {
-            case "enabled" -> {
+            case Parameter.ENABLED -> {
                 var tableViewManager = registrar.getService(CyTableViewManager.class);
                 for (NetworkController controller : this.controllers.get(pdm)) {
                     var nodeTableView = tableViewManager.getTableView(controller.getNetwork().getDefaultNodeTable());
@@ -65,7 +63,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
                 }
                 this.updateTraceGraph(pdm, (Parameter) evt.getSource());
             }
-            case "bins" -> {
+            case Parameter.BINS -> {
                 this.updateTraceGraph(pdm, (Parameter) evt.getSource());
             }
         }
@@ -102,7 +100,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     public void destroyNetwork(NetworkController controller) {
         if (controller != null) {
-            controller.destroy();
+            controller.dispose();
             var pdm = controller.getPDM();
             this.controllers.get(pdm).remove(controller);
             if (controllers.get(pdm).isEmpty()) {
@@ -138,38 +136,35 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
 
     // call to destroy networks, everything else is handled in
     // handleEvent(NetworkAboutToBeDestroyedEvent e)
-    public void destroy() {
+    @Override
+    public void dispose() {
         this.destroying = true;
         var networkManager = registrar.getService(CyNetworkManager.class);
         for (var entry : this.controllers.entrySet()) {
             for (var controller : entry.getValue()) {
                 // destroy controller before destroying network,
                 // controller may need to access network
-                controller.destroy();
+                controller.dispose();
                 networkManager.destroyNetwork(controller.getNetwork());
             }
         }
         this.controllers.clear();
-        traceDetailsController.destroy();
+        traceDetailsController.dispose();
         CyNetwork traceDetailsNetwork;
         if ((traceDetailsNetwork = traceDetailsController.getNetwork()) != null) {
             networkManager.destroyNetwork(traceDetailsNetwork);
         }
         this.registrar.unregisterService(this.panel, CytoPanelComponent.class);
-        this.panel.destroy();
+        this.panel.dispose();
     }
 
     public ParameterDiscretizationModel findPDM(List<String> params) {
         for (var pdm : this.controllers.keySet()) {
-            if (pdm.getParameterCount() != params.size()) {
+            if (!pdm.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet()).equals(new HashSet<>(params))) {
                 return null;
+            } else {
+                return pdm;
             }
-            for (int i = 0; i < pdm.getParameters().size(); i++) {
-                if (!pdm.getParameters().get(i).getName().equals(params.get(i))) {
-                    return null;
-                }
-            }
-            return pdm;
         }
         return null;
     }

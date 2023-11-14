@@ -23,13 +23,12 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
-import javax.swing.*;
 import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener {
+public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable {
 
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;
@@ -133,12 +132,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     @Override
-    public void destroy() {
-        this.renderingController.destroy();
-        this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
-    }
-
-    @Override
     public void handleEvent(SetCurrentNetworkEvent e) {
         if (e.getNetwork() == this.getNetwork()) {
             var eventHelper = this.registrar.getService(CyEventHelper.class);
@@ -162,7 +155,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void mergeTraceGraph(TraceGraphController controller) {
         var networkManager = registrar.getService(CyNetworkManager.class);
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
-        controller.destroy();
+        controller.dispose();
         var network = controller.getNetwork();
         networkManager.destroyNetwork(network);
         for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
@@ -192,5 +185,11 @@ public class TraceGraphController extends NetworkController implements SetCurren
             }
         });
         return iter;
+    }
+
+    @Override
+    public void dispose() {
+        this.renderingController.dispose();
+        this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
     }
 }

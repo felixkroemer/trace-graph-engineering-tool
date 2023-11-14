@@ -21,12 +21,13 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayController implements ShowTraceEventListener {
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
+    public static final String TRACE = "trace";
 
     //TODO: find better way to pass initial trace
     private TraceExtension trace;
 
-    public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                              TraceExtension trace, RenderingController renderingController) {
+    public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph
+            , TraceExtension trace, RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.trace = trace;
     }
@@ -54,7 +55,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
     }
 
     @Override
-    public void disable() {
+    public void dispose() {
         this.registrar.unregisterService(this, ShowTraceEventListener.class);
     }
 
@@ -91,7 +92,8 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
         }
         this.trace = e.getTrace();
         this.showTrace(e.getTrace());
-        pcs.firePropertyChange(new PropertyChangeEvent(this, "trace", null, e.getTrace()));
+        pcs.firePropertyChange(new PropertyChangeEvent(this, ShortestTraceEdgeDisplayController.TRACE, null,
+                e.getTrace()));
     }
 
     public TraceGraphPanel getSettingsPanel() {
@@ -99,7 +101,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
     }
 
     public void addObserver(PropertyChangeListener l) {
-        this.pcs.addPropertyChangeListener("trace", l);
+        this.pcs.addPropertyChangeListener(ShortestTraceEdgeDisplayController.TRACE, l);
     }
 
     public void removeObserver(PropertyChangeListener l) {

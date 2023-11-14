@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import org.cytoscape.model.CyDisposable;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -13,7 +14,7 @@ import java.beans.PropertyChangeSupport;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public abstract class AbstractEdgeDisplayController {
+public abstract class AbstractEdgeDisplayController implements CyDisposable {
 
     protected CyServiceRegistrar registrar;
     protected CyNetworkView networkView;
@@ -23,7 +24,8 @@ public abstract class AbstractEdgeDisplayController {
     protected PropertyChangeSupport pcs;
 
     // assumes the network has the default style applied (besides EDGE_VISIBLE / NODE_VISIBLE)
-    public AbstractEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+    public AbstractEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                         RenderingController renderingController) {
         this.registrar = registrar;
         this.networkView = view;
         this.traceGraph = traceGraph;
@@ -38,7 +40,8 @@ public abstract class AbstractEdgeDisplayController {
     /*
      * clear potential value locks, unregister listeners, etc.
      */
-    public abstract void disable();
+    @Override
+    public abstract void dispose();
 
     protected void showALlEdges() {
         for (var edgeView : networkView.getEdgeViews()) {

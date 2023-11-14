@@ -111,7 +111,7 @@ public class CyActivator extends AbstractCyActivator {
 
     @Override
     public void shutDown() {
-        this.manager.destroy();
+        this.manager.dispose();
     }
 
 }

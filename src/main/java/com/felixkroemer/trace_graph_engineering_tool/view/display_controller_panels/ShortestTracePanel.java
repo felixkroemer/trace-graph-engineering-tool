@@ -28,7 +28,8 @@ public class ShortestTracePanel extends TraceGraphPanel implements PropertyChang
     private JPanel returnToPreviousModePanel;
     private JButton returnToPreviousModeButton;
 
-    public ShortestTracePanel(CyServiceRegistrar reg, ShortestTraceEdgeDisplayController controller, TraceExtension trace) {
+    public ShortestTracePanel(CyServiceRegistrar reg, ShortestTraceEdgeDisplayController controller,
+                              TraceExtension trace) {
         this.reg = reg;
         this.controller = controller;
         this.traceTreeTable = new CustomTreeTable();
@@ -87,7 +88,7 @@ public class ShortestTracePanel extends TraceGraphPanel implements PropertyChang
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "trace" -> {
+            case ShortestTraceEdgeDisplayController.TRACE -> {
                 this.updateTracePanel((TraceExtension) evt.getNewValue());
             }
         }

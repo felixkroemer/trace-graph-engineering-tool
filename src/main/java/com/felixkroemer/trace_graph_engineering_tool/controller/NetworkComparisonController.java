@@ -122,7 +122,7 @@ public class NetworkComparisonController extends NetworkController implements Se
     }
 
     @Override
-    public void destroy() {
+    public void dispose() {
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.removeVisualStyle(this.defaultVisualStyle);

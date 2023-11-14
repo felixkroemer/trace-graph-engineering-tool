@@ -12,6 +12,7 @@ import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.model.CyDisposable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
@@ -37,7 +38,7 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_T
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_VISIBLE;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
-        ShowTraceEventListener {
+        ShowTraceEventListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private TraceGraphController traceGraphController;
@@ -119,7 +120,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             //UIState
-            case "visibleBins", "percentileFilter" -> {
+            case Parameter.VISIBLE_BINS, "percentileFilter" -> {
                 this.hideNodes();
                 var taskManager = registrar.getService(TaskManager.class);
                 taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
@@ -206,7 +207,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             if (this.displayController.getClass() == displayController.getClass()) {
                 return;
             } else {
-                this.displayController.disable();
+                this.displayController.dispose();
                 this.defaultStyle.apply(this.view);
             }
         }
@@ -251,9 +252,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    public void destroy() {
+    @Override
+    public void dispose() {
         if (this.displayController != null) {
-            this.displayController.disable();
+            this.displayController.dispose();
         }
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.removeVisualStyle(this.defaultStyle);

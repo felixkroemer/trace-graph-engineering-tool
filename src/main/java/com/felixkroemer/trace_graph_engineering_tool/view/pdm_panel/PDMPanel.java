@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.application.CyUserLog;
@@ -107,7 +108,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "filtered" -> {
+            case ParameterDiscretizationModel.FILTERED -> {
                 this.updateResetPanel(this.controller);
             }
         }

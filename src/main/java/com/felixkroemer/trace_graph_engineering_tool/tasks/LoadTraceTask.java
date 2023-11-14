@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +47,10 @@ public class LoadTraceTask extends AbstractTask {
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        CyTable sourceTable = tableFactory.createTable(traceFile.getName(), Columns.SOURCE_ID, Long.class, true, true);
+        // CyTable sourceTable = tableFactory.createTable(traceFile.getName(), Columns.SOURCE_ID, Long.class, true,
+        // true);
+        CyTable sourceTable = new TraceGraphSourceTable(traceFile.getName(), Files.lines(traceFile.toPath()).count(),
+                registrar);
         sourceTable.setTitle(traceFile.getName());
         Util.parseCSV(sourceTable, traceFile);
         List<String> params = new ArrayList<>();

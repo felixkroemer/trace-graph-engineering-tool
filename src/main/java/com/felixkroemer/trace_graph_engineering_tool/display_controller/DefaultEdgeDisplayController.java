@@ -18,7 +18,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
 
-    public DefaultEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+    public DefaultEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                        RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.showALlEdges();
     }
@@ -32,7 +33,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
     }
 
     @Override
-    public void disable() {
+    public void dispose() {
+
     }
 
     @Override

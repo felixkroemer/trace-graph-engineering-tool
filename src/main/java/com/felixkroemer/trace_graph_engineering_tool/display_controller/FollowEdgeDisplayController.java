@@ -20,7 +20,8 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     private CyNode previousNode;
 
-    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                       RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
     }
 
@@ -50,7 +51,7 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     @Override
-    public void disable() {
+    public void dispose() {
     }
 
     @Override

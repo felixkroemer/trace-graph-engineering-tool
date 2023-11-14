@@ -2,7 +2,6 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
-import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceSetEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
@@ -18,15 +17,15 @@ import org.javatuples.Pair;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
+    public static final String TRACES = "traces";
     private static final Color[] colors = generateColorList();
 
     private int length;
@@ -91,8 +90,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         }
     }
 
-    public static List<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
-                                                       boolean isEdge) {
+    public static List<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length
+            , boolean isEdge) {
         List<TraceExtension> traces = new ArrayList<>();
         Collection<Integer> sourceRows;
         for (CyTable sourceTable : traceGraph.getSourceTables()) {
@@ -118,7 +117,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(startNode, traceGraph.getNetwork(), sourceIndex, getNextColor());
+                TraceExtension trace = new TraceExtension(startNode, traceGraph.getNetwork(), sourceIndex,
+                        getNextColor());
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
@@ -133,10 +133,12 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
-        if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {;
+        if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
+            ;
             this.traces = this.calculateTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
             this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-            this.pcs.firePropertyChange(new PropertyChangeEvent(this, "traces", null, this.traces));
+            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                    this.traces));
             drawTraces();
         }
         if (event.edgesChanged() && event.getSelectedEdges().size() == 1) {
@@ -153,11 +155,18 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         var selectedNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
         this.traces = this.calculateTraces(selectedNodes, Collections.emptyList(), networkView.getModel());
         this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-        this.pcs.firePropertyChange(new PropertyChangeEvent(this, "traces", null, this.traces));
+        this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                this.traces));
         drawTraces();
     }
 
-    public List<TraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
+    @Override
+    public void dispose() {
+        networkView.getModel().removeEdges(this.multiEdges);
+    }
+
+    public List<TraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges,
+                                                CyNetwork network) {
         network.removeEdges(this.multiEdges);
         this.multiEdges.clear();
         this.traceMapping.clear();
@@ -170,11 +179,6 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         }
         traces.sort(Comparator.comparingInt(TraceExtension::getWeight).reversed());
         return traces;
-    }
-
-    @Override
-    public void disable() {
-        networkView.getModel().removeEdges(this.multiEdges);
     }
 
     @Override
@@ -245,7 +249,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     public void addObserver(PropertyChangeListener l) {
-        this.pcs.addPropertyChangeListener("traces", l);
+        this.pcs.addPropertyChangeListener(TracesEdgeDisplayController.TRACES, l);
     }
 
     public void removeObserver(PropertyChangeListener l) {

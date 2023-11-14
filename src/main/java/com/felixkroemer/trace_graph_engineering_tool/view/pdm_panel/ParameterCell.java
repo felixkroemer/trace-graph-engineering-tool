@@ -74,13 +74,13 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "enabled" -> {
+            case Parameter.ENABLED -> {
                 this.label.setEnabled((boolean) evt.getNewValue());
                 this.editButton.setEnabled((boolean) evt.getNewValue());
             }
-            case "bins" -> {
+            case Parameter.BINS -> {
             }
-            case "visibleBins" -> {
+            case Parameter.VISIBLE_BINS -> {
                 this.setHighlightIndicator((Set<Integer>) evt.getNewValue());
             }
         }

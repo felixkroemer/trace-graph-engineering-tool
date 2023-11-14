@@ -13,6 +13,9 @@ import java.util.function.Consumer;
 
 public class ParameterDiscretizationModel implements PropertyChangeListener {
 
+    public static final String FILTERED = "filtered";
+    public static final String PERCENTILE_FILTER = "percentileFilter";
+
     private PropertyChangeSupport pcs;
     private String name;
     private List<Parameter> parameters;
@@ -78,19 +81,19 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
     }
 
     public void addObserver(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener("filtered", l);
-        pcs.addPropertyChangeListener("percentileFilter", l);
+        pcs.addPropertyChangeListener(ParameterDiscretizationModel.FILTERED, l);
+        pcs.addPropertyChangeListener(ParameterDiscretizationModel.PERCENTILE_FILTER, l);
     }
 
     public void removeObserver(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener("filtered", l);
-        pcs.removePropertyChangeListener("percentileFilter", l);
+        pcs.removePropertyChangeListener(ParameterDiscretizationModel.FILTERED, l);
+        pcs.removePropertyChangeListener(ParameterDiscretizationModel.PERCENTILE_FILTER, l);
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "visibleBins" -> {
+            case Parameter.VISIBLE_BINS -> {
                 this.updateFilteredState();
             }
         }
@@ -98,13 +101,13 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
 
     public void setPercentile(String column, double percentile) {
         this.percentile = new Pair<>(column, percentile);
-        this.pcs.firePropertyChange("percentileFilter", null, this.percentile);
+        this.pcs.firePropertyChange(ParameterDiscretizationModel.PERCENTILE_FILTER, null, this.percentile);
         this.updateFilteredState();
     }
 
     public void resetPercentile() {
         this.percentile = null;
-        this.pcs.firePropertyChange("percentileFilter", null, null);
+        this.pcs.firePropertyChange(ParameterDiscretizationModel.PERCENTILE_FILTER, null, null);
         this.updateFilteredState();
     }
 
@@ -118,7 +121,7 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
         boolean filtered = parameterFiltered || percentileFiltered;
         if (filtered != this.filtered) {
             this.filtered = filtered;
-            pcs.firePropertyChange("filtered", null, this.filtered);
+            pcs.firePropertyChange(ParameterDiscretizationModel.FILTERED, null, this.filtered);
         }
     }
 

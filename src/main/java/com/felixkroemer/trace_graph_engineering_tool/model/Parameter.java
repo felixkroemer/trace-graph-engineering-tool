@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Set;
 
 public class Parameter {
+
+    public static final String ENABLED = "enabled";
+    public static final String BINS = "bins";
+    public static final String VISIBLE_BINS = "visible bins";
+
     private String name;
     private List<Double> bins;
     // set of bins that are visible, if empty all bins are displayed
@@ -41,7 +46,7 @@ public class Parameter {
 
     public void enable() {
         this.enabled = true;
-        pcs.firePropertyChange("enabled", false, true);
+        pcs.firePropertyChange(Parameter.ENABLED, false, true);
     }
 
     public ParameterDiscretizationModel getPdm() {
@@ -50,29 +55,29 @@ public class Parameter {
 
     public void disable() {
         this.enabled = false;
-        pcs.firePropertyChange("enabled", true, false);
+        pcs.firePropertyChange(Parameter.ENABLED, true, false);
     }
 
     public void setBins(List<Double> bins) {
         this.bins = bins;
-        pcs.firePropertyChange("bins", null, this.bins);
+        pcs.firePropertyChange(Parameter.BINS, null, this.bins);
     }
 
     public void addObserver(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener("enabled", l);
-        pcs.addPropertyChangeListener("bins", l);
-        pcs.addPropertyChangeListener("visibleBins", l);
+        pcs.addPropertyChangeListener(Parameter.ENABLED, l);
+        pcs.addPropertyChangeListener(Parameter.BINS, l);
+        pcs.addPropertyChangeListener(Parameter.VISIBLE_BINS, l);
     }
 
     public void removeObserver(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener("enabled", l);
-        pcs.removePropertyChangeListener("bins", l);
-        pcs.removePropertyChangeListener("visibleBins", l);
+        pcs.removePropertyChangeListener(Parameter.ENABLED, l);
+        pcs.removePropertyChangeListener(Parameter.BINS, l);
+        pcs.removePropertyChangeListener(Parameter.VISIBLE_BINS, l);
     }
 
     public void setVisibleBins(Set<Integer> bins) {
         this.visibleBins = bins;
-        this.pcs.firePropertyChange("visibleBins", null, this.visibleBins);
+        this.pcs.firePropertyChange(Parameter.VISIBLE_BINS, null, this.visibleBins);
     }
 
     public Set<Integer> getVisibleBins() {

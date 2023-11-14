@@ -63,7 +63,7 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case "traces" -> {
+            case TracesEdgeDisplayController.TRACES -> {
                 this.updateSliderRange();
             }
         }

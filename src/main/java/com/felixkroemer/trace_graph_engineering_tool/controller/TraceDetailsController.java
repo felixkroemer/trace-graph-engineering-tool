@@ -7,10 +7,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNode;
+import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
@@ -24,11 +21,10 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TraceDetailsController implements ShowTraceSetEventListener, SetCurrentNetworkListener {
+public class TraceDetailsController implements ShowTraceSetEventListener, SetCurrentNetworkListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private CyNetwork network;
@@ -134,7 +130,8 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
         this.updateTraces(this.traces);
     }
 
-    public void destroy() {
+    @Override
+    public void dispose() {
         this.registrar.unregisterService(this, ShowTraceSetEventListener.class);
         registrar.unregisterService(this, SetCurrentNetworkListener.class);
     }

@@ -6,6 +6,7 @@ import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.*;
+import org.cytoscape.model.CyDisposable;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -16,7 +17,7 @@ import java.util.Properties;
 
 public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, SelectedNodesAndEdgesListener,
         SetCurrentNetworkListener, SetCurrentTraceGraphControllerListener, SetCurrentComparisonControllerListener,
-        SetCurrentEdgeDisplayControllerEventListener {
+        SetCurrentEdgeDisplayControllerEventListener, CyDisposable {
 
     private CyServiceRegistrar reg;
     private JTabbedPane tabs;
@@ -57,7 +58,8 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.add(this.tabs, BorderLayout.CENTER);
     }
 
-    public void destroy() {
+    @Override
+    public void dispose() {
         this.reg.unregisterService(this, SelectedNodesAndEdgesListener.class);
         this.reg.unregisterService(this, SetCurrentNetworkListener.class);
         this.reg.unregisterService(this, SetCurrentTraceGraphControllerListener.class);
@@ -103,7 +105,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
 
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
-        if(!event.nodesChanged()) {
+        if (!event.nodesChanged()) {
             return;
         }
         var manager = this.reg.getService(TraceGraphManager.class);
@@ -149,11 +151,11 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     }
 
     private void replaceEdgeDisplayControllerPanel(TraceGraphPanel newPanel) {
-        if(this.edgeDisplayControllerPanel != null) {
+        if (this.edgeDisplayControllerPanel != null) {
             this.hidePanel(this.edgeDisplayControllerPanel);
         }
         this.edgeDisplayControllerPanel = newPanel;
-        if(newPanel != null) {
+        if (newPanel != null) {
             this.showPanel(newPanel);
         }
     }
