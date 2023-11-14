@@ -27,7 +27,7 @@ public class TraceGraphSourceTable implements CyTable {
         this.data = new HashMap<>();
         this.suid = SUIDFactory.getNextSUID();
         this.isPublic = true;
-        this.rowCount = (int) rowCount + 1;
+        this.rowCount = (int) rowCount;
         this.rows = new ArrayList<>(this.rowCount);
         for (int i = 0; i < rowCount; i++) {
             this.rows.add(new TraceGraphSourceRow(i));
@@ -250,7 +250,7 @@ public class TraceGraphSourceTable implements CyTable {
 
         @Override
         public Object getRaw(String fullyQualifiedName) {
-            return null;
+            return get(fullyQualifiedName, Double.class);
         }
 
         @Override

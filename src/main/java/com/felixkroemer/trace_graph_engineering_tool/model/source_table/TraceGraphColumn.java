@@ -72,7 +72,37 @@ final class TraceGraphColumn implements CyColumn {
 
     @Override
     public VirtualColumnInfo getVirtualColumnInfo() {
-        throw new NotImplementedException("getVirtualColumnInfo is not implemented for TraceGraphColumn");
+        return new VirtualColumnInfo() {
+            @Override
+            public boolean isVirtual() {
+                return false;
+            }
+
+            @Override
+            public String getSourceColumn() {
+                return getName();
+            }
+
+            @Override
+            public String getSourceJoinKey() {
+                return null;
+            }
+
+            @Override
+            public String getTargetJoinKey() {
+                return null;
+            }
+
+            @Override
+            public CyTable getSourceTable() {
+                return getTable();
+            }
+
+            @Override
+            public boolean isImmutable() {
+                return false;
+            }
+        };
     }
 
     @Override

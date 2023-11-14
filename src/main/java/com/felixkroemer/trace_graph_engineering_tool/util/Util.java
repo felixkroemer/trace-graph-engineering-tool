@@ -46,7 +46,7 @@ public class Util {
                     }
                     continue;
                 }
-                CyRow row = table.getRow(Long.parseLong(line[0]));
+                CyRow row = table.getRow(Long.parseLong(line[0]) - 1);
                 for (int i = 1; i < line.length; i++) {
                     // csv has some empty entries
                     if (!line[i].isEmpty()) {

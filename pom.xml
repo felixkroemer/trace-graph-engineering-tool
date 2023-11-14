@@ -88,6 +88,12 @@
 
         <dependency>
             <groupId>org.cytoscape</groupId>
+            <artifactId>table-presentation-impl</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
             <artifactId>model-impl</artifactId>
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>

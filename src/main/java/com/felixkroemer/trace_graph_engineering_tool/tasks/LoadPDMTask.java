@@ -6,7 +6,6 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
-import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -66,8 +65,8 @@ public class LoadPDMTask extends AbstractTask {
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {
             var path = new File(traceFile.getParentFile(), csv);
-            // var sourceTable = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
-            var sourceTable = new TraceGraphSourceTable(csv, Files.lines(path.toPath()).count(), registrar);
+            var sourceTable = tableFactory.createTable(csv, Columns.SOURCE_ID, Long.class, true, true);
+            //var sourceTable = new TraceGraphSourceTable(csv, Files.lines(path.toPath()).count(), registrar);
             sourceTable.setTitle(csv);
             Util.parseCSV(sourceTable, path);
             this.tableManager.addTable(sourceTable);
