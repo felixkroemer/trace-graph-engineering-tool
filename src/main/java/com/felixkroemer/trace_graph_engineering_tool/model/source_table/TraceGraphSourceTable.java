@@ -14,7 +14,6 @@ public class TraceGraphSourceTable implements CyTable {
     private Map<String, double[]> data;
     private final CyServiceRegistrar registrar;
     private final Long suid;
-    private ArrayList<CyRow> rows;
     private boolean isPublic;
     private int rowCount;
 
@@ -28,10 +27,6 @@ public class TraceGraphSourceTable implements CyTable {
         this.suid = SUIDFactory.getNextSUID();
         this.isPublic = true;
         this.rowCount = (int) rowCount;
-        this.rows = new ArrayList<>(this.rowCount);
-        for (int i = 0; i < rowCount; i++) {
-            this.rows.add(new TraceGraphSourceRow(i));
-        }
     }
 
     @Override
@@ -118,7 +113,7 @@ public class TraceGraphSourceTable implements CyTable {
     @Override
     public CyRow getRow(Object primaryKey) {
         int index = ((Long) primaryKey).intValue();
-        return rows.get(index);
+        return new TraceGraphSourceRow(index);
     }
 
     @Override
@@ -134,7 +129,11 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public List<CyRow> getAllRows() {
-        return this.rows;
+        var rows = new ArrayList<CyRow>(this.rowCount);
+        for (int i = 0; i < rowCount; i++) {
+            rows.add(new TraceGraphSourceRow(i));
+        }
+        return rows;
     }
 
     @Override

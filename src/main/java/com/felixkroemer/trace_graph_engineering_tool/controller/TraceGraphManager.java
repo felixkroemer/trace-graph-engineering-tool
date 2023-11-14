@@ -162,8 +162,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         for (var pdm : this.controllers.keySet()) {
             if (!pdm.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet()).equals(new HashSet<>(params))) {
                 return null;
-            } else {
-                return pdm;
             }
         }
         return null;

@@ -244,7 +244,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    //TODO: check why this is triggered twice
     @Override
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getNetwork() == this.traceGraph.getNetwork()) {

@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraph
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableNode;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
@@ -59,7 +60,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             public void run(TaskMonitor taskMonitor) throws Exception {
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
                 helper.silenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
-                traceGraph.reinit(changedParameter);
+                traceGraph.onParameterChanged(changedParameter);
                 helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
                 renderingController.hideNodes();
@@ -169,8 +170,12 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.applyStyleAndLayout();
     }
 
-    public RenderingController getRenderingController() {
-        return this.renderingController;
+    /**
+     * Creates a panel for configuring the TraceGraphController
+     * The generated panel depends on the currently selected DisplayController
+     */
+    public TraceGraphPanel getSettingsPanel() {
+        return this.renderingController.getSettingsPanel();
     }
 
     @Override

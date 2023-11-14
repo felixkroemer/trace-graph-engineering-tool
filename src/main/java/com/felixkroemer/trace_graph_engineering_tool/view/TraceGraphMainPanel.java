@@ -145,7 +145,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
         this.showPanel(this.pdmPanel);
-        var settingsPanel = event.getTraceGraphController().getRenderingController().getSettingsPanel();
+        var settingsPanel = event.getTraceGraphController().getSettingsPanel();
         this.replaceEdgeDisplayControllerPanel(settingsPanel);
         this.hidePanel(this.traceGraphComparisonPanel);
     }

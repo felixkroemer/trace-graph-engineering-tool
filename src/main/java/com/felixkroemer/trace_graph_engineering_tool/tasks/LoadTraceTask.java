@@ -7,14 +7,14 @@ import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizati
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import org.cytoscape.application.CyUserLog;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyNetworkTableManager;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
+import org.cytoscape.model.CyTableManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -26,20 +26,13 @@ public class LoadTraceTask extends AbstractTask {
     @Tunable(description = "The trace to load", params = "input=true", required = true)
     public File traceFile;
 
-    private final Logger logger;
-
     private final TraceGraphManager manager;
-    private final CyTableFactory tableFactory;
-    private final CyNetworkFactory networkFactory;
     private final CyNetworkTableManager networkTableManager;
     private final CyTableManager tableManager;
     private final CyServiceRegistrar registrar;
 
     public LoadTraceTask(CyServiceRegistrar reg) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.manager = reg.getService(TraceGraphManager.class);
-        this.tableFactory = reg.getService(CyTableFactory.class);
-        this.networkFactory = reg.getService(CyNetworkFactory.class);
         this.networkTableManager = reg.getService(CyNetworkTableManager.class);
         this.tableManager = reg.getService(CyTableManager.class);
         this.registrar = reg;
@@ -51,7 +44,6 @@ public class LoadTraceTask extends AbstractTask {
         // true);
         CyTable sourceTable = new TraceGraphSourceTable(traceFile.getName(), Files.lines(traceFile.toPath()).count(),
                 registrar);
-        sourceTable.setTitle(traceFile.getName());
         Util.parseCSV(sourceTable, traceFile);
         List<String> params = new ArrayList<>();
         sourceTable.getColumns().forEach(c -> {

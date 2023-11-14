@@ -224,7 +224,7 @@ public class TraceGraph {
         return this.pdm;
     }
 
-    public void reinit(Parameter changedParameter) {
+    public void onParameterChanged(Parameter changedParameter) {
         clearEdges();
         int changedParameterIndex = -1;
         for (int j = 0; j < pdm.getParameterCount(); j++) {
@@ -331,7 +331,7 @@ public class TraceGraph {
     public void clearEdges() {
         this.network.removeEdges(this.network.getEdgeList());
         this.edgeInfo.clear();
-        for(CyRow row : this.defaultNodeTable.getAllRows()) {
+        for (CyRow row : this.defaultNodeTable.getAllRows()) {
             row.set(Columns.NODE_VISITS, 1);
             row.set(Columns.NODE_FREQUENCY, 1);
         }
