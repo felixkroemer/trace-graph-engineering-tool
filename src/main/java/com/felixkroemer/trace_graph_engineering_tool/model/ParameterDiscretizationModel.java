@@ -5,15 +5,13 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscreti
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.javatuples.Pair;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ParameterDiscretizationModel implements PropertyChangeListener {
+public class ParameterDiscretizationModel {
 
-    public static final String FILTERED = "filtered";
     public static final String PERCENTILE_FILTER = "percentileFilter";
 
     private PropertyChangeSupport pcs;
@@ -21,7 +19,6 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
     private List<Parameter> parameters;
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
-    private boolean filtered;
     private Pair<String, Double> percentile;
 
 
@@ -30,11 +27,9 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
             Parameter parameter = new Parameter(paramDto, this);
-            parameter.addObserver(this);
             this.parameters.add(parameter);
         }
         this.suidHashMapping = new HashMap<>();
-        this.filtered = false;
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
     }
@@ -81,52 +76,25 @@ public class ParameterDiscretizationModel implements PropertyChangeListener {
     }
 
     public void addObserver(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener(ParameterDiscretizationModel.FILTERED, l);
         pcs.addPropertyChangeListener(ParameterDiscretizationModel.PERCENTILE_FILTER, l);
     }
 
     public void removeObserver(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener(ParameterDiscretizationModel.FILTERED, l);
         pcs.removePropertyChangeListener(ParameterDiscretizationModel.PERCENTILE_FILTER, l);
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case Parameter.VISIBLE_BINS -> {
-                this.updateFilteredState();
-            }
-        }
     }
 
     public void setPercentile(String column, double percentile) {
         this.percentile = new Pair<>(column, percentile);
         this.pcs.firePropertyChange(ParameterDiscretizationModel.PERCENTILE_FILTER, null, this.percentile);
-        this.updateFilteredState();
     }
 
     public void resetPercentile() {
         this.percentile = null;
         this.pcs.firePropertyChange(ParameterDiscretizationModel.PERCENTILE_FILTER, null, null);
-        this.updateFilteredState();
     }
 
     public Pair<String, Double> getPercentile() {
         return this.percentile;
-    }
-
-    private void updateFilteredState() {
-        boolean parameterFiltered = !this.parameters.stream().allMatch(p -> p.getVisibleBins().isEmpty());
-        boolean percentileFiltered = this.percentile != null;
-        boolean filtered = parameterFiltered || percentileFiltered;
-        if (filtered != this.filtered) {
-            this.filtered = filtered;
-            pcs.firePropertyChange(ParameterDiscretizationModel.FILTERED, null, this.filtered);
-        }
-    }
-
-    public boolean isFiltered() {
-        return this.filtered;
     }
 
     public void resetFilters() {

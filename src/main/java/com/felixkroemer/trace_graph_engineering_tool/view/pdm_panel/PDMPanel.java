@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
-import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.application.CyUserLog;
@@ -25,6 +25,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     private JPanel pdmPanel;
     private JPanel resetFilterPanel;
     private JButton resetFilterButton;
+    private JLabel hiddenNodesCountLabel;
     private CyServiceRegistrar reg;
     private NetworkController controller;
 
@@ -38,7 +39,9 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
         this.pdmPanel.setLayout(new BoxLayout(this.pdmPanel, BoxLayout.Y_AXIS));
         this.resetFilterPanel = new JPanel();
         this.resetFilterButton = new JButton("Reset Filters");
-        resetFilterPanel.add(this.resetFilterButton);
+        this.hiddenNodesCountLabel = new JLabel();
+        this.resetFilterPanel.add(this.resetFilterButton);
+        this.resetFilterPanel.add(this.hiddenNodesCountLabel);
         this.init();
     }
 
@@ -65,36 +68,46 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     }
 
     public void registerCallbacks(NetworkController controller) {
-        if (this.controller != null) {
-            this.controller.getPDM().removeObserver(this);
+        if (this.controller != null && this.controller instanceof TraceGraphController tgc) {
+            tgc.getFilteredState().removeObserver(this);
         }
 
-        this.updatePDMPanel(controller);
-        this.updateInfoTreeTable(controller);
-        this.updateResetPanel(controller);
-
         this.controller = controller;
-        this.controller.getPDM().addObserver(this);
+
+        this.updatePDMPanel();
+        this.updateInfoTreeTable();
+        this.updateResetPanel();
+
+        if (this.controller instanceof TraceGraphController tgc) {
+            tgc.getFilteredState().addObserver(this);
+        }
     }
 
-    private void updatePDMPanel(NetworkController controller) {
+    private void updatePDMPanel() {
         this.pdmPanel.removeAll();
-        controller.getPDM().forEach(parameter -> {
+        this.controller.getPDM().forEach(parameter -> {
             ParameterCell cell = new ParameterCell(reg, parameter, controller);
             parameter.addObserver(cell);
             this.pdmPanel.add(cell);
         });
     }
 
-    private void updateInfoTreeTable(NetworkController controller) {
+    private void updateInfoTreeTable() {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        var model = controller.createNetworkTableModel(root);
+        var model = this.controller.createNetworkTableModel(root);
         this.infoTreeTable.setModel(model);
     }
 
-    private void updateResetPanel(NetworkController controller) {
-        if (controller.getPDM().isFiltered()) {
-            this.add(this.resetFilterPanel, BorderLayout.SOUTH);
+    private void updateResetPanel() {
+        if (this.controller instanceof TraceGraphController tgc) {
+            var filteredState = tgc.getFilteredState();
+            if (filteredState.getHiddenNodeCount() != 0) {
+                var visibleNodeCount = filteredState.getTotalNodeCount() - filteredState.getHiddenNodeCount();
+                this.hiddenNodesCountLabel.setText(visibleNodeCount + " / " + filteredState.getTotalNodeCount() + " " + "nodes shown");
+                this.add(this.resetFilterPanel, BorderLayout.SOUTH);
+            } else {
+                this.remove(this.resetFilterPanel);
+            }
         } else {
             this.remove(this.resetFilterPanel);
         }
@@ -108,8 +121,8 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case ParameterDiscretizationModel.FILTERED -> {
-                this.updateResetPanel(this.controller);
+            case "filteredState" -> {
+                this.updateResetPanel();
             }
         }
     }

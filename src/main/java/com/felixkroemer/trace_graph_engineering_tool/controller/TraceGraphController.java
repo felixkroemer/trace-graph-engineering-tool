@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
@@ -37,6 +38,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         super(registrar, traceGraph.getNetwork(), traceGraph.getPDM());
         this.traceGraph = traceGraph;
+        //TODO set initial filtered state
         this.renderingController = new RenderingController(registrar, this);
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
@@ -63,8 +65,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 traceGraph.onParameterChanged(changedParameter);
                 helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
-                renderingController.hideNodes();
-                renderingController.updateVisualStyle();
+                renderingController.onNetworkChanged();
 
             }
         });
@@ -148,7 +149,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
-        this.renderingController.updateVisualStyle();
+        this.renderingController.onNetworkChanged();
         this.applyStyleAndLayout();
         return new TraceGraphController(registrar, newTg);
     }
@@ -165,8 +166,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         }
         CyEventHelper helper = registrar.getService(CyEventHelper.class);
         helper.flushPayloadEvents();
-        this.renderingController.hideNodes();
-        this.renderingController.updateVisualStyle();
+        this.renderingController.onNetworkChanged();
         this.applyStyleAndLayout();
     }
 
@@ -196,5 +196,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void dispose() {
         this.renderingController.dispose();
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
+    }
+
+    public FilteredState getFilteredState() {
+        return this.renderingController.getFilteredState();
     }
 }

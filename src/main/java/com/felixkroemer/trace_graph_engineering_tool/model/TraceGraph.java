@@ -16,7 +16,6 @@ public class TraceGraph {
     private Set<CyTable> sourceTables;
     private CyTable defaultNodeTable;
     private CyTable defaultEdgetable;
-    // the currently selected trace
 
     // hash to node suid
     //TODO: map directly to node

@@ -5,9 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentEdgeDispla
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.application.CyApplicationManager;
@@ -46,14 +44,13 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private CyNetworkView view;
     private AbstractEdgeDisplayController displayController;
     private TraceGraph traceGraph;
-    private String previousDisplayController;
+    private FilteredState filteredState;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraphController traceGraphController) {
         this.registrar = registrar;
         this.traceGraphController = traceGraphController;
         this.traceGraph = this.traceGraphController.getTraceGraph();
         this.defaultStyle = createDefaultVisualStyle();
-        this.previousDisplayController = null;
 
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
@@ -77,6 +74,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
 
+        // TODO: set initial FilteredState
+        this.filteredState = new FilteredState(this.view);
         this.hideNodes();
     }
 
@@ -116,12 +115,20 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         return style;
     }
 
+    /**
+     * Called when network is split or merged or when nodes are hidden/revealed
+     */
+    public void onNetworkChanged() {
+        this.hideNodes();
+        this.updateVisualStyle();
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             //UIState
-            case Parameter.VISIBLE_BINS, "percentileFilter" -> {
-                this.hideNodes();
+            case Parameter.VISIBLE_BINS, ParameterDiscretizationModel.PERCENTILE_FILTER -> {
+                this.onNetworkChanged();
                 var taskManager = registrar.getService(TaskManager.class);
                 taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
             }
@@ -149,10 +156,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         pairs.sort(Comparator.comparing(Pair::getValue1));
         Collections.reverse(pairs);
-        var network = traceGraph.getNetwork();
         var sum = 0;
         for (var pair : pairs) {
-            var node = network.getNode(pair.getValue0());
+            var node = traceGraph.getNetwork().getNode(pair.getValue0());
             view.getNodeView(node).setVisualProperty(NODE_VISIBLE, sum <= cutOff);
             sum += pair.getValue1();
         }
@@ -165,6 +171,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         } else {
             this.hideNodesUsingBins();
         }
+        this.filteredState.update();
     }
 
     public void hideNodesUsingBins() {
@@ -266,19 +273,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         });
     }
 
-    public void restorePreviousDisplayController() {
-        if (this.previousDisplayController != null) {
-            this.setMode(this.previousDisplayController);
-        }
-    }
-
     @Override
     public void handleEvent(ShowTraceEvent e) {
         if (e.getNetwork() != this.traceGraph.getNetwork()) {
             return;
         }
         if (!(this.displayController instanceof ShortestTraceEdgeDisplayController)) {
-            this.previousDisplayController = this.displayController.getID();
             this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph,
                     e.getTrace(), this));
         }
@@ -290,5 +290,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public TraceGraphController getTraceGraphController() {
         return this.traceGraphController;
+    }
+
+    public FilteredState getFilteredState() {
+        return this.filteredState;
     }
 }
