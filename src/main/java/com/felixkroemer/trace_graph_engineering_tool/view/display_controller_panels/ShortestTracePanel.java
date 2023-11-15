@@ -70,8 +70,7 @@ public class ShortestTracePanel extends TraceGraphPanel implements PropertyChang
     private void updateTracePanel(TraceExtension trace) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         CyNode prevNode = null;
-        for (var entry : trace.getSequence()) {
-            var node = entry.getValue0();
+        for (var node : trace.getSequence()) {
             if (prevNode == null || prevNode != node) {
                 root.add(new CyNodeTreeTableNode(node));
             }

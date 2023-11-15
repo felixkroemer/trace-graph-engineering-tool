@@ -82,9 +82,9 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
             }
             if (up) {
-                trace.addBefore(nextNode, index);
+                trace.addBefore(nextNode, sourceTable, index);
             } else {
-                trace.addAfter(nextNode, index);
+                trace.addAfter(nextNode, sourceTable, index);
             }
             node = nextNode;
         }
@@ -117,15 +117,16 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(startNode, traceGraph.getNetwork(), sourceIndex,
-                        getNextColor());
+                TraceExtension trace = new TraceExtension(traceGraph.getNetwork(), getNextColor());
+                trace.addAfter(startNode, sourceTable, sourceIndex);
+                trace.setPrimaryNode(startNode);
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
                 //TODO: add case where the node in question is also in other places but the middle of the trace
                 // (loop in trace)
                 for (var node : trace.getSequence()) {
-                    foundIndices.add(node.getValue1());
+                    foundIndices.add(trace.getProvenance(node).getIndex());
                 }
             }
         }
@@ -204,8 +205,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
             var trace = traces.get(i);
             for (int j = 0; j < trace.getSequence().size() - 1; j++) {
                 // is null if the edge is a self edge
-                CyEdge edge = this.traceGraph.getEdge(trace.getSequence().get(j).getValue0(),
-                        trace.getSequence().get(j + 1).getValue0());
+                CyEdge edge = this.traceGraph.getEdge(trace.getSequence().get(j), trace.getSequence().get(j + 1));
                 if (edge != null) {
                     if (usedEdges.contains(edge)) {
                         edge = network.addEdge(edge.getSource(), edge.getTarget(), true);

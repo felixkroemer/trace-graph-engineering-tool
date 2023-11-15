@@ -74,8 +74,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
         for (int i = 0; i < trace.getSequence().size() - 1; i++) {
             CyEdge edge;
             // is null if the edge is a self edge
-            if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i).getValue0(),
-                    trace.getSequence().get(i + 1).getValue0())) != null) {
+            if ((edge = this.traceGraph.getEdge(trace.getSequence().get(i), trace.getSequence().get(i + 1))) != null) {
                 this.networkView.getEdgeView(edge).batch(v -> {
                     v.setVisualProperty(EDGE_VISIBLE, true);
                     v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, trace.getColor());

@@ -446,7 +446,7 @@ public class TraceGraph {
                 }
 
                 for (int i = start; i <= end; i++) {
-                    trace.addAfter(findNode(sourceTable, i), i);
+                    trace.addAfter(findNode(sourceTable, i), sourceTable, i);
                 }
 
                 if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {
@@ -509,7 +509,7 @@ public class TraceGraph {
             }
 
             for (int i = window.getValue0(); i <= window.getValue1(); i++) {
-                trace.addAfter(findNode(sourceTable, i), i);
+                trace.addAfter(findNode(sourceTable, i), sourceTable, i);
             }
 
             if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {

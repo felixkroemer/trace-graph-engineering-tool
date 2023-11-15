@@ -80,20 +80,20 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
             CyNode prevTraceNode = null;
             for (int i = 0; i < trace.getSequence().size(); i++) {
                 var node = trace.getSequence().get(i);
-                var startIndex = node.getValue1();
-                while (i < trace.getSequence().size() - 1 && trace.getSequence().get(i + 1).getValue0() == node.getValue0()) {
+                var startIndex = trace.getProvenance(node).getIndex();
+                while (i < trace.getSequence().size() - 1 && trace.getSequence().get(i + 1) == node) {
                     node = trace.getSequence().get(i + 1);
                     i++;
                 }
                 var traceNode = network.addNode();
                 eventHelper.flushPayloadEvents();
-                this.nodeMapping.put(traceNode, node.getValue0());
+                this.nodeMapping.put(traceNode, node);
                 var nodeView = networkView.getNodeView(traceNode);
-                nodeView.setVisualProperty(NODE_LABEL, startIndex != node.getValue1() ?
-                        startIndex + " - " + node.getValue1() : "" + node.getValue1());
+                var index = trace.getProvenance(node).getIndex();
+                nodeView.setVisualProperty(NODE_LABEL, startIndex != index ? startIndex + " - " + index : "" + index);
                 nodeView.setVisualProperty(NODE_FILL_COLOR, trace.getColor());
                 nodeView.setVisualProperty(NODE_WIDTH, 100.0);
-                if (trace.getNode() == node.getValue0()) {
+                if (trace.getPrimaryNode() == node) {
                     nodeView.setVisualProperty(NODE_BORDER_PAINT, Color.MAGENTA);
                 }
                 if (prevTraceNode != null) {
