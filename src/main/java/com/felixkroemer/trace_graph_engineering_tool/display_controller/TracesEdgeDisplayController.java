@@ -133,14 +133,17 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         return traces;
     }
 
+    public void update(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
+        this.traces = this.calculateTraces(selectedNodes, selectedEdges, network);
+        this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
+        this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                this.traces));
+        drawTraces();
+    }
+
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
-            ;
-            this.traces = this.calculateTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
-            this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                    this.traces));
-            drawTraces();
+            this.update(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
         }
         if (event.edgesChanged() && event.getSelectedEdges().size() == 1) {
             var trace = this.traceMapping.get(event.getSelectedEdges().iterator().next());
@@ -242,6 +245,18 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     public void setDisplayRange(int from, int to) {
         this.displayRange = new Pair<>(from, to);
         this.drawTraces();
+    }
+
+    public int getLength() {
+        return this.length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+        var network = this.networkView.getModel();
+        var selectedNodes = CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true);
+        var selectedEdges = CyTableUtil.getEdgesInState(network, CyNetwork.SELECTED, true);
+        this.update(selectedNodes, selectedEdges, network);
     }
 
     public List<TraceExtension> getTraces() {

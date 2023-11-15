@@ -13,45 +13,71 @@ import java.beans.PropertyChangeListener;
 public class TracesPanel extends TraceGraphPanel implements PropertyChangeListener {
     private CyServiceRegistrar registrar;
     private TracesEdgeDisplayController controller;
-    private JSlider slider;
+    private JSlider numberSlider;
+    private JSlider lengthSlider;
 
     public TracesPanel(CyServiceRegistrar registrar, TracesEdgeDisplayController controller) {
         this.registrar = registrar;
         this.controller = controller;
-        this.slider = new JSlider();
+        this.numberSlider = new JSlider();
+        this.lengthSlider = new JSlider();
 
         this.init();
 
         controller.addObserver(this);
     }
 
-    private void updateSliderRange() {
+    private void updateNumberSliderRange() {
         var displayRange = this.controller.getDisplayRange();
-        this.slider.setMinimum(0);
-        this.slider.setMaximum(controller.getTraces().size());
-        this.slider.setValue(displayRange.getValue1());
+        this.numberSlider.setMinimum(0);
+        this.numberSlider.setMaximum(controller.getTraces().size());
+        this.numberSlider.setValue(displayRange.getValue1());
+    }
+
+    private void initNumberSlider() {
+        this.updateNumberSliderRange();
+        this.numberSlider.setMajorTickSpacing(10);
+        this.numberSlider.setMinorTickSpacing(1);
+        this.numberSlider.setSnapToTicks(true);
+        this.numberSlider.setPaintTrack(true);
+        this.numberSlider.setPaintTicks(true);
+        this.numberSlider.setPaintLabels(true);
+        this.numberSlider.setBorder(LookAndFeelUtil.createTitledBorder("Number of Traces"));
+
+        this.numberSlider.addChangeListener(e -> {
+            var number = numberSlider.getValue();
+            controller.setDisplayRange(0, number);
+        });
+    }
+
+    private void initLengthSlider() {
+        this.lengthSlider.setMinimum(1);
+        this.lengthSlider.setMaximum(10);
+        this.lengthSlider.setValue(3);
+        this.lengthSlider.setMajorTickSpacing(4);
+        this.lengthSlider.setMinorTickSpacing(1);
+        this.lengthSlider.setSnapToTicks(true);
+        this.lengthSlider.setPaintTrack(true);
+        this.lengthSlider.setPaintTicks(true);
+        this.lengthSlider.setPaintLabels(true);
+        this.lengthSlider.setBorder(LookAndFeelUtil.createTitledBorder("Trace Length"));
+
+        this.lengthSlider.addChangeListener(e -> {
+            var length = lengthSlider.getValue();
+            controller.setLength(length);
+        });
     }
 
     private void init() {
         this.setLayout(new BorderLayout());
 
-        this.updateSliderRange();
-        this.slider.setMajorTickSpacing(10);
-        this.slider.setMinorTickSpacing(1);
-        this.slider.setSnapToTicks(true);
-        this.slider.setPaintTrack(true);
-        this.slider.setPaintTicks(true);
-        this.slider.setPaintLabels(true);
-        this.slider.setBorder(LookAndFeelUtil.createTitledBorder("Number of Traces"));
-
-        this.slider.addChangeListener(e -> {
-            var value = slider.getValue();
-            controller.setDisplayRange(0, value);
-        });
+        this.initNumberSlider();
+        this.initLengthSlider();
 
         var panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        panel.add(slider, BorderLayout.CENTER);
+        panel.add(numberSlider, BorderLayout.CENTER);
+        panel.add(lengthSlider, BorderLayout.SOUTH);
         this.add(panel, BorderLayout.NORTH);
     }
 
@@ -64,7 +90,7 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case TracesEdgeDisplayController.TRACES -> {
-                this.updateSliderRange();
+                this.updateNumberSliderRange();
             }
         }
     }
