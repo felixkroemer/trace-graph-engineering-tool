@@ -9,18 +9,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class TracesPanel extends TraceGraphPanel implements PropertyChangeListener {
     private CyServiceRegistrar registrar;
     private TracesEdgeDisplayController controller;
     private JSlider numberSlider;
     private JSlider lengthSlider;
+    private final ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> future;
 
     public TracesPanel(CyServiceRegistrar registrar, TracesEdgeDisplayController controller) {
         this.registrar = registrar;
         this.controller = controller;
         this.numberSlider = new JSlider();
         this.lengthSlider = new JSlider();
+        this.scheduler = Executors.newScheduledThreadPool(1);
 
         this.init();
 
@@ -46,8 +53,15 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
 
         this.numberSlider.addChangeListener(e -> {
             var number = numberSlider.getValue();
-            controller.setDisplayRange(0, number);
+            schedule(() -> controller.setDisplayRange(0, number));
         });
+    }
+
+    private void schedule(Runnable runnable) {
+        if (this.future != null) {
+            this.future.cancel(false);
+        }
+        this.future = this.scheduler.schedule(runnable, 200, TimeUnit.MILLISECONDS);
     }
 
     private void initLengthSlider() {
@@ -64,7 +78,7 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
 
         this.lengthSlider.addChangeListener(e -> {
             var length = lengthSlider.getValue();
-            controller.setLength(length);
+            schedule(() -> controller.setLength(length));
         });
     }
 
