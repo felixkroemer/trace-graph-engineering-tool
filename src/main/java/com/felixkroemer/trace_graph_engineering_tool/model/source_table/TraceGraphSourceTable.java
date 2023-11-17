@@ -262,4 +262,9 @@ public class TraceGraphSourceTable implements CyTable {
             return this.suid;
         }
     }
+
+    @Override
+    public String toString() {
+        return this.getTitle();
+    }
 }
