@@ -340,6 +340,7 @@ public class TraceGraph {
     }
 
     public void generateEdges() {
+        var localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
         CyNode prevNode = null;
         CyNode currentNode;
         CyRow currentNodeRow;
@@ -354,6 +355,8 @@ public class TraceGraph {
                     AuxiliaryInformation edgeAux;
                     if ((edge = getEdge(prevNode, currentNode)) == null) {
                         edge = network.addEdge(prevNode, currentNode, true);
+                        edgeRow = localEdgeTable.getRow(edge.getSUID());
+                        edgeRow.set(Columns.EDGE_TRAVERSALS, 1);
                         edgeAux = new AuxiliaryInformation();
                         this.edgeInfo.put(edge, edgeAux);
                     } else {

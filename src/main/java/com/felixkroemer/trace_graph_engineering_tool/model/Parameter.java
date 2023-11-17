@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,15 @@ public class Parameter {
     public Parameter(ParameterDTO dto, ParameterDiscretizationModel pdm) {
         this.name = dto.getName();
         this.bins = dto.getBins();
+        this.visibleBins = new HashSet<>();
+        this.pcs = new PropertyChangeSupport(this);
+        this.enabled = true;
+        this.pdm = pdm;
+    }
+
+    public Parameter(String name, ParameterDiscretizationModel pdm) {
+        this.name = name;
+        this.bins = new ArrayList<>();
         this.visibleBins = new HashSet<>();
         this.pcs = new PropertyChangeSupport(this);
         this.enabled = true;

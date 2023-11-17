@@ -60,9 +60,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
                 CyEventHelper helper = registrar.getService(CyEventHelper.class);
-                helper.silenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
+                //helper.silenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 traceGraph.onParameterChanged(changedParameter);
-                helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
+                //helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
                 renderingController.onNetworkChanged();
 
@@ -70,7 +70,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
         });
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
         taskManager.execute(iterator);
-        applyStyleAndLayout();
     }
 
     @Override

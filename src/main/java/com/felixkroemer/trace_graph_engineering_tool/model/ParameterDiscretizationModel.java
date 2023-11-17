@@ -21,12 +21,23 @@ public class ParameterDiscretizationModel {
     private CyRootNetwork rootNetwork;
     private Pair<String, Double> percentile;
 
-
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
         this.name = dto.getName();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
             Parameter parameter = new Parameter(paramDto, this);
+            this.parameters.add(parameter);
+        }
+        this.suidHashMapping = new HashMap<>();
+        this.percentile = null;
+        this.pcs = new PropertyChangeSupport(this);
+    }
+
+    public ParameterDiscretizationModel(String name, List<String> parameterNames) {
+        this.name = name;
+        this.parameters = new ArrayList<>(parameterNames.size());
+        for (String parameterName : parameterNames) {
+            Parameter parameter = new Parameter(parameterName, this);
             this.parameters.add(parameter);
         }
         this.suidHashMapping = new HashMap<>();

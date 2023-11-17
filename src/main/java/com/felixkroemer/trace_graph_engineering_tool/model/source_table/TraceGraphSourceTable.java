@@ -89,7 +89,7 @@ public class TraceGraphSourceTable implements CyTable {
     @Override
     public <T> void createColumn(String fullyQualifiedName, Class<? extends T> type, boolean isImmutable,
                                  T defaultValue) {
-        var data = new double[rowCount];
+        var data = new double[rowCount + 1];
         this.data.put(fullyQualifiedName, data);
         this.columns.put(fullyQualifiedName, new TraceGraphColumn(this, fullyQualifiedName, data));
     }
@@ -119,7 +119,7 @@ public class TraceGraphSourceTable implements CyTable {
     @Override
     public boolean rowExists(Object primaryKey) {
         int index = (int) primaryKey;
-        return index >= 0 && index < rowCount;
+        return index > 0 && index <= rowCount;
     }
 
     @Override
@@ -130,7 +130,7 @@ public class TraceGraphSourceTable implements CyTable {
     @Override
     public List<CyRow> getAllRows() {
         var rows = new ArrayList<CyRow>(this.rowCount);
-        for (int i = 0; i < rowCount; i++) {
+        for (int i = 1; i <= rowCount; i++) {
             rows.add(new TraceGraphSourceRow(i));
         }
         return rows;
