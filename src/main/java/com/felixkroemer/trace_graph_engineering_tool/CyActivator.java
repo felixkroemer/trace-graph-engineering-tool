@@ -47,13 +47,13 @@ public class CyActivator extends AbstractCyActivator {
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
         registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM", INSERT_SEPARATOR_BEFORE
-                        , "true")));
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or trace",
+                        INSERT_SEPARATOR_BEFORE, "true")));
 
-        LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
+/*        LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
         registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace",
-                        INSERT_SEPARATOR_BEFORE, "true")));
+                        INSERT_SEPARATOR_BEFORE, "true")));*/
 
         RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
         registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class,
