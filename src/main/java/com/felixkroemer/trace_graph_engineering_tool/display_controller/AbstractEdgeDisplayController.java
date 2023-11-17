@@ -43,10 +43,13 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     @Override
     public abstract void dispose();
 
-    protected void showALlEdges() {
+    protected void showAllEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
             edgeView.setVisualProperty(EDGE_VISIBLE, true);
         }
+    }
+
+    public void onNetworkChanged() {
     }
 
     protected void hideAllEdges() {

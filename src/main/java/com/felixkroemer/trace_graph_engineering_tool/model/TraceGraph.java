@@ -49,7 +49,7 @@ public class TraceGraph {
         localNodeTable.createColumn(Columns.NODE_FREQUENCY, Integer.class, false);
 
         var localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
-        localEdgeTable.createColumn(Columns.EDGE_TRAVERSALS, Integer.class, false, 1);
+        localEdgeTable.createColumn(Columns.EDGE_TRAVERSALS, Integer.class, false);
     }
 
     public void init(CyTable sourceTable) {
@@ -115,6 +115,8 @@ public class TraceGraph {
                 AuxiliaryInformation edgeAux;
                 if ((edge = getEdge(prevNode, currentNode)) == null) {
                     edge = network.addEdge(prevNode, currentNode, true);
+                    var edgeRow = localEdgeTable.getRow(edge.getSUID());
+                    edgeRow.set(Columns.EDGE_TRAVERSALS, 1);
                     edgeAux = new AuxiliaryInformation();
                     this.edgeInfo.put(edge, edgeAux);
                 } else {
@@ -137,6 +139,7 @@ public class TraceGraph {
         network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(sourceTables));
     }
 
+    //TODO fix visits, frequency and traversals
     public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTables) {
         TraceGraph traceGraph = new TraceGraph(newNetwork, this.pdm);
         for (CyTable table : sourceTables) {

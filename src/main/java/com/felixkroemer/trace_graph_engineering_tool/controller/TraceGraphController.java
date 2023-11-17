@@ -27,7 +27,6 @@ import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.util.*;
 
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable {
@@ -181,14 +180,14 @@ public class TraceGraphController extends NetworkController implements SetCurren
     @Override
     public TaskIterator getApplyStyleTask() {
         var iter = super.getApplyStyleTask();
-        iter.append(new AbstractTask() {
+/*        iter.append(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
                 for (var edgeView : getView().getEdgeViews()) {
                     edgeView.setVisualProperty(EDGE_VISIBLE, false);
                 }
             }
-        });
+        });*/
         return iter;
     }
 

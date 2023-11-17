@@ -120,6 +120,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
      */
     public void onNetworkChanged() {
         this.hideNodes();
+        if (this.displayController != null) {
+            this.displayController.init();
+        }
         this.updateVisualStyle();
     }
 
