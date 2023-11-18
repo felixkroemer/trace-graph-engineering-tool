@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.ComparisonSizeMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
@@ -11,6 +12,7 @@ import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
@@ -20,6 +22,7 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
+import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -164,7 +167,23 @@ public class NetworkComparisonController extends NetworkController implements Se
         edgeColorMapping.putMapValue(2, Color.BLUE);
         style.addVisualMappingFunction(edgeColorMapping);
 
-        style.setDefaultValue(NODE_SIZE, 10.0);
+        var baseLocalNodeTable = this.base.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+        var baseSUIDs = baseLocalNodeTable.getColumn("SUID").getValues(Long.class);
+        var baseFreqs = baseLocalNodeTable.getColumn(Columns.NODE_FREQUENCY).getValues(Integer.class);
+        var baseMapping = new HashMap<Long, Integer>();
+        for (int i = 0; i < baseSUIDs.size(); i++) {
+            baseMapping.put(baseSUIDs.get(i), Integer.valueOf(baseFreqs.get(i)));
+        }
+        var deltaLocalNodeTable = this.delta.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+        var deltaSUIDs = deltaLocalNodeTable.getColumn("SUID").getValues(Long.class);
+        var deltaFreqs = deltaLocalNodeTable.getColumn(Columns.NODE_FREQUENCY).getValues(Integer.class);
+        var deltaMapping = new HashMap<Long, Integer>();
+        for (int i = 0; i < deltaSUIDs.size(); i++) {
+            deltaMapping.put(deltaSUIDs.get(i), Integer.valueOf(deltaFreqs.get(i)));
+        }
+        PassthroughMapping<CyRow, Double> nodeSizeMapping = new ComparisonSizeMapping(baseMapping, deltaMapping);
+        style.addVisualMappingFunction(nodeSizeMapping);
+
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
 
         return style;
