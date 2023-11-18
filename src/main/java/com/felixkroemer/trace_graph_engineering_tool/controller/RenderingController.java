@@ -7,7 +7,7 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListen
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyDisposable;
@@ -287,7 +287,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    public TraceGraphPanel getSettingsPanel() {
+    public EdgeDisplayControllerPanel getSettingsPanel() {
         return this.displayController.getSettingsPanel();
     }
 

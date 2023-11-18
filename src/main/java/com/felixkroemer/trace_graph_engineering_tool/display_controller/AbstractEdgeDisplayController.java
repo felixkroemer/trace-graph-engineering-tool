@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.model.CyDisposable;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
@@ -80,7 +80,7 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
 
     public abstract String getID();
 
-    public TraceGraphPanel getSettingsPanel() {
+    public EdgeDisplayControllerPanel getSettingsPanel() {
         return null;
     }
 

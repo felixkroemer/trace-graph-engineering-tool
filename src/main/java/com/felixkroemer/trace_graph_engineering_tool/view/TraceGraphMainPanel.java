@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.*;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -26,7 +27,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     private NodeInfoPanel nodeInfoPanel;
     private TraceGraphComparisonPanel traceGraphComparisonPanel;
     private NodeComparisonPanel nodeComparisonPanel;
-    private TraceGraphPanel edgeDisplayControllerPanel;
+    private EdgeDisplayControllerPanel edgeDisplayControllerPanel;
 
     public TraceGraphMainPanel(CyServiceRegistrar reg) {
         super(new BorderLayout());
@@ -149,13 +150,30 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.hidePanel(this.traceGraphComparisonPanel);
     }
 
-    private void replaceEdgeDisplayControllerPanel(TraceGraphPanel newPanel) {
+    private void replaceEdgeDisplayControllerPanel(EdgeDisplayControllerPanel newPanel) {
         if (this.edgeDisplayControllerPanel != null) {
-            this.hidePanel(this.edgeDisplayControllerPanel);
+            var displayMode = this.edgeDisplayControllerPanel.getDisplayLocation();
+            switch (displayMode) {
+                case PANEL -> {
+                    this.hidePanel(this.edgeDisplayControllerPanel);
+                }
+                case NORTH -> {
+                    BorderLayout layout = (BorderLayout) this.getLayout();
+                    this.remove(layout.getLayoutComponent(BorderLayout.NORTH));
+                }
+            }
         }
         this.edgeDisplayControllerPanel = newPanel;
         if (newPanel != null) {
-            this.showPanel(newPanel);
+            var displayMode = this.edgeDisplayControllerPanel.getDisplayLocation();
+            switch (displayMode) {
+                case PANEL -> {
+                    this.showPanel(newPanel);
+                }
+                case NORTH -> {
+                    this.add(newPanel, BorderLayout.NORTH);
+                }
+            }
         }
     }
 

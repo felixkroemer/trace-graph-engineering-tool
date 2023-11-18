@@ -3,7 +3,6 @@ package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_pa
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -18,7 +17,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class ShortestTracePanel extends TraceGraphPanel implements PropertyChangeListener {
+public class ShortestTracePanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
 
     private CyServiceRegistrar reg;
 
@@ -91,6 +90,11 @@ public class ShortestTracePanel extends TraceGraphPanel implements PropertyChang
                 this.updateTracePanel((TraceExtension) evt.getNewValue());
             }
         }
+    }
+
+    @Override
+    public EdgeDisplayControllerPanelLocation getDisplayLocation() {
+        return EdgeDisplayControllerPanelLocation.PANEL;
     }
 }
 

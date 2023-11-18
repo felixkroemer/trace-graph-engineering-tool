@@ -4,7 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingControl
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.TracesPanel;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.*;
@@ -247,7 +247,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         return colors[colorIndex - 1];
     }
 
-    public TraceGraphPanel getSettingsPanel() {
+    public EdgeDisplayControllerPanel getSettingsPanel() {
         return new TracesPanel(registrar, this);
     }
 

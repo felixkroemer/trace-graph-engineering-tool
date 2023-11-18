@@ -2,7 +2,6 @@ package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_pa
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 
@@ -16,7 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class TracesPanel extends TraceGraphPanel implements PropertyChangeListener {
+public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
     private CyServiceRegistrar registrar;
     private TracesEdgeDisplayController controller;
     private JSlider numberSlider;
@@ -127,5 +126,10 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
                 this.updateLengthSlider(traces);
             }
         }
+    }
+
+    @Override
+    public EdgeDisplayControllerPanelLocation getDisplayLocation() {
+        return EdgeDisplayControllerPanelLocation.NORTH;
     }
 }

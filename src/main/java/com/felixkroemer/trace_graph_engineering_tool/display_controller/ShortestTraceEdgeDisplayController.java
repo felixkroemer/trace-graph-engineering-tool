@@ -5,7 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.ShortestTracePanel;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
@@ -95,7 +95,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
                 e.getTrace()));
     }
 
-    public TraceGraphPanel getSettingsPanel() {
+    public EdgeDisplayControllerPanel getSettingsPanel() {
         return new ShortestTracePanel(registrar, this, this.trace);
     }
 

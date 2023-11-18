@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.javatuples.Pair;
 
@@ -10,7 +9,7 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class DefaultEdgeDisplayControllerPanel extends TraceGraphPanel implements PropertyChangeListener {
+public class DefaultEdgeDisplayControllerPanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
 
     private DefaultEdgeDisplayController controller;
     private JSlider slider;
@@ -76,5 +75,10 @@ public class DefaultEdgeDisplayControllerPanel extends TraceGraphPanel implement
                 this.slider.setValue(range.getValue0());
             }
         }
+    }
+
+    @Override
+    public EdgeDisplayControllerPanelLocation getDisplayLocation() {
+        return EdgeDisplayControllerPanelLocation.NORTH;
     }
 }

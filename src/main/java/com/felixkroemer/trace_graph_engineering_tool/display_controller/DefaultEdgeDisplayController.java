@@ -4,8 +4,8 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingControl
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
-import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.DefaultEdgeDisplayControllerPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
@@ -89,7 +89,7 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
         return RENDERING_MODE_FULL;
     }
 
-    public TraceGraphPanel getSettingsPanel() {
+    public EdgeDisplayControllerPanel getSettingsPanel() {
         return new DefaultEdgeDisplayControllerPanel(this);
     }
 
