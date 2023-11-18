@@ -136,10 +136,12 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
         if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
             this.traces = this.calculateTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
-            this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                    this.traces));
-            drawTraces();
+            if (this.traces != null) {
+                this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
+                this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                        this.traces));
+                drawTraces();
+            }
         }
         if (event.edgesChanged() && event.getSelectedEdges().size() == 1) {
             var trace = this.traceMapping.get(event.getSelectedEdges().iterator().next());
@@ -148,16 +150,24 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 eventHelper.fireEvent(new ShowTraceEvent(this, trace, networkView.getModel()));
             }
         }
+        if (event.getSelectedNodes().isEmpty()) {
+            this.traces = null;
+            this.displayRange = null;
+            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                    this.traces));
+        }
     }
 
-    @Override
     public void init() {
+        this.hideAllEdges();
         var selectedNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
         this.traces = this.calculateTraces(selectedNodes, Collections.emptyList(), networkView.getModel());
-        this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-        this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                this.traces));
-        drawTraces();
+        if (this.traces != null) {
+            this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
+            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
+                    this.traces));
+            drawTraces();
+        }
     }
 
     @Override
@@ -170,15 +180,19 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         network.removeEdges(this.multiEdges);
         this.multiEdges.clear();
         this.traceMapping.clear();
-        List<TraceExtension> traces = new LinkedList<>();
-        if (selectedNodes.size() == 1) {
-            traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
+
+        if (!selectedNodes.isEmpty() || !selectedEdges.isEmpty()) {
+            List<TraceExtension> traces = new LinkedList<>();
+            if (selectedNodes.size() == 1) {
+                traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
+            }
+            if (selectedEdges.size() == 1) {
+                traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
+            }
+            traces.sort(Comparator.comparingInt(TraceExtension::getWeight).reversed());
+            return traces;
         }
-        if (selectedEdges.size() == 1) {
-            traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
-        }
-        traces.sort(Comparator.comparingInt(TraceExtension::getWeight).reversed());
-        return traces;
+        return null;
     }
 
     @Override
@@ -197,6 +211,9 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public void drawTraces(int from, int to) {
         this.hideAllEdges();
+        if (this.traces == null) {
+            return;
+        }
         colorIndex = 0;
         var usedEdges = new HashSet<CyEdge>();
         var network = networkView.getModel();

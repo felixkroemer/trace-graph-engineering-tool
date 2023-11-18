@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
@@ -9,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -34,15 +36,20 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
         controller.addObserver(this);
     }
 
-    private void updateNumberSliderRange() {
-        var displayRange = this.controller.getDisplayRange();
-        this.numberSlider.setMinimum(0);
-        this.numberSlider.setMaximum(controller.getTraces().size());
-        this.numberSlider.setValue(displayRange.getValue1());
+    private void updateNumberSlider(List<TraceExtension> traces) {
+        if (traces != null) {
+            this.numberSlider.setEnabled(true);
+            var displayRange = this.controller.getDisplayRange();
+            this.numberSlider.setMinimum(0);
+            this.numberSlider.setMaximum(traces.size());
+            this.numberSlider.setValue(displayRange.getValue1());
+        } else {
+            this.numberSlider.setEnabled(false);
+        }
     }
 
-    private void initNumberSlider() {
-        this.updateNumberSliderRange();
+    private void initNumberSlider(List<TraceExtension> traces) {
+        this.updateNumberSlider(traces);
         this.numberSlider.setMajorTickSpacing(10);
         this.numberSlider.setMinorTickSpacing(1);
         this.numberSlider.setSnapToTicks(true);
@@ -64,10 +71,19 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
         this.future = this.scheduler.schedule(runnable, 200, TimeUnit.MILLISECONDS);
     }
 
-    private void initLengthSlider() {
+    private void updateLengthSlider(List<TraceExtension> traces) {
+        if (traces != null) {
+            this.lengthSlider.setEnabled(true);
+            this.lengthSlider.setValue(controller.getLength());
+        } else {
+            this.lengthSlider.setEnabled(false);
+        }
+    }
+
+    private void initLengthSlider(List<TraceExtension> traces) {
+        this.updateLengthSlider(traces);
         this.lengthSlider.setMinimum(1);
         this.lengthSlider.setMaximum(10);
-        this.lengthSlider.setValue(3);
         this.lengthSlider.setMajorTickSpacing(4);
         this.lengthSlider.setMinorTickSpacing(1);
         this.lengthSlider.setSnapToTicks(true);
@@ -82,11 +98,13 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
         });
     }
 
-    private void init() {
+    public void init() {
         this.setLayout(new BorderLayout());
 
-        this.initNumberSlider();
-        this.initLengthSlider();
+        var traces = controller.getTraces();
+
+        this.initNumberSlider(traces);
+        this.initLengthSlider(traces);
 
         var panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -104,7 +122,9 @@ public class TracesPanel extends TraceGraphPanel implements PropertyChangeListen
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case TracesEdgeDisplayController.TRACES -> {
-                this.updateNumberSliderRange();
+                var traces = (List<TraceExtension>) evt.getNewValue();
+                this.updateNumberSlider(traces);
+                this.updateLengthSlider(traces);
             }
         }
     }

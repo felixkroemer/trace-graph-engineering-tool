@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.ComparisonSizeMapping;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
@@ -188,6 +189,8 @@ public class NetworkComparisonController extends NetworkController implements Se
         }
         PassthroughMapping<CyRow, Double> nodeSizeMapping = new ComparisonSizeMapping(baseMapping, deltaMapping);
         style.addVisualMappingFunction(nodeSizeMapping);
+
+        style.addVisualMappingFunction(new TooltipMapping(this.pdm));
 
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
 

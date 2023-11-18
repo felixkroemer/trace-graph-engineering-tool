@@ -138,7 +138,6 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         var controller = manager.findControllerForNetwork(network);
         if (controller != null) {
             this.pdmPanel.registerCallbacks(controller);
-            this.showMainPanel();
         }
     }
 
