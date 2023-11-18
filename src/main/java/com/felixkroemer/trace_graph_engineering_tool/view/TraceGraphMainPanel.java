@@ -179,7 +179,12 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     }
 
     private void showPanel(TraceGraphPanel panel) {
-        this.hideTemporaryPanels();
+        if (panel != this.nodeInfoPanel) {
+            this.hidePanel(this.nodeInfoPanel);
+        }
+        if (panel != this.nodeComparisonPanel) {
+            this.hidePanel(this.nodeComparisonPanel);
+        }
         if (panel != pdmPanel && getPanelIndex(panel.getTitle()) == -1) {
             this.tabs.addTab(panel.getTitle(), panel);
         }

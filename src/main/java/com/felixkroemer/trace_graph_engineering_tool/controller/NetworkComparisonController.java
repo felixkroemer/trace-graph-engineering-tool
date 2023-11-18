@@ -39,6 +39,8 @@ public class NetworkComparisonController extends NetworkController implements Se
     public static final String DO = "DO";
     public static final String BD = "BD";
 
+    private TraceGraphController baseController;
+    private TraceGraphController deltaController;
     private CyNetwork base;
     private CyNetwork delta;
     private CySubNetwork network;
@@ -53,11 +55,14 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     private VisualStyle defaultVisualStyle;
 
-    public NetworkComparisonController(CyNetwork base, CyNetwork delta, CySubNetwork network,
-                                       ParameterDiscretizationModel pdm, CyServiceRegistrar registrar) {
+    public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController,
+                                       CySubNetwork network, ParameterDiscretizationModel pdm,
+                                       CyServiceRegistrar registrar) {
         super(registrar, network, pdm);
-        this.base = base;
-        this.delta = delta;
+        this.baseController = baseController;
+        this.deltaController = deltaController;
+        this.base = baseController.getNetwork();
+        this.delta = deltaController.getNetwork();
         this.network = network;
         this.nodesBaseOnlyVisible = true;
         this.nodesDeltaOnlyVisible = true;
@@ -234,6 +239,12 @@ public class NetworkComparisonController extends NetworkController implements Se
         HashMap<String, String> map = new HashMap<>();
         var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
         map.put("Group", group == 2 ? "BD" : (group == 1 ? "DO" : "BO"));
+        if (group == 2 || group == 0) {
+            map.put("Base Frequency", baseController.getNodeInfo(node).get("Frequency"));
+        }
+        if (group == 2 || group == 1) {
+            map.put("Delta Frequency", deltaController.getNodeInfo(node).get("Frequency"));
+        }
         return map;
     }
 
