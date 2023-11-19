@@ -123,7 +123,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (this.displayController != null) {
             this.displayController.init();
         }
-        this.updateVisualStyle();
     }
 
     @Override
@@ -131,6 +130,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         switch (evt.getPropertyName()) {
             //UIState
             case Parameter.VISIBLE_BINS, ParameterDiscretizationModel.PERCENTILE_FILTER -> {
+                this.updateVisualStyle();
                 this.onNetworkChanged();
                 var taskManager = registrar.getService(TaskManager.class);
                 taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));

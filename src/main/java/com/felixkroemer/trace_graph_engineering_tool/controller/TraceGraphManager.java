@@ -158,13 +158,14 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         this.panel.dispose();
     }
 
-    public ParameterDiscretizationModel findPDM(List<String> params) {
+    public List<ParameterDiscretizationModel> findPDM(Collection<String> params) {
+        List<ParameterDiscretizationModel> matchingPDMs = new ArrayList<>();
         for (var pdm : this.controllers.keySet()) {
             if (pdm.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet()).equals(new HashSet<>(params))) {
-                return pdm;
+                matchingPDMs.add(pdm);
             }
         }
-        return null;
+        return matchingPDMs;
     }
 
     public void showTraceDetailsNetwork() {
@@ -202,6 +203,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         String name = preferredName;
         while (names.contains(name)) {
             name = preferredName + "(" + i + ")";
+            i += 1;
         }
         return name;
     }

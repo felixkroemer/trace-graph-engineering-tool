@@ -38,7 +38,6 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
                     networkView.getNodeView(neighbor).getVisualProperty(NODE_Y_LOCATION));
         }
         if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
-            this.hideAllEdges();
             this.previousNode = event.getSelectedNodes().iterator().next();
             showEdgesOfSelectedNodes();
         }
@@ -46,7 +45,6 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     @Override
     public void init() {
-        this.hideAllEdges();
         showEdgesOfSelectedNodes();
     }
 
@@ -82,9 +80,15 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
                     }
                 }
                 var edgeView = networkView.getEdgeView(edge);
-                edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
-                edgeView.setVisualProperty(EDGE_VISIBLE, true);
-                edgeView.setVisualProperty(EDGE_TOOLTIP, sb.toString());
+                // when TracGraphs are merged, the selectedNodesAndEdges event may be fired before the views are
+                // created in NetworkMediator
+                // the correct edges will still be displayed when init is called in onNetworkChanged
+                if (edgeView != null) {
+                    edgeView.setVisualProperty(EDGE_VISIBLE, true);
+                    edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
+                    edgeView.setVisualProperty(EDGE_TOOLTIP, sb.toString());
+                }
+
             }
         }
     }

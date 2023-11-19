@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManage
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
@@ -57,8 +58,32 @@ public class LoadPDMTask extends AbstractTask {
         localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
     }
 
-    public void loadPDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto, String name) throws Exception {
-        var subNetwork = createAndInitSubnetwork(pdm, name);
+    /**
+     * If there exist PDMs with the same set of parameters, ask the user which pdm this dto should be assigned to or
+     * if a new pdm should be created.
+     *
+     * @return The PDM that the DTO should be assigned to.
+     */
+    public ParameterDiscretizationModel queryPDMsForDTO(ParameterDiscretizationModelDTO dto) {
+        var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
+        var matchingPDMs = manager.findPDM(params);
+        ParameterDiscretizationModel pdm = null;
+        if (!matchingPDMs.isEmpty()) {
+/*            SelectMatchingPDMDialog d = new SelectMatchingPDMDialog();
+            d.setTitle("Select PDM");
+            d.setPreferredSize(new Dimension(600, 600));
+            d.setModalityType(APPLICATION_MODAL);
+            pdm = d.showDialog();*/
+        }
+        if (pdm == null) {
+            pdm = new ParameterDiscretizationModel(dto);
+        }
+        return pdm;
+    }
+
+    public void loadPDM(ParameterDiscretizationModelDTO dto) throws Exception {
+        var pdm = queryPDMsForDTO(dto);
+        var subNetwork = createAndInitSubnetwork(pdm, dto.getName());
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {
             var path = new File(traceFile.getParentFile(), csv);
@@ -82,13 +107,14 @@ public class LoadPDMTask extends AbstractTask {
         sourceTable.getColumns().forEach(c -> {
             if (!c.getName().equals(Columns.SOURCE_ID)) params.add(c.getName());
         });
-        var pdm = manager.findPDM(params);
-        if (pdm == null) {
+        var pdms = manager.findPDM(params);
+        if (pdms.isEmpty()) {
             var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
-            pdm = new ParameterDiscretizationModel(parameterNames);
+            var pdm = new ParameterDiscretizationModel(parameterNames);
             var subNetwork = createAndInitSubnetwork(pdm, "New PDM");
             addTraceGraphToPDM(pdm, sourceTable, subNetwork);
         } else {
+            var pdm = pdms.iterator().next();
             addTraceGraphToPDM(pdm, sourceTable);
         }
     }
@@ -122,8 +148,7 @@ public class LoadPDMTask extends AbstractTask {
         ParameterDiscretizationModel pdm;
         try {
             ParameterDiscretizationModelDTO dto = parsePDM();
-            pdm = new ParameterDiscretizationModel(dto);
-            loadPDM(pdm, dto, dto.getName());
+            loadPDM(dto);
         } catch (JsonSyntaxException e) {
             loadTrace();
         }

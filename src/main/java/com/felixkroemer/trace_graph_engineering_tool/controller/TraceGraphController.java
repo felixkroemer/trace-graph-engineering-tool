@@ -64,6 +64,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 traceGraph.onParameterChanged(changedParameter);
                 //helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
                 helper.flushPayloadEvents();
+                renderingController.updateVisualStyle();
                 renderingController.onNetworkChanged();
 
             }
@@ -147,6 +148,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
+        CyEventHelper helper = registrar.getService(CyEventHelper.class);
+        helper.flushPayloadEvents();
+        this.renderingController.updateVisualStyle();
         this.renderingController.onNetworkChanged();
         this.applyStyleAndLayout();
         return new TraceGraphController(registrar, newTg);
@@ -164,8 +168,10 @@ public class TraceGraphController extends NetworkController implements SetCurren
         }
         CyEventHelper helper = registrar.getService(CyEventHelper.class);
         helper.flushPayloadEvents();
-        this.renderingController.onNetworkChanged();
+        this.renderingController.updateVisualStyle();
         this.applyStyleAndLayout();
+        // can not be called before applyStyleAndLayout would override changes made by EdgeDisplayController.init
+        this.renderingController.onNetworkChanged();
     }
 
     /**

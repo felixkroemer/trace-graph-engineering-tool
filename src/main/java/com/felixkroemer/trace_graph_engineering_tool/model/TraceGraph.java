@@ -87,7 +87,7 @@ public class TraceGraph {
                     ((CySubNetwork) network).addNode(currentNode);
                     currentRow = localNodeTable.getRow(currentNode.getSUID());
                     currentRow.set(Columns.NODE_VISITS, 1);
-                    currentRow.set(Columns.NODE_FREQUENCY, 1);
+                    currentRow.set(Columns.NODE_FREQUENCY, 0);
                     currentNodeInfo = new AuxiliaryInformation();
                     this.nodeInfo.put(currentNode, currentNodeInfo);
                 }
@@ -104,7 +104,7 @@ public class TraceGraph {
                     currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
                 currentRow.set(Columns.NODE_VISITS, 1);
-                currentRow.set(Columns.NODE_FREQUENCY, 1);
+                currentRow.set(Columns.NODE_FREQUENCY, 0);
                 currentNodeInfo = new AuxiliaryInformation();
                 this.nodeInfo.put(currentNode, currentNodeInfo);
             }
@@ -140,9 +140,9 @@ public class TraceGraph {
     }
 
     //TODO fix visits, frequency and traversals
-    public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTables) {
+    public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTablesToRemove) {
         TraceGraph traceGraph = new TraceGraph(newNetwork, this.pdm);
-        for (CyTable table : sourceTables) {
+        for (CyTable table : sourceTablesToRemove) {
             if (!this.sourceTables.contains(table)) {
                 throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
             } else {
@@ -155,33 +155,38 @@ public class TraceGraph {
 
         for (CyNode node : this.network.getNodeList()) {
             var info = this.nodeInfo.get(node);
-            if (sourceTables.containsAll(info.getSourceTables())) {
+            if (sourceTablesToRemove.containsAll(info.getSourceTables())) {
                 nodesToRemove.add(node);
                 nodeInfo.remove(node);
+            } else {
+                info.getSourceTables().removeIf(sourceTablesToRemove::contains);
             }
         }
 
         for (CyEdge edge : this.network.getEdgeList()) {
             var info = this.edgeInfo.get(edge);
-            if (sourceTables.containsAll(info.getSourceTables())) {
+            if (sourceTablesToRemove.containsAll(info.getSourceTables())) {
                 edgesToRemove.add(edge);
                 edgeInfo.remove(edge);
+            } else {
+                info.getSourceTables().removeIf(sourceTablesToRemove::contains);
             }
         }
 
         this.network.removeNodes(nodesToRemove);
         this.network.removeEdges(edgesToRemove);
 
-        for (CyTable table : sourceTables) {
+        for (CyTable table : sourceTablesToRemove) {
             this.nodeMapping.remove(table);
         }
 
         //TODO: improvement: do not use init, pass data directly
-        for (CyTable table : sourceTables) {
+        for (CyTable table : sourceTablesToRemove) {
             traceGraph.addSourceTable(table);
         }
 
         fixNetworkName();
+        fixAux();
 
         return traceGraph;
     }
@@ -284,7 +289,7 @@ public class TraceGraph {
                                 ((CySubNetwork) network).addNode(newNode);
                                 newNodeRow = defaultNodeTable.getRow(newNode.getSUID());
                                 newNodeRow.set(Columns.NODE_VISITS, 1);
-                                newNodeRow.set(Columns.NODE_FREQUENCY, 1);
+                                newNodeRow.set(Columns.NODE_FREQUENCY, 0);
                                 newNodeAux = new AuxiliaryInformation();
                                 this.nodeInfo.put(newNode, newNodeAux);
                             } else {
@@ -299,7 +304,7 @@ public class TraceGraph {
                                 newNodeRow.set(this.pdm.getParameters().get(k).getName(), state[k]);
                             }
                             newNodeRow.set(Columns.NODE_VISITS, 1);
-                            newNodeRow.set(Columns.NODE_FREQUENCY, 1);
+                            newNodeRow.set(Columns.NODE_FREQUENCY, 0);
                             newNodeAux = new AuxiliaryInformation();
                             this.nodeInfo.put(newNode, newNodeAux);
                         }
@@ -313,6 +318,18 @@ public class TraceGraph {
         }
         this.generateEdges();
         this.removeLeftoverNodes();
+        this.fixAux();
+    }
+
+    private void fixAux() {
+        for (CyNode node : this.network.getNodeList()) {
+            var aux = this.nodeInfo.get(node);
+            var info = aux.getVisitsAndFrequency();
+            var localNodeTable = this.network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+            var row = localNodeTable.getRow(node.getSUID());
+            row.set(Columns.NODE_VISITS, info.getValue0());
+            row.set(Columns.NODE_FREQUENCY, info.getValue1());
+        }
     }
 
     private void removeLeftoverNodes() {
@@ -333,10 +350,6 @@ public class TraceGraph {
     public void clearEdges() {
         this.network.removeEdges(this.network.getEdgeList());
         this.edgeInfo.clear();
-        for (CyRow row : this.defaultNodeTable.getAllRows()) {
-            row.set(Columns.NODE_VISITS, 1);
-            row.set(Columns.NODE_FREQUENCY, 1);
-        }
     }
 
     public void generateEdges() {

@@ -1,6 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import org.cytoscape.model.CyTable;
+import org.javatuples.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +37,23 @@ public class AuxiliaryInformation {
 
     public Set<CyTable> getSourceTables() {
         return this.source_rows.keySet();
+    }
+
+    public Pair<Integer, Integer> getVisitsAndFrequency() {
+        int visits = 0;
+        int frequency = 0;
+        for (var list : this.source_rows.values()) {
+            int prev = Integer.MIN_VALUE;
+            for (int i : list) {
+                if (i == prev + 1) {
+                    frequency += 1;
+                } else {
+                    visits += 1;
+                }
+                prev = i;
+            }
+        }
+        return new Pair<>(visits, frequency);
     }
 
 }

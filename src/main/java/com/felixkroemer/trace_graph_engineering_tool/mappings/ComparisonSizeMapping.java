@@ -26,7 +26,7 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
 
         var baseMin = Collections.min(baseMapping.values());
         var deltaMin = Collections.min(deltaMapping.values());
-        this.xMin = baseMin < deltaMin ? baseMin : deltaMin;
+        this.xMin = Math.max(baseMin < deltaMin ? baseMin : deltaMin, 1);
     }
 
 
@@ -70,6 +70,10 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
     }
 
     private double getLogValue(int linValue) {
+        //TODO: fix mapping when a value is 0
+        if (linValue == 0) {
+            linValue = 1;
+        }
         int yMin = 10;
         int yMax = 100;
         double a = (yMin - yMax) / Math.log((xMin * 1.0) / xMax);
