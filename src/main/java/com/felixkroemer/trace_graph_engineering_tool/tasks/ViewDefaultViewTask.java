@@ -26,6 +26,6 @@ public class ViewDefaultViewTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = this.registrar.getService(TraceGraphManager.class);
-        manager.focusNode(this.node);
+        //manager.focusNode(this.node);
     }
 }

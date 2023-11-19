@@ -7,7 +7,6 @@ import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.task.EdgeViewTaskFactory;
 import org.cytoscape.task.NetworkCollectionTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.task.NodeViewTaskFactory;
@@ -66,22 +65,6 @@ public class CyActivator extends AbstractCyActivator {
         RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_TRACES);
         registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
-
-        var showTraceDetailsNodeTaskFactory = new ShowTraceDetailsNodeTaskFactory(reg);
-        registerService(bundleContext, showTraceDetailsNodeTaskFactory, NodeViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace Details")));
-
-        var showTraceDetailsEdgeTaskFactory = new ShowTraceDetailsEdgeTaskFactory(reg);
-        registerService(bundleContext, showTraceDetailsEdgeTaskFactory, EdgeViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace Details")));
-
-        var viewDefaultViewNetworkTaskFactory = new ViewDefaultViewNetworkTaskFactory(reg);
-        registerService(bundleContext, viewDefaultViewNetworkTaskFactory, NetworkViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Return to default network view")));
-
-        var viewDefaultViewNodeTaskFactory = new ViewDefaultViewNodeTaskFactory(reg);
-        registerService(bundleContext, viewDefaultViewNodeTaskFactory, NodeViewTaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Return to selected node")));
 
         var showTraceNodeTaskFactory = new ShowTraceNodeTaskFactory(reg);
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class,

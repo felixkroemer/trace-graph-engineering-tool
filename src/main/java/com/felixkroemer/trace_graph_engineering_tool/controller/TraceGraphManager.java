@@ -3,11 +3,13 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphMainPanel;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyDisposable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -25,21 +27,16 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
     private final TraceGraphMainPanel panel;
-    private final TraceDetailsController traceDetailsController;
     private boolean destroying;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
         this.registrar = registrar;
         this.panel = new TraceGraphMainPanel(registrar);
         this.controllers = new HashMap<>();
-        this.traceDetailsController = new TraceDetailsController(registrar);
         this.destroying = false;
     }
 
     public void registerTraceGraph(ParameterDiscretizationModel pdm, NetworkController controller) {
-        if (this.controllers.isEmpty()) {
-            this.traceDetailsController.createAndRegisterNetwork();
-        }
         if (this.controllers.get(pdm) == null) {
             this.controllers.put(pdm, new HashSet<>());
             pdm.getParameters().forEach(p -> p.addObserver(this));
@@ -149,11 +146,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             }
         }
         this.controllers.clear();
-        traceDetailsController.dispose();
-        CyNetwork traceDetailsNetwork;
-        if ((traceDetailsNetwork = traceDetailsController.getNetwork()) != null) {
-            networkManager.destroyNetwork(traceDetailsNetwork);
-        }
         this.registrar.unregisterService(this.panel, CytoPanelComponent.class);
         this.panel.dispose();
     }
@@ -166,23 +158,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             }
         }
         return matchingPDMs;
-    }
-
-    public void showTraceDetailsNetwork() {
-        traceDetailsController.update();
-        var manager = this.registrar.getService(CyApplicationManager.class);
-        manager.setCurrentNetwork(this.traceDetailsController.getNetwork());
-    }
-
-    public void focusNode(CyNode node) {
-        var manager = this.registrar.getService(CyApplicationManager.class);
-        var network = this.traceDetailsController.getCorrespondingNetwork();
-        var controller = findControllerForNetwork(network);
-        manager.setCurrentNetwork(network);
-        if (node != null) {
-            var defaultNetworkNode = this.traceDetailsController.findCorrespondingNode(node);
-            controller.focusNode(defaultNetworkNode);
-        }
     }
 
     public Set<CyTable> getSourceTables(ParameterDiscretizationModel pdm) {
