@@ -15,7 +15,7 @@ public class TraceGraph {
     private ParameterDiscretizationModel pdm;
     private Set<CyTable> sourceTables;
     private CyTable defaultNodeTable;
-    private CyTable defaultEdgetable;
+    private CyTable defaultEdgeTable;
 
     // hash to node suid
     //TODO: map directly to node
@@ -34,7 +34,7 @@ public class TraceGraph {
 
         // DEFAULT_ATTRS = Shared (root) + Local
         this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
-        this.defaultEdgetable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
+        this.defaultEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
         this.suidHashMapping = this.pdm.getSuidHashMapping();
         this.nodeMapping = new HashMap<>();
         this.nodeInfo = new HashMap<>();
@@ -52,7 +52,7 @@ public class TraceGraph {
         localEdgeTable.createColumn(Columns.EDGE_TRAVERSALS, Integer.class, false);
     }
 
-    public void init(CyTable sourceTable) {
+    public void addSourceTable(CyTable sourceTable) {
         var localNodeTable = this.network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
         var localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
         this.sourceTables.add(sourceTable);
@@ -135,7 +135,7 @@ public class TraceGraph {
     /**
      * Called when a trace is added to or extracted from this Trace Graph.
      */
-    public void fixNetworkName() {
+    private void fixNetworkName() {
         network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(sourceTables));
     }
 
@@ -178,7 +178,7 @@ public class TraceGraph {
 
         //TODO: improvement: do not use init, pass data directly
         for (CyTable table : sourceTables) {
-            traceGraph.init(table);
+            traceGraph.addSourceTable(table);
         }
 
         fixNetworkName();
@@ -326,7 +326,7 @@ public class TraceGraph {
             }
         }
         // need to be removed in batches, otherwise events take forever
-        // TODO: check problem with rendering timer concurrency (trying to render nodes that were already deleted)
+        // also removes edges
         this.network.removeNodes(nodesToRemove);
     }
 
@@ -360,7 +360,7 @@ public class TraceGraph {
                         edgeAux = new AuxiliaryInformation();
                         this.edgeInfo.put(edge, edgeAux);
                     } else {
-                        edgeRow = this.defaultEdgetable.getRow(edge.getSUID());
+                        edgeRow = this.defaultEdgeTable.getRow(edge.getSUID());
                         edgeRow.set(Columns.EDGE_TRAVERSALS, edgeRow.get(Columns.EDGE_TRAVERSALS, Integer.class) + 1);
                         edgeAux = this.edgeInfo.get(edge);
                     }
@@ -376,13 +376,13 @@ public class TraceGraph {
         }
     }
 
-    private boolean isFeasible(List<CyNode> nodes, CyTable sourceTable) {
+    private boolean isSatSolutionInfeasible(List<CyNode> nodes, CyTable sourceTable) {
         for (var node : nodes) {
             if (this.nodeInfo.get(node).getSourceRows(sourceTable) == null) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public Trace findTraceCPSat(List<CyNode> nodes) {
@@ -393,7 +393,7 @@ public class TraceGraph {
 
         for (CyTable sourceTable : this.sourceTables) {
 
-            if (!isFeasible(nodes, sourceTable)) {
+            if (isSatSolutionInfeasible(nodes, sourceTable)) {
                 continue;
             }
 
@@ -480,7 +480,7 @@ public class TraceGraph {
         Trace trace = null;
         for (CyTable sourceTable : this.sourceTables) {
 
-            if (!isFeasible(nodes, sourceTable)) {
+            if (isSatSolutionInfeasible(nodes, sourceTable)) {
                 continue;
             }
 

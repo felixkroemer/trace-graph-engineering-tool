@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.javatuples.Pair;
 
@@ -15,14 +16,12 @@ public class ParameterDiscretizationModel {
     public static final String PERCENTILE_FILTER = "percentileFilter";
 
     private PropertyChangeSupport pcs;
-    private String name;
     private List<Parameter> parameters;
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
     private Pair<String, Double> percentile;
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
-        this.name = dto.getName();
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
             Parameter parameter = new Parameter(paramDto, this);
@@ -33,8 +32,7 @@ public class ParameterDiscretizationModel {
         this.pcs = new PropertyChangeSupport(this);
     }
 
-    public ParameterDiscretizationModel(String name, List<String> parameterNames) {
-        this.name = name;
+    public ParameterDiscretizationModel(List<String> parameterNames) {
         this.parameters = new ArrayList<>(parameterNames.size());
         for (String parameterName : parameterNames) {
             Parameter parameter = new Parameter(parameterName, this);
@@ -60,7 +58,11 @@ public class ParameterDiscretizationModel {
     }
 
     public String getName() {
-        return this.name;
+        if (this.rootNetwork != null) {
+            return rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).get(CyNetwork.NAME, String.class);
+        } else {
+            return null;
+        }
     }
 
     public Parameter getParameter(String name) {

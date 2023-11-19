@@ -195,4 +195,15 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
         return tables;
     }
 
+    public String getAvailableRootNetworkName(String preferredName) {
+        var names =
+                this.controllers.keySet().stream().map(ParameterDiscretizationModel::getName).collect(Collectors.toSet());
+        int i = 1;
+        String name = preferredName;
+        while (names.contains(name)) {
+            name = preferredName + "(" + i + ")";
+        }
+        return name;
+    }
+
 }

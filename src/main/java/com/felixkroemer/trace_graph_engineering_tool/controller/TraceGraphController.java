@@ -160,7 +160,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         networkManager.destroyNetwork(network);
         for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
             networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + sourceTable.hashCode(), sourceTable);
-            this.traceGraph.init(sourceTable);
+            this.traceGraph.addSourceTable(sourceTable);
         }
         CyEventHelper helper = registrar.getService(CyEventHelper.class);
         helper.flushPayloadEvents();

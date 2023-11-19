@@ -57,14 +57,8 @@ public class LoadPDMTask extends AbstractTask {
         localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
     }
 
-    public void loadPDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto) throws Exception {
-        var subNetwork = (CySubNetwork) networkFactory.createNetwork();
-        var rootNetwork = subNetwork.getRootNetwork();
-        rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, pdm.getName());
-        pdm.setRootNetwork(rootNetwork);
-
-        this.initSubNetwork(subNetwork, rootNetwork, pdm);
-
+    public void loadPDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto, String name) throws Exception {
+        var subNetwork = createAndInitSubnetwork(pdm, name);
         var traceGraph = new TraceGraph(subNetwork, pdm);
         for (String csv : dto.getCsvs()) {
             var path = new File(traceFile.getParentFile(), csv);
@@ -74,7 +68,7 @@ public class LoadPDMTask extends AbstractTask {
             Util.parseCSV(sourceTable, path);
             this.tableManager.addTable(sourceTable);
             this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
-            traceGraph.init(sourceTable);
+            traceGraph.addSourceTable(sourceTable);
         }
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);
@@ -91,18 +85,22 @@ public class LoadPDMTask extends AbstractTask {
         var pdm = manager.findPDM(params);
         if (pdm == null) {
             var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
-            pdm = new ParameterDiscretizationModel("Temp Name", parameterNames);
-
-            var subNetwork = (CySubNetwork) networkFactory.createNetwork();
-            var rootNetwork = subNetwork.getRootNetwork();
-            rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, pdm.getName());
-            pdm.setRootNetwork(rootNetwork);
-            this.initSubNetwork(subNetwork, rootNetwork, pdm);
-
+            pdm = new ParameterDiscretizationModel(parameterNames);
+            var subNetwork = createAndInitSubnetwork(pdm, "New PDM");
             addTraceGraphToPDM(pdm, sourceTable, subNetwork);
         } else {
             addTraceGraphToPDM(pdm, sourceTable);
         }
+    }
+
+    private CySubNetwork createAndInitSubnetwork(ParameterDiscretizationModel pdm, String preferredName) {
+        var subNetwork = (CySubNetwork) networkFactory.createNetwork();
+        var rootNetwork = subNetwork.getRootNetwork();
+        var rootNetworkName = manager.getAvailableRootNetworkName(preferredName);
+        rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, rootNetworkName);
+        pdm.setRootNetwork(rootNetwork);
+        this.initSubNetwork(subNetwork, rootNetwork, pdm);
+        return subNetwork;
     }
 
     public void addTraceGraphToPDM(ParameterDiscretizationModel pdm, CyTable sourceTable) {
@@ -114,7 +112,7 @@ public class LoadPDMTask extends AbstractTask {
         this.tableManager.addTable(sourceTable);
         this.networkTableManager.setTable(subNetwork, CyNode.class, sourceTable.getTitle(), sourceTable);
         var traceGraph = new TraceGraph(subNetwork, pdm);
-        traceGraph.init(sourceTable);
+        traceGraph.addSourceTable(sourceTable);
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(pdm, controller);
     }
@@ -125,7 +123,7 @@ public class LoadPDMTask extends AbstractTask {
         try {
             ParameterDiscretizationModelDTO dto = parsePDM();
             pdm = new ParameterDiscretizationModel(dto);
-            loadPDM(pdm, dto);
+            loadPDM(pdm, dto, dto.getName());
         } catch (JsonSyntaxException e) {
             loadTrace();
         }
