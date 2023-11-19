@@ -265,7 +265,7 @@ public class TraceGraph {
 
                     var sourceRow = sourceTable.getRow((long) j);
                     double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
-                    var bucket = findBucket(sourceRowValue, changedParameter);
+                    var bucket = changedParameter.isEnabled() ? findBucket(sourceRowValue, changedParameter) : 0;
 
                     // source row j does not belong to this node anymore
                     // create state of j, hash it, check if a node with that hash exists, add j to it,
