@@ -72,6 +72,7 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
 
     @Override
     public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
+        this.updateMaxTraversals();
         var visualStyleFactory = registrar.getService(VisualStyleFactory.class);
         var newStyle = visualStyleFactory.createVisualStyle(defaultVisualStyle);
 
