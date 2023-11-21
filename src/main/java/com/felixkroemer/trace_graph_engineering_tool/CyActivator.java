@@ -49,6 +49,10 @@ public class CyActivator extends AbstractCyActivator {
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or trace",
                         INSERT_SEPARATOR_BEFORE, "true")));
 
+        ExportPDMTaskFactory exportPDMTaskFactory = new ExportPDMTaskFactory(reg);
+        registerService(bundleContext, exportPDMTaskFactory, NetworkViewTaskFactory.class,
+                Util.genProperties(Map.of(PREFERRED_MENU, "File.Export", TITLE, "Export PDM to json")));
+
 /*        LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
         registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace",

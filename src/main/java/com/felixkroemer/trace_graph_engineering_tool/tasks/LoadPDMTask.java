@@ -145,7 +145,6 @@ public class LoadPDMTask extends AbstractTask {
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
-        ParameterDiscretizationModel pdm;
         try {
             ParameterDiscretizationModelDTO dto = parsePDM();
             loadPDM(dto);

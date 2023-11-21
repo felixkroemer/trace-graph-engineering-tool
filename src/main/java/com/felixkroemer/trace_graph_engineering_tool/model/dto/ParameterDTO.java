@@ -1,11 +1,17 @@
 package com.felixkroemer.trace_graph_engineering_tool.model.dto;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+
 import java.util.List;
 
 public class ParameterDTO {
     private String name;
-    private String type;
     private List<Double> bins;
+
+    public ParameterDTO(Parameter parameter) {
+        this.name = parameter.getName();
+        this.bins = parameter.getBins();
+    }
 
     public String getName() {
         return name;
@@ -13,14 +19,6 @@ public class ParameterDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public List<Double> getBins() {

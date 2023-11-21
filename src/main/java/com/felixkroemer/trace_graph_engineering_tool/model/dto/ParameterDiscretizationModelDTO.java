@@ -1,13 +1,21 @@
 package com.felixkroemer.trace_graph_engineering_tool.model.dto;
 
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ParameterDiscretizationModelDTO {
     private String name;
-    private String version;
     private List<String> csvs;
     private String description;
     private List<ParameterDTO> parameters;
+
+    public ParameterDiscretizationModelDTO(ParameterDiscretizationModel pdm) {
+        this.name = pdm.getName();
+        this.csvs = pdm.getCSVs();
+        this.parameters = pdm.getParameters().stream().map(ParameterDTO::new).collect(Collectors.toList());
+    }
 
     public String getName() {
         return name;
@@ -15,14 +23,6 @@ public class ParameterDiscretizationModelDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public List<String> getCsvs() {
