@@ -18,7 +18,11 @@ public class RenderingModeTaskFactory extends AbstractNetworkViewTaskFactory {
 
     @Override
     public boolean isReady(CyNetworkView networkView) {
-        return Util.isTraceGraphNetwork(networkView.getModel());
+        if (networkView != null) {
+            return Util.isTraceGraphNetwork(networkView.getModel());
+        } else {
+            return false;
+        }
     }
 
     @Override

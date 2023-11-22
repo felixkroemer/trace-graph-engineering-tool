@@ -124,6 +124,8 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         int strWidth = SwingUtilities.computeStringWidth(g.getFontMetrics(), maxStr);
         g.drawString(maxStr, trackWidth - strWidth - 26, arrowBarYPosition + 35);
 
+        g.drawImage(this.heatMap, 0, 5, trackWidth, trackHeight, null);
+
         if (stops.isEmpty()) {
             g.setColor(BORDER_COLOR);
             g.setStroke(new BasicStroke(1.5f));
@@ -133,8 +135,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         }
 
         g.setStroke(STROKE1);
-
-        g.drawImage(this.heatMap, 0, 5, trackWidth, trackHeight, null);
 
         g.setColor(LABEL_COLOR);
         g.setStroke(STROKE1);

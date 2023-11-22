@@ -481,7 +481,7 @@ public class TraceGraph {
     }
 
     public Trace findTrace(List<CyNode> nodes) {
-        if (nodes.size() == 2) {
+        if (nodes.size() <= 2) {
             return findTraceNaive(nodes);
         } else {
             return findTraceCPSat(nodes);

@@ -17,7 +17,6 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.TaskIterator;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
@@ -154,20 +153,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
      */
     public EdgeDisplayControllerPanel getSettingsPanel() {
         return this.renderingController.getSettingsPanel();
-    }
-
-    @Override
-    public TaskIterator createApplyStyleTask() {
-        var iter = super.createApplyStyleTask();
-/*        iter.append(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) throws Exception {
-                for (var edgeView : getView().getEdgeViews()) {
-                    edgeView.setVisualProperty(EDGE_VISIBLE, false);
-                }
-            }
-        });*/
-        return iter;
     }
 
     @Override
