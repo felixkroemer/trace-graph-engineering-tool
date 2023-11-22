@@ -141,9 +141,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void updateVisualStyle() {
         var newStyle = createDefaultVisualStyle();
         newStyle = displayController.adjustVisualStyle(newStyle);
-        var visualMappingManager = registrar.getService(VisualMappingManager.class);
-        visualMappingManager.setVisualStyle(newStyle, this.view);
-        visualMappingManager.removeVisualStyle(this.defaultStyle);
         this.defaultStyle = newStyle;
     }
 

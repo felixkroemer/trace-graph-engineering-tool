@@ -66,7 +66,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 helper.flushPayloadEvents();
                 renderingController.updateVisualStyle();
                 renderingController.onNetworkChanged();
-
             }
         });
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
