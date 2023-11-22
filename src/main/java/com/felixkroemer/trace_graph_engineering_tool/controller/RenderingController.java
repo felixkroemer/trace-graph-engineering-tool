@@ -119,10 +119,14 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
      * Called when network is split or merged or when nodes are hidden/revealed
      */
     public void onNetworkChanged() {
-        this.hideNodes();
+        CyEventHelper helper = registrar.getService(CyEventHelper.class);
+        helper.flushPayloadEvents();
+        this.updateVisualStyle();
         if (this.displayController != null) {
             this.displayController.init();
         }
+        this.hideNodes();
+        this.traceGraphController.applyStyleAndLayout();
     }
 
     @Override
@@ -130,10 +134,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         switch (evt.getPropertyName()) {
             //UIState
             case Parameter.VISIBLE_BINS, ParameterDiscretizationModel.PERCENTILE_FILTER -> {
-                this.updateVisualStyle();
                 this.onNetworkChanged();
-                var taskManager = registrar.getService(TaskManager.class);
-                taskManager.execute(NetworkController.createLayoutTask(registrar, this.view));
             }
         }
     }
@@ -182,7 +183,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         // do not hide any nodes if no bins are selected
         if (visibleBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {
-                nodeView.setVisualProperty(NODE_VISIBLE, true);
+                nodeView.setLockedValue(NODE_VISIBLE, true);
             }
             return;
         }
@@ -197,7 +198,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                     return entry.getValue().contains(value);
                 }
             });
-            view.getNodeView(node).setVisualProperty(NODE_VISIBLE, match);
+            view.getNodeView(node).setLockedValue(NODE_VISIBLE, match);
         }
     }
 

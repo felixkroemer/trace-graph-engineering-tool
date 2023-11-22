@@ -69,7 +69,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
         for (NetworkController controller : controllers.get(pdm)) {
             controller.updateNetwork(changedParameter);
-            controller.applyStyleAndLayout();
         }
     }
 

@@ -17,10 +17,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.table.CyTableViewManager;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskMonitor;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
@@ -55,21 +52,8 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public void updateNetwork(Parameter changedParameter) {
-        var iterator = new TaskIterator();
-        iterator.append(new AbstractTask() {
-            @Override
-            public void run(TaskMonitor taskMonitor) throws Exception {
-                CyEventHelper helper = registrar.getService(CyEventHelper.class);
-                //helper.silenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
-                traceGraph.onParameterChanged(changedParameter);
-                //helper.unsilenceEventSource(traceGraph.getNetwork().getDefaultNodeTable());
-                helper.flushPayloadEvents();
-                renderingController.updateVisualStyle();
-                renderingController.onNetworkChanged();
-            }
-        });
-        var taskManager = this.registrar.getService(SynchronousTaskManager.class);
-        taskManager.execute(iterator);
+        traceGraph.onParameterChanged(changedParameter);
+        renderingController.onNetworkChanged();
     }
 
     @Override
@@ -147,11 +131,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
-        CyEventHelper helper = registrar.getService(CyEventHelper.class);
-        helper.flushPayloadEvents();
-        this.renderingController.updateVisualStyle();
         this.renderingController.onNetworkChanged();
-        this.applyStyleAndLayout();
         return new TraceGraphController(registrar, newTg);
     }
 
@@ -165,11 +145,6 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             this.traceGraph.addSourceTable(sourceTable);
         }
-        CyEventHelper helper = registrar.getService(CyEventHelper.class);
-        helper.flushPayloadEvents();
-        this.renderingController.updateVisualStyle();
-        this.applyStyleAndLayout();
-        // can not be called before applyStyleAndLayout would override changes made by EdgeDisplayController.init
         this.renderingController.onNetworkChanged();
     }
 
@@ -182,8 +157,8 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     @Override
-    public TaskIterator getApplyStyleTask() {
-        var iter = super.getApplyStyleTask();
+    public TaskIterator createApplyStyleTask() {
+        var iter = super.createApplyStyleTask();
 /*        iter.append(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
