@@ -80,7 +80,7 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
             CyNode prevTraceNode = null;
             for (int i = 0; i < trace.getSequence().size(); i++) {
                 var node = trace.getSequence().get(i);
-                var startIndex = trace.getSourceTableIndex(node);
+                var startIndex = trace.getStartIndex();
                 while (i < trace.getSequence().size() - 1 && trace.getSequence().get(i + 1) == node) {
                     node = trace.getSequence().get(i + 1);
                     i++;
@@ -89,7 +89,7 @@ public class TraceDetailsController implements ShowTraceSetEventListener, SetCur
                 eventHelper.flushPayloadEvents();
                 this.nodeMapping.put(traceNode, node);
                 var nodeView = networkView.getNodeView(traceNode);
-                var index = trace.getSourceTableIndex(node);
+                var index = trace.getStartIndex();
                 nodeView.setVisualProperty(NODE_LABEL, startIndex != index ? startIndex + " - " + index : "" + index);
                 nodeView.setVisualProperty(NODE_FILL_COLOR, trace.getColor());
                 nodeView.setVisualProperty(NODE_WIDTH, 100.0);

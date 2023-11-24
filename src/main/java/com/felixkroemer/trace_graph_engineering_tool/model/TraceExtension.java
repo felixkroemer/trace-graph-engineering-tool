@@ -35,9 +35,9 @@ public class TraceExtension extends Trace {
         for (int i = 0; i < this.sequence.size(); i++) {
             var node = this.sequence.get(i);
             if (i < this.sequence.size() - 1) {
-                sb.append(String.format("(%d, %d) -> ", node.getSUID(), this.getSourceTableIndex(node)));
+                sb.append(String.format("(%d, %d) -> ", node.getSUID(), this.startIndex + i));
             } else {
-                sb.append(String.format("(%d, %d)", node.getSUID(), this.getSourceTableIndex(node)));
+                sb.append(String.format("(%d, %d)", node.getSUID(), this.startIndex + i));
             }
         }
         return sb.toString();

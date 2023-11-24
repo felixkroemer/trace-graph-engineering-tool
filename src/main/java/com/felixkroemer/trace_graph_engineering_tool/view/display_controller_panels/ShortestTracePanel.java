@@ -4,9 +4,11 @@ package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_pa
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import javax.swing.*;
@@ -21,25 +23,20 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
 
     private CyServiceRegistrar reg;
 
-    private CustomTreeTable traceTreeTable;
+    private CustomTreeTable traceInfoTable;
+    private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;
-
-    private JPanel returnToPreviousModePanel;
-    private JButton returnToPreviousModeButton;
 
     public ShortestTracePanel(CyServiceRegistrar reg, ShortestTraceEdgeDisplayController controller,
                               TraceExtension trace) {
         this.reg = reg;
         this.controller = controller;
-        this.traceTreeTable = new CustomTreeTable();
-        this.returnToPreviousModePanel = new JPanel();
-        this.returnToPreviousModeButton = new JButton("Restore previous mode");
-        //TODO: fix
-        this.returnToPreviousModeButton.setEnabled(false);
+        this.traceInfoTable = new CustomTreeTable();
+        this.traceSequenceTable = new CustomTreeTable();
 
         this.init();
 
-        this.updateTracePanel(trace);
+        this.updatePanels(trace);
         controller.addObserver(this);
     }
 
@@ -47,35 +44,42 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
         setLayout(new BorderLayout());
         this.setBackground(UIManager.getColor("Panel.background"));
 
-        this.add(traceTreeTable, BorderLayout.CENTER);
+        this.traceInfoTable.setBorder(LookAndFeelUtil.createTitledBorder("Trace Info"));
+        this.add(this.traceInfoTable, BorderLayout.NORTH);
 
-        traceTreeTable.getWrappedTreeTable().addMouseListener(new MouseAdapter() {
+        this.traceSequenceTable.setBorder(LookAndFeelUtil.createTitledBorder("Trace"));
+        this.add(traceSequenceTable, BorderLayout.CENTER);
+
+        this.traceSequenceTable.getWrappedTreeTable().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
-                    int row = traceTreeTable.getWrappedTreeTable().rowAtPoint(e.getPoint());
-                    TreePath path = traceTreeTable.getWrappedTreeTable().getPathForRow(row);
-                    var nodeNode = (CyNodeTreeTableNode) path.getLastPathComponent();
-                    var networkController = controller.getRenderingController().getTraceGraphController();
-                    networkController.focusNode(nodeNode.getNode());
+                    int row = traceSequenceTable.getWrappedTreeTable().rowAtPoint(e.getPoint());
+                    TreePath path = traceSequenceTable.getWrappedTreeTable().getPathForRow(row);
+                    if (path != null) {
+                        var nodeNode = (MultiObjectTreeTableNode) path.getLastPathComponent();
+                        var networkController = controller.getRenderingController().getTraceGraphController();
+                        var node = (CyNode) nodeNode.getValueAt(0);
+                        networkController.focusNode(node);
+                    }
                 }
             }
         });
-
-        returnToPreviousModePanel.add(this.returnToPreviousModeButton);
-        this.add(this.returnToPreviousModePanel, BorderLayout.SOUTH);
     }
 
-    private void updateTracePanel(TraceExtension trace) {
+    private void updatePanels(TraceExtension trace) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        CyNode prevNode = null;
-        for (var node : trace.getSequence()) {
-            if (prevNode == null || prevNode != node) {
-                root.add(new CyNodeTreeTableNode(node));
-            }
-            prevNode = node;
+        for (var x : trace.getIndices()) {
+            root.add(new MultiObjectTreeTableNode(x.getValue0(), x.getValue1()));
+
         }
-        this.traceTreeTable.setModel(new CyNodeTreeTableModel(root));
+        this.traceSequenceTable.setModel(new CustomTreeTableModel(root, 2));
+
+        root = new DefaultMutableTreeTableNode("Root");
+        root.add(new MultiObjectTreeTableNode("Source table", trace.getSourceTable()));
+        root.add(new MultiObjectTreeTableNode("Length", trace.getSequence().size()));
+        root.add(new MultiObjectTreeTableNode("Unique nodes", trace.getUniqueSequence().size()));
+        this.traceInfoTable.setModel(new CustomTreeTableModel(root, 2));
     }
 
     @Override
@@ -87,7 +91,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case ShortestTraceEdgeDisplayController.TRACE -> {
-                this.updateTracePanel((TraceExtension) evt.getNewValue());
+                this.updatePanels((TraceExtension) evt.getNewValue());
             }
         }
     }
@@ -96,61 +100,4 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     public EdgeDisplayControllerPanelLocation getDisplayLocation() {
         return EdgeDisplayControllerPanelLocation.PANEL;
     }
-}
-
-class CyNodeTreeTableNode extends DefaultMutableTreeTableNode {
-    private CyNode node;
-
-    public CyNodeTreeTableNode(CyNode node) {
-        this.node = node;
-    }
-
-    public CyNode getNode() {
-        return this.node;
-    }
-}
-
-class CyNodeTreeTableModel extends AbstractTreeTableModel {
-
-    public CyNodeTreeTableModel(DefaultMutableTreeTableNode root) {
-        super(root);
-    }
-
-    @Override
-    public int getColumnCount() {
-        return 1;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return "";
-    }
-
-    @Override
-    public Object getValueAt(Object node, int column) {
-        if (node instanceof CyNodeTreeTableNode treeTableNode) {
-            return treeTableNode.getNode().getSUID();
-        }
-        return null;
-    }
-
-    @Override
-    public Object getChild(Object parent, int index) {
-        var node = (DefaultMutableTreeTableNode) parent;
-        return node.getChildAt(index);
-    }
-
-    @Override
-    public int getChildCount(Object parent) {
-        var node = (DefaultMutableTreeTableNode) parent;
-        return node.getChildCount();
-    }
-
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        var node = (DefaultMutableTreeTableNode) parent;
-        var childNode = (DefaultMutableTreeTableNode) parent;
-        return node.getIndex(childNode);
-    }
-
 }

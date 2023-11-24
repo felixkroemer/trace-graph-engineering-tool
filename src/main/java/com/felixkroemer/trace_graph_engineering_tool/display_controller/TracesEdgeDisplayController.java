@@ -120,10 +120,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
-                //TODO: add case where the node in question is also in other places but the middle of the trace
-                // (loop in trace)
-                for (var node : trace.getSequence()) {
-                    foundIndices.add(trace.getSourceTableIndex(node));
+                for (int i = 0; i < trace.getSequence().size(); i++) {
+                    foundIndices.add(trace.getStartIndex() + i);
                 }
             }
         }

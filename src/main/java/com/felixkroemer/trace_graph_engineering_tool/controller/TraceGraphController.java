@@ -6,7 +6,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
-import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableNode;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -78,19 +78,19 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root) {
-        root.add(new CustomTreeTableNode("Nodes", this.network.getNodeCount()));
-        root.add(new CustomTreeTableNode("Edges", this.network.getEdgeCount()));
+        root.add(new MultiObjectTreeTableNode("Nodes", this.network.getNodeCount()));
+        root.add(new MultiObjectTreeTableNode("Edges", this.network.getEdgeCount()));
 
-        var sourceTablesNode = new CustomTreeTableNode("Source Tables", "");
+        var sourceTablesNode = new MultiObjectTreeTableNode("Source Tables", "");
         for (CyTable sourceTable : this.traceGraph.getSourceTables()) {
-            var tableNode = new CustomTreeTableNode(sourceTable.getTitle(), "");
-            var rowsNode = new CustomTreeTableNode("Rows", sourceTable.getRowCount());
+            var tableNode = new MultiObjectTreeTableNode(sourceTable.getTitle(), "");
+            var rowsNode = new MultiObjectTreeTableNode("Rows", sourceTable.getRowCount());
             tableNode.add(rowsNode);
             sourceTablesNode.add(tableNode);
         }
 
         root.add(sourceTablesNode);
-        return new CustomTreeTableModel(root);
+        return new CustomTreeTableModel(root, 2);
     }
 
     private void hideUnneededColumns() {

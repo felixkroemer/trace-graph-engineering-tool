@@ -4,8 +4,10 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.javatuples.Pair;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Trace {
     protected LinkedList<CyNode> sequence;
@@ -48,8 +50,22 @@ public class Trace {
         return new LinkedList<>(this.sequence);
     }
 
-    public int getSourceTableIndex(CyNode node) {
-        return startIndex + this.sequence.indexOf(node);
+    public List<CyNode> getUniqueSequence() {
+        return this.sequence.stream().distinct().collect(Collectors.toList());
+    }
+
+    public List<Pair<CyNode, Pair<Integer, Integer>>> getIndices() {
+        List<Pair<CyNode, Pair<Integer, Integer>>> indices = new ArrayList<>();
+        for (int i = 0; i < this.sequence.size(); i++) {
+            var node = this.sequence.get(i);
+            var start = i;
+            while (i < this.sequence.size() - 1 && this.sequence.get(i + 1) == node) {
+                i += 1;
+            }
+            var end = i;
+            indices.add(new Pair<>(node, new Pair<>(this.startIndex + start, this.startIndex + end)));
+        }
+        return indices;
     }
 
     public CyTable getSourceTable() {
@@ -58,6 +74,10 @@ public class Trace {
 
     public Pair<Integer, Integer> getWindow() {
         return new Pair<>(startIndex, startIndex + sequence.size());
+    }
+
+    public int getStartIndex() {
+        return this.startIndex;
     }
 }
 

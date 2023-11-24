@@ -4,14 +4,16 @@ import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 public class CustomTreeTableModel extends AbstractTreeTableModel {
+    private int columns;
 
-    public CustomTreeTableModel(DefaultMutableTreeTableNode root) {
+    public CustomTreeTableModel(DefaultMutableTreeTableNode root, int columns) {
         super(root);
+        this.columns = columns;
     }
 
     @Override
     public int getColumnCount() {
-        return 2; // Two columns
+        return this.columns;
     }
 
     @Override
@@ -21,12 +23,8 @@ public class CustomTreeTableModel extends AbstractTreeTableModel {
 
     @Override
     public Object getValueAt(Object node, int column) {
-        if (node instanceof CustomTreeTableNode treeTableNode) {
-            if (column == 0) {
-                return treeTableNode.getColumn1Value();
-            } else if (column == 1) {
-                return treeTableNode.getColumn2Value();
-            }
+        if (node instanceof DefaultMutableTreeTableNode treeTableNode) {
+            return treeTableNode.getValueAt(column);
         }
         return null;
     }
