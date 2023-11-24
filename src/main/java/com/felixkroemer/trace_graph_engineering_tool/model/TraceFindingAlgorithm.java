@@ -53,11 +53,11 @@ public class TraceFindingAlgorithm {
                 }
                 end += 1;
                 prevNodeEnd = node;
-                while (!values.contains(1)) {
+                while (!values.contains(0)) {
                     node = traceGraph.findNode(sourceTable, start);
                     if ((prevNodeStart != node) && nodes.contains(node)) {
                         histogram.merge(node, -1, Integer::sum);
-                        if (values.contains(1)) {
+                        if (values.contains(0)) {
                             if (end - 1 - start < minimumWindow.getValue1() - minimumWindow.getValue0()) {
                                 minimumWindow = new Pair<>(start, end - 1);
                                 minimumSourceTable = sourceTable;
