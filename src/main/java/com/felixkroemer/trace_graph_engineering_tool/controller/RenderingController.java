@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.display_controller.*;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentEdgeDisplayControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.SizeMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
@@ -89,20 +90,22 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         int maxFrequency = -1;
         int maxVisits = -1;
-        for (CyRow row : this.traceGraph.getNetwork().getTable(CyNode.class, CyNetwork.LOCAL_ATTRS).getAllRows()) {
-            int frequency = row.get(Columns.NODE_FREQUENCY, Integer.class);
+        for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
+            int frequency = this.traceGraph.getNodeAux(node).getFrequency();
             if (frequency > maxFrequency) maxFrequency = frequency;
-            int visits = row.get(Columns.NODE_VISITS, Integer.class);
+            int visits = this.traceGraph.getNodeAux(node).getVisits();
             if (visits > maxVisits) maxVisits = visits;
         }
 
-        VisualMappingFunction<Integer, Double> sizeMapping = Mappings.createSizeMapping(1, maxVisits,
-                visualMappingFunctionFactory);
-        VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, maxFrequency,
-                visualMappingFunctionFactory);
+        var frequencyMapping = new HashMap<Long, Integer>();
+        for(CyNode node : this.traceGraph.getNetwork().getNodeList()) {
+            frequencyMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getFrequency());
+        }
+        //VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, maxFrequency,
+        //        visualMappingFunctionFactory);
 
-        style.addVisualMappingFunction(sizeMapping);
-        style.addVisualMappingFunction(colorMapping);
+        style.addVisualMappingFunction(new SizeMapping(frequencyMapping));
+        //style.addVisualMappingFunction(colorMapping);
         style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn

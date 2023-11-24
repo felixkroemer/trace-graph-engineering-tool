@@ -37,7 +37,7 @@ public class Mappings {
         return mapping;
     }
 
-    public static VisualMappingFunction<Integer, Double> createSizeMapping(int xMin, int xMax,
+    /*public static VisualMappingFunction<Integer, Double> createSizeMapping(int xMin, int xMax,
                                                                            VisualMappingFunctionFactory factory) {
         ContinuousMapping<Integer, Double> sizeMapping =
                 (ContinuousMapping<Integer, Double>) factory.createVisualMappingFunction(Columns.NODE_VISITS,
@@ -88,6 +88,6 @@ public class Mappings {
         mapping.addPoint(xMax, boundaryMax);
 
         return mapping;
-    }
+    }*/
 
 }

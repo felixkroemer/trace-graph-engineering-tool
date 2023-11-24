@@ -47,9 +47,9 @@ public class SetPercentileFilterDialog extends JPanel {
 
             String column;
             if (this.visitsRadioButton.isSelected()) {
-                column = Columns.NODE_VISITS;
+                column = "visits";
             } else {
-                column = Columns.NODE_FREQUENCY;
+                column = "frequency";
             }
 
             int percentile = Integer.parseInt(this.percentileField.getText());

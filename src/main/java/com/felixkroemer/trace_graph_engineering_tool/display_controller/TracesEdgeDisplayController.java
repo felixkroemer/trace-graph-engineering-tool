@@ -117,7 +117,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(traceGraph.getNetwork(), getNextColor());
+                TraceExtension trace = new TraceExtension(traceGraph, getNextColor());
                 trace.addAfter(startNode, sourceTable, sourceIndex);
                 trace.setPrimaryNode(startNode);
                 traces.add(trace);

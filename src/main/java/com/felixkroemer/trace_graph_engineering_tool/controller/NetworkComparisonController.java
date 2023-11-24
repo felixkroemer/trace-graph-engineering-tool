@@ -172,20 +172,17 @@ public class NetworkComparisonController extends NetworkController implements Se
         edgeColorMapping.putMapValue(2, Color.BLUE);
         style.addVisualMappingFunction(edgeColorMapping);
 
-        var baseLocalNodeTable = this.base.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
-        var baseSUIDs = baseLocalNodeTable.getColumn("SUID").getValues(Long.class);
-        var baseFreqs = baseLocalNodeTable.getColumn(Columns.NODE_FREQUENCY).getValues(Integer.class);
+
         var baseMapping = new HashMap<Long, Integer>();
-        for (int i = 0; i < baseSUIDs.size(); i++) {
-            baseMapping.put(baseSUIDs.get(i), Integer.valueOf(baseFreqs.get(i)));
+        for(CyNode node : this.base.getNodeList()) {
+            baseMapping.put(node.getSUID(), this.baseController.getTraceGraph().getNodeAux(node).getFrequency());
         }
-        var deltaLocalNodeTable = this.delta.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
-        var deltaSUIDs = deltaLocalNodeTable.getColumn("SUID").getValues(Long.class);
-        var deltaFreqs = deltaLocalNodeTable.getColumn(Columns.NODE_FREQUENCY).getValues(Integer.class);
+
         var deltaMapping = new HashMap<Long, Integer>();
-        for (int i = 0; i < deltaSUIDs.size(); i++) {
-            deltaMapping.put(deltaSUIDs.get(i), Integer.valueOf(deltaFreqs.get(i)));
+        for(CyNode node : this.delta.getNodeList()) {
+            baseMapping.put(node.getSUID(), this.deltaController.getTraceGraph().getNodeAux(node).getFrequency());
         }
+        
         PassthroughMapping<CyRow, Double> nodeSizeMapping = new ComparisonSizeMapping(baseMapping, deltaMapping);
         style.addVisualMappingFunction(nodeSizeMapping);
 

@@ -1,7 +1,6 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import org.cytoscape.model.CyTable;
-import org.javatuples.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,9 +10,37 @@ import java.util.stream.Collectors;
  */
 public class AuxiliaryInformation {
     private Map<CyTable, List<Integer>> source_rows;
+    private int visits;
+    private int frequency;
 
     public AuxiliaryInformation() {
         this.source_rows = new HashMap<>();
+        this.visits = 1;
+        this.frequency = 0;
+    }
+
+    public void increaseVisits() {
+        this.visits += 1;
+    }
+
+    public void resetVisits() {
+        this.visits = 1;
+    }
+
+    public int getVisits() {
+        return this.visits;
+    }
+
+    public void increaseFrequency() {
+        this.frequency += 1;
+    }
+
+    public void resetFrequency() {
+        this.frequency = 0;
+    }
+
+    public int getFrequency() {
+        return this.frequency;
     }
 
     public void addSourceRow(CyTable sourceTable, int index) {
@@ -39,7 +66,7 @@ public class AuxiliaryInformation {
         return this.source_rows.keySet();
     }
 
-    public Pair<Integer, Integer> getVisitsAndFrequency() {
+    public void fixVisitsAndFrequency() {
         int visits = 0;
         int frequency = 0;
         for (var list : this.source_rows.values()) {
@@ -53,7 +80,8 @@ public class AuxiliaryInformation {
                 prev = i;
             }
         }
-        return new Pair<>(visits, frequency);
+        this.visits = visits;
+        this.frequency = frequency;
     }
 
 }

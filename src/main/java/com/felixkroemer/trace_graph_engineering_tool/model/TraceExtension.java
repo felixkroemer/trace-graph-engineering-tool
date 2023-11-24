@@ -11,18 +11,18 @@ public class TraceExtension extends Trace {
 
     private CyNode primaryNode;
     private Color color;
-    private CyNetwork network;
+    private TraceGraph traceGraph;
 
-    public TraceExtension(CyNetwork network, Color color) {
+    public TraceExtension(TraceGraph traceGraph, Color color) {
         super();
         this.color = color;
-        this.network = network;
+        this.traceGraph = traceGraph;
     }
 
-    public TraceExtension(Trace trace, CyNetwork network) {
+    public TraceExtension(Trace trace, TraceGraph traceGraph) {
         super();
         this.primaryNode = null;
-        this.network = network;
+        this.traceGraph = traceGraph;
         this.color = Color.BLACK;
         this.sequence = (LinkedList<CyNode>) trace.getSequence();
     }
@@ -48,10 +48,8 @@ public class TraceExtension extends Trace {
     public int getWeight() {
         int weight = 0;
         for (var node : this.sequence) {
-            var visits = this.network.getDefaultNodeTable().getRow(node.getSUID()).get(Columns.NODE_VISITS,
-                    Integer.class);
-            var frequency = this.network.getDefaultNodeTable().getRow(node.getSUID()).get(Columns.NODE_FREQUENCY,
-                    Integer.class);
+            var visits = this.traceGraph.getNodeAux(node).getVisits();
+            var frequency = this.traceGraph.getNodeAux(node).getFrequency();
             weight += visits + frequency;
         }
         return weight;
