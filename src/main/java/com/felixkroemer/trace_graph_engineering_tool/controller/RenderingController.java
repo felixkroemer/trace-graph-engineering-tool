@@ -4,30 +4,31 @@ import com.felixkroemer.trace_graph_engineering_tool.display_controller.*;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentEdgeDisplayControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.ColorMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.SizeMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
-import com.felixkroemer.trace_graph_engineering_tool.model.*;
-import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
+import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
+import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyDisposable;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-import org.cytoscape.view.vizmap.*;
-import org.cytoscape.work.TaskManager;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyle;
+import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.javatuples.Pair;
 
-import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 import java.util.*;
 
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
@@ -98,14 +99,17 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
 
         var frequencyMapping = new HashMap<Long, Integer>();
-        for(CyNode node : this.traceGraph.getNetwork().getNodeList()) {
+        for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
             frequencyMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getFrequency());
         }
-        //VisualMappingFunction<Integer, Paint> colorMapping = Mappings.createColorMapping(1, maxFrequency,
-        //        visualMappingFunctionFactory);
+
+        var visitsMapping = new HashMap<Long, Integer>();
+        for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
+            visitsMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getVisits());
+        }
 
         style.addVisualMappingFunction(new SizeMapping(frequencyMapping));
-        //style.addVisualMappingFunction(colorMapping);
+        style.addVisualMappingFunction(new ColorMapping(visitsMapping, registrar.getService(CyEventHelper.class)));
         style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
@@ -141,7 +145,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
         }
     }
-
+    
     public void updateVisualStyle() {
         var newStyle = createDefaultVisualStyle();
         newStyle = displayController.adjustVisualStyle(newStyle);
@@ -224,25 +228,17 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
                 return;
             } else {
                 this.displayController.dispose();
-                this.defaultStyle.apply(this.view);
             }
         }
 
-        var previousDisplayController = this.displayController;
         this.displayController = displayController;
 
-        var visualStyle = displayController.adjustVisualStyle(this.defaultStyle);
-        var mapper = registrar.getService(VisualMappingManager.class);
-        if (visualStyle != null) {
-            mapper.setVisualStyle(visualStyle, this.view);
-        } else {
-            mapper.setVisualStyle(createDefaultVisualStyle(), this.view);
-        }
-
+        this.updateVisualStyle();
+        this.defaultStyle.apply(this.view);
         this.displayController.init();
+
         var eventHelper = registrar.getService(CyEventHelper.class);
-        eventHelper.fireEvent(new SetCurrentEdgeDisplayControllerEvent(this, previousDisplayController,
-                this.displayController));
+        eventHelper.fireEvent(new SetCurrentEdgeDisplayControllerEvent(this, null, this.displayController));
     }
 
     public void setMode(String mode) {

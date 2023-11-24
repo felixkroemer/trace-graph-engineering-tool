@@ -174,15 +174,15 @@ public class NetworkComparisonController extends NetworkController implements Se
 
 
         var baseMapping = new HashMap<Long, Integer>();
-        for(CyNode node : this.base.getNodeList()) {
+        for (CyNode node : this.base.getNodeList()) {
             baseMapping.put(node.getSUID(), this.baseController.getTraceGraph().getNodeAux(node).getFrequency());
         }
 
         var deltaMapping = new HashMap<Long, Integer>();
-        for(CyNode node : this.delta.getNodeList()) {
-            baseMapping.put(node.getSUID(), this.deltaController.getTraceGraph().getNodeAux(node).getFrequency());
+        for (CyNode node : this.delta.getNodeList()) {
+            deltaMapping.put(node.getSUID(), this.deltaController.getTraceGraph().getNodeAux(node).getFrequency());
         }
-        
+
         PassthroughMapping<CyRow, Double> nodeSizeMapping = new ComparisonSizeMapping(baseMapping, deltaMapping);
         style.addVisualMappingFunction(nodeSizeMapping);
 

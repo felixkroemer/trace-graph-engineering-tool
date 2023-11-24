@@ -14,7 +14,6 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.javatuples.Pair;
 
 import java.beans.PropertyChangeListener;
@@ -73,16 +72,14 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
     @Override
     public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
         this.updateMaxTraversals();
-        var visualStyleFactory = registrar.getService(VisualStyleFactory.class);
-        var newStyle = visualStyleFactory.createVisualStyle(defaultVisualStyle);
 
         VisualMappingFunctionFactory visualMappingFunctionFactory =
                 registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
 
         var traversalMapping = Mappings.createEdgeTraversalMapping(1, maxTraversals, visualMappingFunctionFactory);
-        newStyle.addVisualMappingFunction(traversalMapping);
+        defaultVisualStyle.addVisualMappingFunction(traversalMapping);
 
-        return newStyle;
+        return defaultVisualStyle;
     }
 
     @Override

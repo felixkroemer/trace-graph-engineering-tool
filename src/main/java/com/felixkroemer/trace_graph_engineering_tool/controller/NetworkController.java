@@ -3,20 +3,24 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyDisposable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.opencl.layout.CLLayoutContext;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.model.View;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.*;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.SynchronousTaskManager;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskMonitor;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -51,7 +55,8 @@ public abstract class NetworkController implements CyDisposable {
         context.defaultSpringLength = 100;
         //context.numIterationsEdgeRepulsive = 10;
         context.defaultNodeMass = 10;
-        var views = view.getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE)).collect(Collectors.toSet());
+        var views =
+                view.getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE)).collect(Collectors.toSet());
         return layoutFactory.createTaskIterator(view, context, views, null);
     }
 

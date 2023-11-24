@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.mappings;
 
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.view.model.View;
@@ -53,6 +52,9 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
     }
 
     private double getLogValue(int linValue) {
+        if (linValue == 0) {
+            linValue = 1;
+        }
         int yMin = 10;
         int yMax = 100;
         double a = (yMin - yMax) / Math.log((this.min) / this.max);
