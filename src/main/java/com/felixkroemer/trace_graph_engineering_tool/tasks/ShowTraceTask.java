@@ -14,6 +14,8 @@ import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+
 public class ShowTraceTask extends AbstractTask {
     private CyServiceRegistrar registrar;
     private Logger logger;
@@ -37,7 +39,7 @@ public class ShowTraceTask extends AbstractTask {
             var traceGraph = controller.getTraceGraph();
             var trace = traceGraph.findTrace(nodes);
             if (trace != null) {
-                TraceExtension extension = new TraceExtension(trace, traceGraph);
+                TraceExtension extension = new TraceExtension(trace, traceGraph, Color.BLACK);
                 helper.fireEvent(new ShowTraceEvent(this, extension, network));
             } else {
                 throw new Exception("No Trace found");

@@ -82,9 +82,9 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
             }
             if (up) {
-                trace.addBefore(nextNode, sourceTable, index);
+                trace.addBefore(nextNode);
             } else {
-                trace.addAfter(nextNode, sourceTable, index);
+                trace.addAfter(nextNode);
             }
             node = nextNode;
         }
@@ -117,8 +117,9 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(traceGraph, getNextColor());
-                trace.addAfter(startNode, sourceTable, sourceIndex);
+                TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph,
+                        getNextColor());
+                trace.addAfter(startNode);
                 trace.setPrimaryNode(startNode);
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
@@ -126,7 +127,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 //TODO: add case where the node in question is also in other places but the middle of the trace
                 // (loop in trace)
                 for (var node : trace.getSequence()) {
-                    foundIndices.add(trace.getProvenance(node).getIndex());
+                    foundIndices.add(trace.getSourceTableIndex(node));
                 }
             }
         }

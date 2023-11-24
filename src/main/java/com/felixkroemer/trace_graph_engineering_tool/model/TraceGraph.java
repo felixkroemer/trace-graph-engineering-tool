@@ -1,11 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import com.felixkroemer.trace_graph_engineering_tool.util.CustomLoader;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import com.google.ortools.sat.*;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
-import org.javatuples.Pair;
 
 import java.util.*;
 
@@ -372,154 +369,14 @@ public class TraceGraph {
         }
     }
 
-    private boolean isSatSolutionInfeasible(List<CyNode> nodes, CyTable sourceTable) {
-        for (var node : nodes) {
-            if (this.nodeInfo.get(node).getSourceRows(sourceTable) == null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Trace findTraceCPSat(List<CyNode> nodes) {
-        Trace shortestTrace = null;
-        Trace trace = null;
-
-        CustomLoader.loadNativeLibraries();
-
-        for (CyTable sourceTable : this.sourceTables) {
-
-            if (isSatSolutionInfeasible(nodes, sourceTable)) {
-                continue;
-            }
-
-            trace = new Trace();
-
-            BoolVar[] vars = new BoolVar[sourceTable.getRowCount()];
-            BoolVar[] starts = new BoolVar[sourceTable.getRowCount()];
-
-            CpModel model = new CpModel();
-            for (int i = 0; i < sourceTable.getRowCount(); i++) {
-                vars[i] = model.newBoolVar("" + i);
-                starts[i] = model.newBoolVar("s" + i);
-            }
-
-            for (var node : nodes) {
-                var sources = this.nodeInfo.get(node).getSourceRows(sourceTable);
-                IntVar[] expressions = new IntVar[sources.size()];
-                int i = 0;
-                for (var x : sources) {
-                    expressions[i] = vars[x - 1];
-                    i = i + 1;
-                }
-                model.addGreaterOrEqual(LinearExpr.sum(expressions), 1);
-            }
-
-            for (int i = 1; i < vars.length; i++) {
-                model.addLessOrEqual(LinearExpr.weightedSum(new Literal[]{vars[i], vars[i - 1], starts[i]},
-                        new long[]{1, -1, -1}), 0);
-            }
-            model.addImplication(vars[0], starts[0]);
-
-            model.addLessOrEqual(LinearExpr.sum(starts), 1);
-
-            model.minimize(LinearExpr.sum(vars));
-
-            // Create a solver and solve the model.
-            CpSolver solver = new CpSolver();
-            solver.getParameters().setCpModelPresolve(false);
-            solver.getParameters().setLogSearchProgress(true);
-            CpSolverStatus status = solver.solve(model);
-
-
-            if (status == CpSolverStatus.OPTIMAL) {
-                int start = -1;
-                int end = vars.length - 1;
-                for (int i = 0; i < vars.length; i++) {
-                    if (solver.value(vars[i]) == 1) {
-                        start = i;
-                        continue;
-                    }
-                    if (start != -1 && solver.value(vars[i]) == 0) {
-                        end = i - 1;
-                        break;
-                    }
-                }
-
-                for (int i = start; i <= end; i++) {
-                    trace.addAfter(findNode(sourceTable, i), sourceTable, i);
-                }
-
-                if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {
-                    shortestTrace = trace;
-                }
-
-            } else {
-                return null;
-            }
-        }
-
-
-        return shortestTrace;
-    }
-
     public Trace findTrace(List<CyNode> nodes) {
         if (nodes.size() <= 2) {
-            return findTraceNaive(nodes);
+            return TraceFindingAlgorithm.findTraceNaive(this, nodes);
         } else {
-            return findTraceCPSat(nodes);
+            return TraceFindingAlgorithm.findTraceEfficient(this, nodes);
         }
     }
 
-    public Trace findTraceNaive(List<CyNode> nodes) {
-        Trace shortestTrace = null;
-        Trace trace = null;
-        for (CyTable sourceTable : this.sourceTables) {
-
-            if (isSatSolutionInfeasible(nodes, sourceTable)) {
-                continue;
-            }
-
-            trace = new Trace();
-
-            var nodeA = nodes.get(0);
-            var nodeB = nodes.get(1);
-
-            var sourcesA = this.nodeInfo.get(nodeA).getSourceRows(sourceTable);
-            var sourcesB = this.nodeInfo.get(nodeB).getSourceRows(sourceTable);
-
-            if (sourcesA == null || sourcesB == null) {
-                continue;
-            }
-
-            Pair<Integer, Integer> window = null;
-            for (var x : sourcesA) {
-                for (var y : sourcesB) {
-                    if (window == null) {
-                        var lowerBound = x < y ? x : y;
-                        var upperBound = lowerBound == x ? y : x;
-                        window = new Pair<>(lowerBound, upperBound);
-                    } else {
-                        if (Math.abs(x - y) < window.getValue1() - window.getValue0()) {
-                            var lowerBound = x < y ? x : y;
-                            var upperBound = lowerBound == x ? y : x;
-                            window = new Pair<>(lowerBound, upperBound);
-                        }
-                    }
-                }
-            }
-
-            for (int i = window.getValue0(); i <= window.getValue1(); i++) {
-                trace.addAfter(findNode(sourceTable, i), sourceTable, i);
-            }
-
-            if (shortestTrace == null || shortestTrace.getSequence().size() > trace.getSequence().size()) {
-                shortestTrace = trace;
-            }
-
-        }
-        return shortestTrace;
-    }
 
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();

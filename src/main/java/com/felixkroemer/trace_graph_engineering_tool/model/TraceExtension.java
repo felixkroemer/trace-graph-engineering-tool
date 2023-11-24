@@ -1,10 +1,9 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 
 import java.awt.*;
-import java.util.LinkedList;
 
 
 public class TraceExtension extends Trace {
@@ -13,18 +12,17 @@ public class TraceExtension extends Trace {
     private Color color;
     private TraceGraph traceGraph;
 
-    public TraceExtension(TraceGraph traceGraph, Color color) {
-        super();
-        this.color = color;
+    public TraceExtension(CyTable sourceTable, CyNode startNode, int index, TraceGraph traceGraph, Color color) {
+        super(sourceTable, startNode, index);
         this.traceGraph = traceGraph;
+        this.color = color;
     }
 
-    public TraceExtension(Trace trace, TraceGraph traceGraph) {
-        super();
+    public TraceExtension(Trace trace, TraceGraph traceGraph, Color color) {
+        super(trace);
         this.primaryNode = null;
         this.traceGraph = traceGraph;
-        this.color = Color.BLACK;
-        this.sequence = (LinkedList<CyNode>) trace.getSequence();
+        this.color = color;
     }
 
     public Color getColor() {
@@ -37,9 +35,9 @@ public class TraceExtension extends Trace {
         for (int i = 0; i < this.sequence.size(); i++) {
             var node = this.sequence.get(i);
             if (i < this.sequence.size() - 1) {
-                sb.append(String.format("(%d, %d) -> ", node.getSUID(), this.provenance.get(node).getIndex()));
+                sb.append(String.format("(%d, %d) -> ", node.getSUID(), this.getSourceTableIndex(node)));
             } else {
-                sb.append(String.format("(%d, %d)", node.getSUID(), this.provenance.get(node).getIndex()));
+                sb.append(String.format("(%d, %d)", node.getSUID(), this.getSourceTableIndex(node)));
             }
         }
         return sb.toString();

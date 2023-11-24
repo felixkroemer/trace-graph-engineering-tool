@@ -2,37 +2,62 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
+import org.javatuples.Pair;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class Trace {
     protected LinkedList<CyNode> sequence;
-    protected Map<CyNode, TraceElementProvenance> provenance;
+    protected int startIndex;
+    protected CyTable sourceTable;
 
-    public Trace() {
+    private Trace(CyTable sourceTable) {
+        this.sourceTable = sourceTable;
         this.sequence = new LinkedList<>();
-        this.provenance = new HashMap<>();
     }
 
-    public void addBefore(CyNode node, CyTable sourceTable, int sourceIndex) {
+    public Trace(CyTable sourceTable, List<CyNode> nodes, int startIndex) {
+        this(sourceTable);
+        this.sequence = new LinkedList<>(nodes);
+        this.startIndex = startIndex;
+    }
+
+    public Trace(CyTable sourceTable, CyNode node, int index) {
+        this(sourceTable);
+        this.sequence.add(node);
+        this.startIndex = index;
+    }
+
+    public Trace(Trace trace) {
+        this.sourceTable = trace.getSourceTable();
+        this.sequence = (LinkedList<CyNode>) trace.getSequence();
+        this.startIndex = trace.getWindow().getValue0();
+    }
+
+    public void addBefore(CyNode node) {
         this.sequence.addFirst(node);
-        this.provenance.put(node, new TraceElementProvenance(sourceTable, sourceIndex));
+        this.startIndex -= 1;
     }
 
-    public void addAfter(CyNode node, CyTable sourceTable, int sourceIndex) {
+    public void addAfter(CyNode node) {
         this.sequence.addLast(node);
-        this.provenance.put(node, new TraceElementProvenance(sourceTable, sourceIndex));
     }
 
     public List<CyNode> getSequence() {
-        return this.sequence;
+        return new LinkedList<>(this.sequence);
     }
 
-    public TraceElementProvenance getProvenance(CyNode node) {
-        return this.provenance.get(node);
+    public int getSourceTableIndex(CyNode node) {
+        return startIndex + this.sequence.indexOf(node);
+    }
+
+    public CyTable getSourceTable() {
+        return this.sourceTable;
+    }
+
+    public Pair<Integer, Integer> getWindow() {
+        return new Pair<>(startIndex, startIndex + sequence.size());
     }
 }
 
