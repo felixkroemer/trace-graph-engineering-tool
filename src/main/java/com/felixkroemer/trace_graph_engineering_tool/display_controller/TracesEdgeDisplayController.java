@@ -65,28 +65,25 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable,
                                      int length, boolean up) {
-        CyNode node = traceGraph.findNode(sourceTable, index);
+        CyNode currentNode = traceGraph.findNode(sourceTable, index);
         CyNode nextNode;
         int found = 0;
         while (true) {
             index = up ? index - 1 : index + 1;
-            nextNode = traceGraph.findNode(sourceTable, index);
-            if (nextNode == null) {
+            if (index < 1 || index > sourceTable.getRowCount() || found == length) {
                 return;
             }
-            if (nextNode != node) {
-                found++;
-                // also collect trailing rows that map to the same node
-                if (found == length + 1) {
-                    break;
+            // must exist
+            nextNode = traceGraph.findNode(sourceTable, index);
+            if (nextNode != currentNode) {
+                if (up) {
+                    trace.addBefore(nextNode);
+                } else {
+                    trace.addAfter(nextNode);
                 }
+                found++;
             }
-            if (up) {
-                trace.addBefore(nextNode);
-            } else {
-                trace.addAfter(nextNode);
-            }
-            node = nextNode;
+            currentNode = nextNode;
         }
     }
 
@@ -119,7 +116,6 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
                 TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph,
                         getNextColor());
-                trace.addAfter(startNode);
                 trace.setPrimaryNode(startNode);
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);

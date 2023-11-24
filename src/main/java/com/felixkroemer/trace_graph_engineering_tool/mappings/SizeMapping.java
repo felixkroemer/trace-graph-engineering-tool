@@ -59,7 +59,7 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
         int yMax = 100;
         double a = (yMin - yMax) / Math.log((this.min) / this.max);
         double b = Math.exp((yMax * Math.log(this.min) - yMin * Math.log(this.max)) / (yMin - yMax));
-        return a * Math.log(b * linValue);
+        return min == max ? 100 : a * Math.log(b * linValue);
     }
 
 }
