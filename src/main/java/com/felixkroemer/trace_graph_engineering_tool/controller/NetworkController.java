@@ -79,6 +79,9 @@ public abstract class NetworkController implements CyDisposable {
 
     public void applyStyleAndLayout() {
         TaskIterator iterator = new TaskIterator();
+        // applying the style would not be necessary if the style mappings used table values because the RowsSetEvent
+        // would trigger a style refresh in NetworkMediator and RowsSetViewUpdater. Setting a aux value will not trigger
+        // a refresh automatically
         iterator.append(this.createApplyStyleTask());
         iterator.append(this.createLayoutTask());
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);

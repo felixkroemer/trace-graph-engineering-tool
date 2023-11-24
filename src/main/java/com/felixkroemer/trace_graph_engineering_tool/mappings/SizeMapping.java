@@ -18,7 +18,9 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
         this.frequency = frequency;
 
         this.max = Collections.max(frequency.values());
-        this.min = Math.max(Collections.min(frequency.values()), 1);
+        this.min = Collections.min(frequency.values());
+        this.min += 1;
+        this.max += 1;
     }
 
 
@@ -52,9 +54,7 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
     }
 
     private double getLogValue(int linValue) {
-        if (linValue == 0) {
-            linValue = 1;
-        }
+        linValue += 1;
         int yMin = 10;
         int yMax = 100;
         double a = (yMin - yMax) / Math.log((this.min) / this.max);

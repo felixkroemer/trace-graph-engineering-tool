@@ -14,7 +14,7 @@ import java.util.Map;
 public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> {
     private Map<Long, Integer> baseMapping;
     private Map<Long, Integer> deltaMapping;
-    private double xMin, xMax;
+    private double min, max;
 
     public ComparisonSizeMapping(Map<Long, Integer> baseMapping, Map<Long, Integer> deltaMapping) {
         this.baseMapping = baseMapping;
@@ -22,11 +22,14 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
 
         var baseMax = Collections.max(baseMapping.values());
         var deltaMax = Collections.max(deltaMapping.values());
-        this.xMax = baseMax > deltaMax ? baseMax : deltaMax;
+        this.max = baseMax > deltaMax ? baseMax : deltaMax;
 
         var baseMin = Collections.min(baseMapping.values());
         var deltaMin = Collections.min(deltaMapping.values());
-        this.xMin = Math.max(baseMin < deltaMin ? baseMin : deltaMin, 1);
+        this.min = baseMin < deltaMin ? baseMin : deltaMin;
+
+        this.min += 1;
+        this.max += 1;
     }
 
 
@@ -70,14 +73,11 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
     }
 
     private double getLogValue(int linValue) {
-        //TODO: fix mapping when a value is 0
-        if (linValue == 0) {
-            linValue = 1;
-        }
+        linValue += 1;
         int yMin = 10;
         int yMax = 100;
-        double a = (yMin - yMax) / Math.log((xMin * 1.0) / xMax);
-        double b = Math.exp((yMax * Math.log(xMin) - yMin * Math.log(xMax)) / (yMin - yMax));
+        double a = (yMin - yMax) / Math.log((min) / max);
+        double b = Math.exp((yMax * Math.log(min) - yMin * Math.log(max)) / (yMin - yMax));
         return a * Math.log(b * linValue);
     }
 
