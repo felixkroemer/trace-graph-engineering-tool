@@ -132,6 +132,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         if (this.displayController != null) {
             this.displayController.init();
         }
+        // hideNodes uses setLockedValue rather than setVisualProperty because NODE_VISIBLE would be overridden by
+        // vs.apply from RowsSetEvent even if applyStyleAndLayout were not called here
         this.hideNodes();
         this.traceGraphController.applyStyleAndLayout();
     }
@@ -145,7 +147,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             }
         }
     }
-    
+
     public void updateVisualStyle() {
         var newStyle = createDefaultVisualStyle();
         newStyle = displayController.adjustVisualStyle(newStyle);
@@ -154,20 +156,28 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void hideNodesUsingPercentiles() {
         var percentile = traceGraph.getPDM().getPercentile();
-        var nodeTable = traceGraph.getNetwork().getDefaultNodeTable();
-        var suids = nodeTable.getColumn("SUID").getValues(Long.class);
-        var values = nodeTable.getColumn(percentile.getValue0()).getValues(Integer.class);
-        var cutOff = values.stream().mapToInt(Integer::intValue).sum() * percentile.getValue1() / 100;
-        List<Pair<Long, Integer>> pairs = new ArrayList<>(suids.size());
-        for (int i = 0; i < suids.size(); i++) {
-            pairs.add(new Pair<>(suids.get(i), values.get(i)));
+        List<Pair<Long, Integer>> pairs = new ArrayList<>(this.traceGraph.getNetwork().getNodeCount());
+        var valueSum = 0;
+        for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
+            var value = 0;
+            switch (percentile.getValue0()) {
+                case "visits" -> {
+                    value = this.traceGraph.getNodeAux(node).getVisits();
+                }
+                case "frequency" -> {
+                    value = this.traceGraph.getNodeAux(node).getFrequency();
+                }
+            }
+            pairs.add(new Pair<>(node.getSUID(), value));
+            valueSum += value;
         }
+        var cutOff = valueSum * percentile.getValue1() / 100;
         pairs.sort(Comparator.comparing(Pair::getValue1));
         Collections.reverse(pairs);
         var sum = 0;
         for (var pair : pairs) {
             var node = traceGraph.getNetwork().getNode(pair.getValue0());
-            view.getNodeView(node).setVisualProperty(NODE_VISIBLE, sum <= cutOff);
+            view.getNodeView(node).setLockedValue(NODE_VISIBLE, sum <= cutOff);
             sum += pair.getValue1();
         }
     }
