@@ -9,6 +9,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -23,6 +24,7 @@ import org.cytoscape.work.Tunable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -109,14 +111,23 @@ public class LoadPDMTask extends AbstractTask {
         });
         var pdms = manager.findPDM(params);
         if (pdms.isEmpty()) {
-            var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
-            var pdm = new ParameterDiscretizationModel(parameterNames);
-            var subNetwork = createAndInitSubnetwork(pdm, "New PDM");
-            addTraceGraphToPDM(pdm, sourceTable, subNetwork);
+            this.createPDMandInitSubnetwork(sourceTable);
         } else {
-            var pdm = pdms.iterator().next();
-            addTraceGraphToPDM(pdm, sourceTable);
+            SwingUtilities.invokeLater(() -> {
+                new SelectMatchingPDMDialog(pdms, () -> {
+                    this.createPDMandInitSubnetwork(sourceTable);
+                }, (pdm) -> {
+                    this.addTraceGraphToPDM(pdm, sourceTable);
+                }).showDialog();
+            });
         }
+    }
+
+    private void createPDMandInitSubnetwork(CyTable sourceTable) {
+        var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
+        var pdm = new ParameterDiscretizationModel(parameterNames);
+        var subNetwork = createAndInitSubnetwork(pdm, "PDM");
+        addTraceGraphToPDM(pdm, sourceTable, subNetwork);
     }
 
     private CySubNetwork createAndInitSubnetwork(ParameterDiscretizationModel pdm, String preferredName) {
