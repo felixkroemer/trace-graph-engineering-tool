@@ -2,33 +2,41 @@ package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_pa
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
-import org.cytoscape.service.util.CyServiceRegistrar;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.util.swing.LookAndFeelUtil;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
-    private CyServiceRegistrar registrar;
+
     private TracesEdgeDisplayController controller;
     private JSlider numberSlider;
     private JSlider lengthSlider;
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> future;
+    private CustomTreeTable tracesInfoTable;
 
-    public TracesPanel(CyServiceRegistrar registrar, TracesEdgeDisplayController controller) {
-        this.registrar = registrar;
+    public TracesPanel(TracesEdgeDisplayController controller) {
         this.controller = controller;
         this.numberSlider = new JSlider();
         this.lengthSlider = new JSlider();
         this.scheduler = Executors.newScheduledThreadPool(1);
+        this.tracesInfoTable = new CustomTreeTable();
 
         this.init();
 
@@ -104,12 +112,45 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
 
         this.initNumberSlider(traces);
         this.initLengthSlider(traces);
+        this.initInfoTable(traces);
 
+        this.add(tracesInfoTable, BorderLayout.CENTER);
         var panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.add(numberSlider, BorderLayout.CENTER);
         panel.add(lengthSlider, BorderLayout.SOUTH);
         this.add(panel, BorderLayout.NORTH);
+    }
+
+    private void initInfoTable(List<TraceExtension> traces) {
+        this.tracesInfoTable.setBorder(LookAndFeelUtil.createTitledBorder("Traces"));
+        this.updateInfoTable(traces);
+    }
+
+    private void updateInfoTable(List<TraceExtension> traces) {
+        if (traces != null) {
+            Map<CyTable, MultiObjectTreeTableNode> nodeMap = new HashMap<>();
+            DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
+            for (var trace : traces) {
+                MultiObjectTreeTableNode tableNode = nodeMap.get(trace.getSourceTable());
+                if (tableNode == null) {
+                    tableNode = new MultiObjectTreeTableNode(trace.getSourceTable());
+                    nodeMap.put(trace.getSourceTable(), tableNode);
+                    root.add(tableNode);
+                }
+                var range =
+                        "[" + trace.getStartIndex() + " -> " + (trace.getStartIndex() + trace.getSequence().size() - 1) + "]";
+                var traceNode = new MultiObjectTreeTableNode(range);
+                tableNode.add(traceNode);
+                for (var element : trace.getIndices()) {
+                    traceNode.add(new MultiObjectTreeTableNode(element.getValue0(), element.getValue1()));
+                }
+                tableNode.add(traceNode);
+            }
+            this.tracesInfoTable.setModel(new CustomTreeTableModel(root, 2));
+        } else {
+            this.tracesInfoTable.setModel(new DefaultTreeTableModel());
+        }
     }
 
     @Override
@@ -124,12 +165,13 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
                 var traces = (List<TraceExtension>) evt.getNewValue();
                 this.updateNumberSlider(traces);
                 this.updateLengthSlider(traces);
+                this.updateInfoTable(traces);
             }
         }
     }
 
     @Override
     public EdgeDisplayControllerPanelLocation getDisplayLocation() {
-        return EdgeDisplayControllerPanelLocation.NORTH;
+        return EdgeDisplayControllerPanelLocation.PANEL;
     }
 }

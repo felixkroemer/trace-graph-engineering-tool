@@ -98,8 +98,8 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     }
 
     private void hidePanel(TraceGraphPanel panel) {
-        var index = getPanelIndex(panel.getTitle());
-        if (index != -1) {
+        int index;
+        if (panel != null && (index = getPanelIndex(panel.getTitle())) != -1) {
             this.tabs.removeTabAt(index);
         }
     }

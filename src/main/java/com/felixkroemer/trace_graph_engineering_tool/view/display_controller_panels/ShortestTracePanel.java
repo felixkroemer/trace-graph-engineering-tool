@@ -71,7 +71,6 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         for (var x : trace.getIndices()) {
             root.add(new MultiObjectTreeTableNode(x.getValue0(), x.getValue1()));
-
         }
         this.traceSequenceTable.setModel(new CustomTreeTableModel(root, 2));
 

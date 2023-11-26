@@ -75,12 +75,13 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
             }
             // must exist
             nextNode = traceGraph.findNode(sourceTable, index);
+
+            if (up) {
+                trace.addBefore(nextNode);
+            } else {
+                trace.addAfter(nextNode);
+            }
             if (nextNode != currentNode) {
-                if (up) {
-                    trace.addBefore(nextNode);
-                } else {
-                    trace.addAfter(nextNode);
-                }
                 found++;
             }
             currentNode = nextNode;
@@ -243,7 +244,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {
-        return new TracesPanel(registrar, this);
+        return new TracesPanel(this);
     }
 
     public Pair<Integer, Integer> getDisplayRange() {
