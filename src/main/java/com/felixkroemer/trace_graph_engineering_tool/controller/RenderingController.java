@@ -60,7 +60,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         // instead, DefaultNetworkViewFactory is retrieved, which
         // retrieves the CyNetworkViewFactory of the default NetworkViewRenderer (which is ding)
         var manager = this.registrar.getService(CyApplicationManager.class);
-        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
+        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(traceGraph.getNetwork());
         this.setMode(RENDERING_MODE_FOLLOW);
