@@ -68,14 +68,12 @@
                     <instructions>
                         <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Export-Package>!${bundle.namespace}.*</Export-Package>
-                        <Private-Package>${bundle.namespace}.*
-                        </Private-Package>
+                        <Private-Package>${bundle.namespace}.*</Private-Package>
                         <Import-Package>
                             *;resolution:=optional
                         </Import-Package>
                         <Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
-                        <Embed-Dependency>*;scope=!provided;groupId=!org.osgi|org.cytoscape</Embed-Dependency>
+                        <Embed-Dependency>*;scope=!provided</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                     </instructions>
                 </configuration>
@@ -116,16 +114,9 @@
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>event-api</artifactId>
-            <version>${cytoscape.api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.cytoscape</groupId>
-            <artifactId>viewmodel-impl</artifactId>
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -259,6 +250,7 @@
             <groupId>org.cytoscape</groupId>
             <artifactId>custom-graphics-internal</artifactId>
             <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- 3rd party library -->
