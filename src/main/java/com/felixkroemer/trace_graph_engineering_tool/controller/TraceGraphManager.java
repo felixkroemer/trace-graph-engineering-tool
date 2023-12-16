@@ -42,7 +42,6 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             pdm.getParameters().forEach(p -> p.addObserver(this));
         }
         this.controllers.get(pdm).add(controller);
-        controller.registerNetwork();
         this.showPanel();
     }
 

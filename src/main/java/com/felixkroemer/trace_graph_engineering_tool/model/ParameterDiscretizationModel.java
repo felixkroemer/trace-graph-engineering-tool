@@ -67,15 +67,6 @@ public class ParameterDiscretizationModel {
         }
     }
 
-    public Parameter getParameter(String name) {
-        for (Parameter p : this.parameters) {
-            if (p.getName().equals(name)) {
-                return p;
-            }
-        }
-        return null;
-    }
-
     public Map<Long, Long> getSuidHashMapping() {
         return this.suidHashMapping;
     }

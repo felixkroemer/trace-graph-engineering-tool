@@ -37,6 +37,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.renderingController = new RenderingController(registrar, this);
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
+        this.registerNetwork();
     }
 
     @Override

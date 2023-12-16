@@ -110,6 +110,8 @@ public class NetworkComparisonController extends NetworkController implements Se
 
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultVisualStyle, this.view);
+
+        this.registerNetwork();
     }
 
     public void initTables() {

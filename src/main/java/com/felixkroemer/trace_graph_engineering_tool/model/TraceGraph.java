@@ -11,8 +11,8 @@ public class TraceGraph {
     private CyNetwork network;
     private ParameterDiscretizationModel pdm;
     private Set<CyTable> sourceTables;
-    private CyTable localNodeTable;
     private CyTable localEdgeTable;
+    private CyTable defaultNodeTable;
     private CyTable defaultEdgeTable;
 
     // hash to node suid
@@ -30,9 +30,9 @@ public class TraceGraph {
         this.sourceTables = new HashSet<>();
         this.network = network;
 
-        this.localNodeTable = this.network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
         this.localEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS);
         // DEFAULT_ATTRS = Shared (root) + Local
+        this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
         this.defaultEdgeTable = this.network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
         this.suidHashMapping = this.pdm.getSuidHashMapping();
         this.nodeMapping = new HashMap<>();
@@ -87,7 +87,7 @@ public class TraceGraph {
             } else { // node does not exist yet
                 currentNode = network.addNode();
                 suidHashMapping.put(hash, currentNode.getSUID());
-                currentRow = this.localNodeTable.getRow(currentNode.getSUID());
+                currentRow = this.defaultNodeTable.getRow(currentNode.getSUID());
                 for (int j = 0; j < this.pdm.getParameters().size(); j++) {
                     currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
                 }
@@ -236,7 +236,7 @@ public class TraceGraph {
                 // changes)
                 // uses source row index to node map, not influenced by already changed parameter bins
                 var oldNode = this.nodeMapping.get(sourceTable)[i];
-                var oldNodeRow = this.localNodeTable.getRow(oldNode.getSUID());
+                var oldNodeRow = this.defaultNodeTable.getRow(oldNode.getSUID());
                 var oldNodeAux = this.nodeInfo.get(oldNode);
                 for (int j = 0; j < pdm.getParameterCount(); j++) {
                     state[j] = oldNodeRow.get(this.pdm.getParameters().get(j).getName(), Integer.class);
@@ -281,7 +281,7 @@ public class TraceGraph {
                         } else {
                             newNode = network.addNode();
                             suidHashMapping.put(hash, newNode.getSUID());
-                            newNodeRow = this.localNodeTable.getRow(newNode.getSUID());
+                            newNodeRow = this.defaultNodeTable.getRow(newNode.getSUID());
                             for (int k = 0; k < this.pdm.getParameters().size(); k++) {
                                 newNodeRow.set(this.pdm.getParameters().get(k).getName(), state[k]);
                             }

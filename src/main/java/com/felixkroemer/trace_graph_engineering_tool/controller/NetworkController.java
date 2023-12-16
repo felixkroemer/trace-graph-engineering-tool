@@ -42,11 +42,7 @@ public abstract class NetworkController implements CyDisposable {
 
     public abstract VisualStyle getVisualStyle();
 
-    public TaskIterator createLayoutTask() {
-        return createLayoutTask(registrar, this.getView());
-    }
-
-    public static TaskIterator createLayoutTask(CyServiceRegistrar registrar, CyNetworkView view) {
+    private TaskIterator createLayoutTask() {
         var layoutManager = registrar.getService(CyLayoutAlgorithmManager.class);
         // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
@@ -56,11 +52,15 @@ public abstract class NetworkController implements CyDisposable {
         //context.numIterationsEdgeRepulsive = 10;
         context.defaultNodeMass = 10;
         var views =
-                view.getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE)).collect(Collectors.toSet());
-        return layoutFactory.createTaskIterator(view, context, views, null);
+                getView().getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE)).collect(Collectors.toSet());
+        return layoutFactory.createTaskIterator(getView(), context, views, null);
     }
 
-    public void registerNetwork() {
+    /*
+    Can not be called in constructor because the view may not exist yet. Must be called by implementing classes when
+    they are done initiating.
+     */
+    protected void registerNetwork() {
         var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.addNetwork(this.network);
         var networkViewManager = registrar.getService(CyNetworkViewManager.class);
@@ -68,7 +68,7 @@ public abstract class NetworkController implements CyDisposable {
         this.applyStyleAndLayout();
     }
 
-    public TaskIterator createApplyStyleTask() {
+    private TaskIterator createStyleTask() {
         return new TaskIterator(new AbstractTask() {
             @Override
             public void run(TaskMonitor taskMonitor) throws Exception {
@@ -82,7 +82,7 @@ public abstract class NetworkController implements CyDisposable {
         // applying the style would not be necessary if the style mappings used table values because the RowsSetEvent
         // would trigger a style refresh in NetworkMediator and RowsSetViewUpdater. Setting a aux value will not trigger
         // a refresh automatically
-        iterator.append(this.createApplyStyleTask());
+        iterator.append(this.createStyleTask());
         iterator.append(this.createLayoutTask());
         var taskManager = this.registrar.getService(SynchronousTaskManager.class);
         taskManager.execute(iterator);

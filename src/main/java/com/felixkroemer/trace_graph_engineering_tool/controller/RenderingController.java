@@ -129,6 +129,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         CyEventHelper helper = registrar.getService(CyEventHelper.class);
         helper.flushPayloadEvents();
         this.updateVisualStyle();
+        // visual style has already been adjusted by the displayController
+        // => we can tell it to initialize
         if (this.displayController != null) {
             this.displayController.init();
         }
