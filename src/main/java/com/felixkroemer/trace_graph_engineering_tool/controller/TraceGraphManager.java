@@ -13,16 +13,11 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.view.model.table.CyTableViewManager;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
-
-public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, PropertyChangeListener, CyDisposable {
+public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
@@ -37,49 +32,12 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
     }
 
     public void registerTraceGraph(ParameterDiscretizationModel pdm, NetworkController controller) {
-        if (this.controllers.get(pdm) == null) {
-            this.controllers.put(pdm, new HashSet<>());
-            pdm.getParameters().forEach(p -> p.addObserver(this));
-        }
+        this.controllers.computeIfAbsent(pdm, k -> new HashSet<>());
         this.controllers.get(pdm).add(controller);
-        this.showPanel();
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        ParameterDiscretizationModel pdm = ((Parameter) evt.getSource()).getPdm();
-        switch (evt.getPropertyName()) {
-            case Parameter.ENABLED -> {
-                var tableViewManager = registrar.getService(CyTableViewManager.class);
-                for (NetworkController controller : this.controllers.get(pdm)) {
-                    var nodeTableView = tableViewManager.getTableView(controller.getNetwork().getDefaultNodeTable());
-                    Parameter param = (Parameter) evt.getSource();
-                    var columnView = nodeTableView.getColumnView(param.getName());
-                    columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
-                }
-                this.updateTraceGraph(pdm, (Parameter) evt.getSource());
-            }
-            case Parameter.BINS -> {
-                this.updateTraceGraph(pdm, (Parameter) evt.getSource());
-            }
-        }
-    }
-
-    private void updateTraceGraph(ParameterDiscretizationModel pdm, Parameter changedParameter) {
-        for (NetworkController controller : controllers.get(pdm)) {
-            controller.updateNetwork(changedParameter);
-        }
-    }
-
-    private void showPanel() {
         CySwingApplication swingApplication = registrar.getService(CySwingApplication.class);
         if (swingApplication.getCytoPanel(CytoPanelName.WEST).indexOfComponent("TraceGraphPanel") < 0) {
             this.registrar.registerService(this.panel, CytoPanelComponent.class);
         }
-    }
-
-    private void hidePanel() {
-        this.registrar.unregisterService(this.panel, CytoPanelComponent.class);
     }
 
     @Override
@@ -103,7 +61,7 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, Pro
             }
         }
         if (this.controllers.isEmpty()) {
-            this.hidePanel();
+            this.registrar.unregisterService(this.panel, CytoPanelComponent.class);
         }
     }
 

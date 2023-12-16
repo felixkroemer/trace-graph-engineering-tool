@@ -133,18 +133,13 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         var network = e.getNetwork();
         if (network == null) {
             this.pdmPanel.clear();
-            return;
-        }
-        var manager = reg.getService(TraceGraphManager.class);
-        var controller = manager.findControllerForNetwork(network);
-        if (controller != null) {
-            this.pdmPanel.registerCallbacks(controller);
         }
     }
 
     @Override
     public void handleEvent(SetCurrentTraceGraphControllerEvent event) {
         this.showPanel(this.pdmPanel);
+        this.pdmPanel.registerCallbacks(event.getTraceGraphController());
         var settingsPanel = event.getTraceGraphController().getSettingsPanel();
         this.replaceEdgeDisplayControllerPanel(settingsPanel);
         this.hidePanel(this.traceGraphComparisonPanel);

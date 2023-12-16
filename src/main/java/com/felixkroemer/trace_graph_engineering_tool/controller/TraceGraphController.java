@@ -21,11 +21,14 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable {
+public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable,
+        PropertyChangeListener {
 
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;
@@ -35,6 +38,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.traceGraph = traceGraph;
         //TODO set initial filtered state
         this.renderingController = new RenderingController(registrar, this);
+        pdm.getParameters().forEach(p -> p.addObserver(this));
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
         this.registerNetwork();
@@ -75,6 +79,23 @@ public class TraceGraphController extends NetworkController implements SetCurren
             }
         }
         return new DefaultTreeTableModel(root);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+            case Parameter.ENABLED -> {
+                var tableViewManager = registrar.getService(CyTableViewManager.class);
+                var nodeTableView = tableViewManager.getTableView(this.network.getDefaultNodeTable());
+                Parameter param = (Parameter) evt.getSource();
+                var columnView = nodeTableView.getColumnView(param.getName());
+                columnView.setVisualProperty(COLUMN_VISIBLE, evt.getNewValue());
+                this.updateNetwork((Parameter) evt.getSource());
+            }
+            case Parameter.BINS -> {
+                this.updateNetwork((Parameter) evt.getSource());
+            }
+        }
     }
 
     @Override
@@ -158,6 +179,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public void dispose() {
+        pdm.getParameters().forEach(p -> p.removeObserver(this));
         this.renderingController.dispose();
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
     }
