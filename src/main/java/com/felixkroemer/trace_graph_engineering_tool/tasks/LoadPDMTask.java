@@ -73,8 +73,15 @@ public class LoadPDMTask extends AbstractTask {
         return new TraceGraph(subNetwork, pdm);
     }
 
-    private void updatePDM(ParameterDiscretizationModel pdm, String name, List<String> dtos) {
-
+    private void updatePDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto) {
+        pdm.setParameterBins(dto.getParameters());
+        if(dto.getCsvs() != null) {
+            var subNetwork = Util.createSubNetwork(pdm);
+            TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
+            loadTracesToTraceGraph(dto, traceGraph);
+            TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+            manager.registerTraceGraph(traceGraph.getPDM(), controller);
+        }
     }
 
     public void loadPDM(ParameterDiscretizationModelDTO dto) {
@@ -84,12 +91,16 @@ public class LoadPDMTask extends AbstractTask {
             SwingUtilities.invokeLater(() -> {
                 new SelectMatchingPDMDialog(matchingPDMs, () -> {
                     TraceGraph traceGraph = createTraceGraphAndPDM(dto);
-                    loadTraceToTraceGraph(dto, traceGraph);
+                    if(dto.getCsvs() != null) {
+                        loadTracesToTraceGraph(dto, traceGraph);
+                    } else {
+                        traceGraph.setPlaceholder();
+                    }
                     TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
                     manager.registerTraceGraph(traceGraph.getPDM(), controller);
                 }, (pdm) -> {
                     try {
-                        updatePDM(pdm, dto.getName(), dto.getCsvs());
+                        updatePDM(pdm, dto);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -97,13 +108,20 @@ public class LoadPDMTask extends AbstractTask {
             });
         } else {
             TraceGraph traceGraph = this.createTraceGraphAndPDM(dto);
-            loadTraceToTraceGraph(dto, traceGraph);
+            if(dto.getCsvs() != null) {
+                loadTracesToTraceGraph(dto, traceGraph);
+            } else {
+                traceGraph.setPlaceholder();
+            }
             TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
             manager.registerTraceGraph(traceGraph.getPDM(), controller);
         }
     }
 
-    private void loadTraceToTraceGraph(ParameterDiscretizationModelDTO dto, TraceGraph traceGraph) {
+    private void loadTracesToTraceGraph(ParameterDiscretizationModelDTO dto, TraceGraph traceGraph) {
+        if (dto.getCsvs() == null) {
+            return;
+        }
         for (String csv : dto.getCsvs()) {
             File path = null;
             try {

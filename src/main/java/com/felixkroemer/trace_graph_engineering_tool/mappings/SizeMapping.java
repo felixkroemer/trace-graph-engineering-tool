@@ -17,10 +17,15 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
     public SizeMapping(Map<Long, Integer> frequency) {
         this.frequency = frequency;
 
-        this.max = Collections.max(frequency.values());
-        this.min = Collections.min(frequency.values());
-        this.min += 1;
-        this.max += 1;
+        if(!frequency.isEmpty()) {
+            this.max = Collections.max(frequency.values());
+            this.min = Collections.min(frequency.values());
+            this.min += 1;
+            this.max += 1;
+        } else {
+            this.min = 1;
+            this.max = 1;
+        }
     }
 
 

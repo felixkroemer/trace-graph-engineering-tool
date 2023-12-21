@@ -20,7 +20,6 @@ public class ParameterDiscretizationModel {
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
     private Pair<String, Double> percentile;
-    private List<String> csvs;
 
     public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
         this.parameters = new ArrayList<>(dto.getParameterCount());
@@ -28,7 +27,6 @@ public class ParameterDiscretizationModel {
             Parameter parameter = new Parameter(paramDto, this);
             this.parameters.add(parameter);
         }
-        this.csvs = dto.getCsvs();
         this.suidHashMapping = new HashMap<>();
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
@@ -47,6 +45,24 @@ public class ParameterDiscretizationModel {
 
     public List<Parameter> getParameters() {
         return this.parameters;
+    }
+
+    public Parameter getParameter(String name) {
+        for(var param : parameters) {
+            if(param.getName().equals(name)) {
+                return param;
+            }
+        }
+        return null;
+    }
+
+    public void setParameterBins(List<ParameterDTO> parameters) {
+        for(var paramDTO : parameters) {
+            var parameter = this.getParameter(paramDTO.getName());
+            if(parameter != null) {
+                parameter.setBins(paramDTO.getBins());
+            }
+        }
     }
 
     public int getParameterCount() {
@@ -112,10 +128,6 @@ public class ParameterDiscretizationModel {
         if (this.percentile != null) {
             this.resetPercentile();
         }
-    }
-
-    public List<String> getCSVs() {
-        return this.csvs;
     }
 }
 

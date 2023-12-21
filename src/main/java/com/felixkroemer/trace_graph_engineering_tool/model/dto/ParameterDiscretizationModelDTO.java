@@ -13,7 +13,6 @@ public class ParameterDiscretizationModelDTO {
 
     public ParameterDiscretizationModelDTO(ParameterDiscretizationModel pdm) {
         this.name = pdm.getName();
-        this.csvs = pdm.getCSVs();
         this.parameters = pdm.getParameters().stream().map(ParameterDTO::new).collect(Collectors.toList());
     }
 

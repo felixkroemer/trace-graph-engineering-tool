@@ -25,6 +25,8 @@ public class TraceGraph {
     private Map<CyNode, AuxiliaryInformation> nodeInfo;
     private Map<CyEdge, AuxiliaryInformation> edgeInfo;
 
+    private boolean placeholder;
+
     public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
         this.sourceTables = new HashSet<>();
@@ -38,6 +40,7 @@ public class TraceGraph {
         this.nodeMapping = new HashMap<>();
         this.nodeInfo = new HashMap<>();
         this.edgeInfo = new HashMap<>();
+        this.placeholder = false;
 
         this.initTables();
     }
@@ -125,7 +128,11 @@ public class TraceGraph {
         network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(sourceTables));
     }
 
-    //TODO fix visits, frequency and traversals
+    public void setPlaceholder() {
+        network.getRow(network).set(CyNetwork.NAME, "Placeholder");
+        this.placeholder = true;
+    }
+
     public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTablesToRemove) {
         TraceGraph traceGraph = new TraceGraph(newNetwork, this.pdm);
         for (CyTable table : sourceTablesToRemove) {

@@ -13,8 +13,14 @@ public class ColorMapping extends ContinuousMappingImpl {
     public ColorMapping(Map<Long, Integer> visitsMap, CyEventHelper eventHelper) {
         super(visitsMap, BasicVisualLexicon.NODE_FILL_COLOR, eventHelper);
 
-        var max = Collections.max(visitsMap.values());
-        var min = Math.max(Collections.min(visitsMap.values()), 1);
+        int min, max;
+        if (!visitsMap.isEmpty()) {
+            max = Collections.max(visitsMap.values());
+            min = Math.max(Collections.min(visitsMap.values()), 1);
+        } else {
+            max = 1;
+            min = 1;
+        }
 
         BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
 
