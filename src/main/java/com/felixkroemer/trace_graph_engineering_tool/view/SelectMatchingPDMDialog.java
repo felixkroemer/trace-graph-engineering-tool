@@ -31,7 +31,6 @@ public class SelectMatchingPDMDialog extends JDialog {
         this.pdmRadioButtonGroup = new ButtonGroup();
         this.pdmRadioButtonMap = new HashMap<>();
 
-
         this.init();
     }
 

@@ -13,16 +13,15 @@ import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMDialo
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.*;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 
 import javax.swing.*;
 import java.io.File;
@@ -37,7 +36,6 @@ public class LoadPDMTask extends AbstractTask {
     public File traceFile;
 
     private final Logger logger;
-
     private final TraceGraphManager manager;
     private final CyNetworkFactory networkFactory;
     private final CyNetworkTableManager networkTableManager;
@@ -45,113 +43,12 @@ public class LoadPDMTask extends AbstractTask {
     private final CyServiceRegistrar registrar;
 
     public LoadPDMTask(CyServiceRegistrar reg) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
+        this.logger = LoggerFactory.getLogger(CyNetwork.NAME);
         this.manager = reg.getService(TraceGraphManager.class);
         this.networkFactory = reg.getService(CyNetworkFactory.class);
         this.networkTableManager = reg.getService(CyNetworkTableManager.class);
         this.tableManager = reg.getService(CyTableManager.class);
         this.registrar = reg;
-    }
-
-    public void initSubNetwork(CySubNetwork subNetwork, CyRootNetwork rootNetwork, ParameterDiscretizationModel pdm) {
-        var sharedNodeTable = rootNetwork.getSharedNodeTable();
-        pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
-        var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
-        localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
-    }
-
-    /**
-     * If there exist PDMs with the same set of parameters, ask the user which pdm this dto should be assigned to or
-     * if a new pdm should be created.
-     *
-     * @return The PDM that the DTO should be assigned to.
-     */
-    public ParameterDiscretizationModel queryPDMsForDTO(ParameterDiscretizationModelDTO dto) {
-        var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
-        var matchingPDMs = manager.findPDM(params);
-        ParameterDiscretizationModel pdm = null;
-        if (!matchingPDMs.isEmpty()) {
-/*            SelectMatchingPDMDialog d = new SelectMatchingPDMDialog();
-            d.setTitle("Select PDM");
-            d.setPreferredSize(new Dimension(600, 600));
-            d.setModalityType(APPLICATION_MODAL);
-            pdm = d.showDialog();*/
-        }
-        if (pdm == null) {
-            pdm = new ParameterDiscretizationModel(dto);
-        }
-        return pdm;
-    }
-
-    public void loadPDM(ParameterDiscretizationModelDTO dto) throws Exception {
-        var pdm = queryPDMsForDTO(dto);
-        var subNetwork = createAndInitSubnetwork(pdm, dto.getName());
-        var traceGraph = new TraceGraph(subNetwork, pdm);
-        for (String csv : dto.getCsvs()) {
-            var path = new File(traceFile.getParentFile(), csv);
-            // exclude header
-            var sourceTable = new TraceGraphSourceTable(csv, Files.lines(path.toPath()).count() - 1, registrar);
-            sourceTable.setTitle(csv);
-            Util.parseCSV(sourceTable, path);
-            this.tableManager.addTable(sourceTable);
-            this.networkTableManager.setTable(subNetwork, CyNode.class, "" + sourceTable.hashCode(), sourceTable);
-            traceGraph.addSourceTable(sourceTable);
-        }
-        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-        manager.registerTraceGraph(pdm, controller);
-    }
-
-    public void loadTrace() throws Exception {
-        CyTable sourceTable = new TraceGraphSourceTable(traceFile.getName(),
-                Files.lines(traceFile.toPath()).count() - 1, registrar);
-        Util.parseCSV(sourceTable, traceFile);
-        List<String> params = new ArrayList<>();
-        sourceTable.getColumns().forEach(c -> {
-            if (!c.getName().equals(Columns.SOURCE_ID)) params.add(c.getName());
-        });
-        var pdms = manager.findPDM(params);
-        if (pdms.isEmpty()) {
-            this.createPDMandInitSubnetwork(sourceTable);
-        } else {
-            SwingUtilities.invokeLater(() -> {
-                new SelectMatchingPDMDialog(pdms, () -> {
-                    this.createPDMandInitSubnetwork(sourceTable);
-                }, (pdm) -> {
-                    this.addTraceGraphToPDM(pdm, sourceTable);
-                }).showDialog();
-            });
-        }
-    }
-
-    private void createPDMandInitSubnetwork(CyTable sourceTable) {
-        var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
-        var pdm = new ParameterDiscretizationModel(parameterNames);
-        var subNetwork = createAndInitSubnetwork(pdm, "PDM");
-        addTraceGraphToPDM(pdm, sourceTable, subNetwork);
-    }
-
-    private CySubNetwork createAndInitSubnetwork(ParameterDiscretizationModel pdm, String preferredName) {
-        var subNetwork = (CySubNetwork) networkFactory.createNetwork();
-        var rootNetwork = subNetwork.getRootNetwork();
-        var rootNetworkName = manager.getAvailableRootNetworkName(preferredName);
-        rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, rootNetworkName);
-        pdm.setRootNetwork(rootNetwork);
-        this.initSubNetwork(subNetwork, rootNetwork, pdm);
-        return subNetwork;
-    }
-
-    public void addTraceGraphToPDM(ParameterDiscretizationModel pdm, CyTable sourceTable) {
-        var subNetwork = Util.createSubNetwork(pdm);
-        this.addTraceGraphToPDM(pdm, sourceTable, subNetwork);
-    }
-
-    public void addTraceGraphToPDM(ParameterDiscretizationModel pdm, CyTable sourceTable, CyNetwork subNetwork) {
-        this.tableManager.addTable(sourceTable);
-        this.networkTableManager.setTable(subNetwork, CyNode.class, sourceTable.getTitle(), sourceTable);
-        var traceGraph = new TraceGraph(subNetwork, pdm);
-        traceGraph.addSourceTable(sourceTable);
-        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-        manager.registerTraceGraph(pdm, controller);
     }
 
     @Override
@@ -162,6 +59,120 @@ public class LoadPDMTask extends AbstractTask {
         } catch (JsonSyntaxException e) {
             loadTrace();
         }
+    }
+
+    public TraceGraph createTraceGraphAndPDM(ParameterDiscretizationModelDTO dto) {
+        var pdm = new ParameterDiscretizationModel(dto);
+        var subNetwork = createRootNetworkForPDM(pdm, dto.getName());
+        return new TraceGraph(subNetwork, pdm);
+    }
+
+    public TraceGraph createTraceGraphAndPDM(List<String> parameters) {
+        var pdm = new ParameterDiscretizationModel(parameters);
+        var subNetwork = createRootNetworkForPDM(pdm, "PDM");
+        return new TraceGraph(subNetwork, pdm);
+    }
+
+    private void updatePDM(ParameterDiscretizationModel pdm, String name, List<String> dtos) {
+
+    }
+
+    public void loadPDM(ParameterDiscretizationModelDTO dto) {
+        var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
+        var matchingPDMs = manager.findPDM(params);
+        if (!matchingPDMs.isEmpty()) {
+            SwingUtilities.invokeLater(() -> {
+                new SelectMatchingPDMDialog(matchingPDMs, () -> {
+                    TraceGraph traceGraph = createTraceGraphAndPDM(dto);
+                    loadTraceToTraceGraph(dto, traceGraph);
+                    TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+                    manager.registerTraceGraph(traceGraph.getPDM(), controller);
+                }, (pdm) -> {
+                    try {
+                        updatePDM(pdm, dto.getName(), dto.getCsvs());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).showDialog();
+            });
+        } else {
+            TraceGraph traceGraph = this.createTraceGraphAndPDM(dto);
+            loadTraceToTraceGraph(dto, traceGraph);
+            TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+            manager.registerTraceGraph(traceGraph.getPDM(), controller);
+        }
+    }
+
+    private void loadTraceToTraceGraph(ParameterDiscretizationModelDTO dto, TraceGraph traceGraph) {
+        for (String csv : dto.getCsvs()) {
+            File path = null;
+            try {
+                path = new File(traceFile.getParentFile(), csv);
+                var sourceTable = new TraceGraphSourceTable(csv, Files.lines(path.toPath()).count() - 1, registrar);
+                sourceTable.setTitle(csv);
+                Util.parseCSV(sourceTable, path);
+                loadTraceToTraceGraph(sourceTable, traceGraph);
+            } catch (Exception e) {
+                logger.error("Could not load Trace with path " + path);
+            }
+        }
+    }
+
+    public void loadTrace() throws Exception {
+        CyTable sourceTable = new TraceGraphSourceTable(traceFile.getName(), Files.lines(traceFile.toPath()).count() - 1, registrar);
+        Util.parseCSV(sourceTable, traceFile);
+        List<String> params = new ArrayList<>();
+        sourceTable.getColumns().forEach(c -> {
+            if (!c.getName().equals(Columns.SOURCE_ID)) params.add(c.getName());
+        });
+        var pdms = manager.findPDM(params);
+        if (pdms.isEmpty()) {
+            this.loadTraceToNewPDM(sourceTable);
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                new SelectMatchingPDMDialog(pdms, () -> {
+                    this.loadTraceToNewPDM(sourceTable);
+                }, (pdm) -> {
+                    var subNetwork = Util.createSubNetwork(pdm);
+                    TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
+                    this.loadTraceToTraceGraph(sourceTable, traceGraph);
+                    TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+                    manager.registerTraceGraph(traceGraph.getPDM(), controller);
+                }).showDialog();
+            });
+        }
+    }
+
+    private void loadTraceToNewPDM(CyTable sourceTable) {
+        var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
+        var traceGraph = this.createTraceGraphAndPDM(parameterNames);
+        loadTraceToTraceGraph(sourceTable, traceGraph);
+        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+        manager.registerTraceGraph(traceGraph.getPDM(), controller);
+    }
+
+
+    /*
+    Create a and set a root network for a pdm with the preferred name, create all parameter columns in the shared
+    node table and set the TG network marker in the network table.
+     */
+    private CySubNetwork createRootNetworkForPDM(ParameterDiscretizationModel pdm, String preferredName) {
+        var subNetwork = (CySubNetwork) networkFactory.createNetwork();
+        var rootNetwork = subNetwork.getRootNetwork();
+        var rootNetworkName = manager.getAvailableRootNetworkName(preferredName);
+        rootNetwork.getDefaultNetworkTable().getRow(rootNetwork.getSUID()).set(CyNetwork.NAME, rootNetworkName);
+        pdm.setRootNetwork(rootNetwork);
+        var sharedNodeTable = rootNetwork.getSharedNodeTable();
+        pdm.forEach(p -> sharedNodeTable.createColumn(p.getName(), Integer.class, false));
+        var localNetworkTable = subNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
+        localNetworkTable.createColumn(Columns.NETWORK_TG_MARKER, Integer.class, true);
+        return subNetwork;
+    }
+
+    public void loadTraceToTraceGraph(CyTable sourceTable, TraceGraph traceGraph) {
+        this.tableManager.addTable(sourceTable);
+        this.networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, sourceTable.getTitle(), sourceTable);
+        traceGraph.addSourceTable(sourceTable);
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {

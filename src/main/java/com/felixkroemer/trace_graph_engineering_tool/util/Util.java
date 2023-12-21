@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.opencsv.CSVReader;
 import org.cytoscape.model.*;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
 import java.io.File;
@@ -69,7 +70,7 @@ public class Util {
         return null;
     }
 
-    public static CyNetwork createSubNetwork(ParameterDiscretizationModel pdm) {
+    public static CySubNetwork createSubNetwork(ParameterDiscretizationModel pdm) {
         var root = pdm.getRootNetwork();
         var subNetwork = root.addSubNetwork();
 
