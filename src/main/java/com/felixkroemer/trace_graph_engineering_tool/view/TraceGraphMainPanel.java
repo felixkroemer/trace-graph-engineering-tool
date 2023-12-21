@@ -111,20 +111,19 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         }
         var manager = this.reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(event.getNetwork());
-        if (controller == null) {
-            this.hideControllerSpecificPanels();
-            return;
-        }
         if (event.getSelectedNodes().size() == 1) {
             this.nodeInfoPanel.setNode(controller, event.getSelectedNodes().iterator().next());
             this.showPanel(this.nodeInfoPanel);
+            this.hidePanel(this.nodeComparisonPanel);
             this.showMainPanel();
         } else if (event.getSelectedNodes().size() > 1 && event.getSelectedNodes().size() < 6) {
             this.nodeComparisonPanel.setNodes(controller, event.getSelectedNodes(), event.getNetwork());
             this.showPanel(this.nodeComparisonPanel);
+            this.hidePanel(this.nodeInfoPanel);
             this.showMainPanel();
         } else {
-            this.hideTemporaryPanels();
+            this.hidePanel(this.nodeInfoPanel);
+            this.hidePanel(this.nodeComparisonPanel);
         }
     }
 
@@ -134,6 +133,8 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         if (network == null) {
             this.pdmPanel.clear();
         }
+        this.hidePanel(this.nodeInfoPanel);
+        this.hidePanel(this.nodeComparisonPanel);
     }
 
     @Override
@@ -141,8 +142,8 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.showPanel(this.pdmPanel);
         this.pdmPanel.registerCallbacks(event.getTraceGraphController());
         var settingsPanel = event.getTraceGraphController().getSettingsPanel();
-        this.replaceEdgeDisplayControllerPanel(settingsPanel);
         this.hidePanel(this.traceGraphComparisonPanel);
+        this.replaceEdgeDisplayControllerPanel(settingsPanel);
     }
 
     private void replaceEdgeDisplayControllerPanel(EdgeDisplayControllerPanel newPanel) {
@@ -191,27 +192,10 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     }
 
     private void showPanel(TraceGraphPanel panel) {
-        if (panel != this.nodeInfoPanel) {
-            this.hidePanel(this.nodeInfoPanel);
-        }
-        if (panel != this.nodeComparisonPanel) {
-            this.hidePanel(this.nodeComparisonPanel);
-        }
         if (panel != pdmPanel && getPanelIndex(panel.getTitle()) == -1) {
             this.tabs.addTab(panel.getTitle(), panel);
         }
         this.tabs.setSelectedIndex(getPanelIndex(panel.getTitle()));
-    }
-
-    private void hideTemporaryPanels() {
-        this.hidePanel(this.nodeInfoPanel);
-        this.hidePanel(this.nodeComparisonPanel);
-    }
-
-    private void hideControllerSpecificPanels() {
-        this.hideTemporaryPanels();
-        this.hidePanel(this.traceGraphComparisonPanel);
-        this.hidePanel(this.edgeDisplayControllerPanel);
     }
 
     @Override

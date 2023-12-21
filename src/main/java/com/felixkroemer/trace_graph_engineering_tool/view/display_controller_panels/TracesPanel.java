@@ -31,12 +31,15 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
     private ScheduledFuture<?> future;
     private CustomTreeTable tracesInfoTable;
 
+    private boolean loading;
+
     public TracesPanel(TracesEdgeDisplayController controller) {
         this.controller = controller;
         this.numberSlider = new JSlider();
         this.lengthSlider = new JSlider();
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.tracesInfoTable = new CustomTreeTable();
+        this.loading = false;
 
         this.init();
 
@@ -66,8 +69,10 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         this.numberSlider.setBorder(LookAndFeelUtil.createTitledBorder("Number of Traces"));
 
         this.numberSlider.addChangeListener(e -> {
-            var number = numberSlider.getValue();
-            schedule(() -> controller.setDisplayRange(0, number));
+            if (!loading) {
+                var number = numberSlider.getValue();
+                schedule(() -> controller.setDisplayRange(0, number));
+            }
         });
     }
 
@@ -100,8 +105,10 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         this.lengthSlider.setBorder(LookAndFeelUtil.createTitledBorder("Trace Length"));
 
         this.lengthSlider.addChangeListener(e -> {
-            var length = lengthSlider.getValue();
-            schedule(() -> controller.setLength(length));
+            if (!loading) {
+                var length = lengthSlider.getValue();
+                schedule(() -> controller.setLength(length));
+            }
         });
     }
 
@@ -162,10 +169,12 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case TracesEdgeDisplayController.TRACES -> {
+                this.loading = true;
                 var traces = (List<TraceExtension>) evt.getNewValue();
                 this.updateNumberSlider(traces);
                 this.updateLengthSlider(traces);
                 this.updateInfoTable(traces);
+                this.loading = false;
             }
         }
     }

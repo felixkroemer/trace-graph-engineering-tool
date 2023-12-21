@@ -134,8 +134,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
             this.traces = this.calculateTraces(event.getSelectedNodes(), event.getSelectedEdges(), event.getNetwork());
             if (this.traces != null) {
                 this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-                this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                        this.traces));
+                this.pcs.firePropertyChange(TracesEdgeDisplayController.TRACES, null, this.traces);
                 drawTraces();
             }
         }
@@ -267,8 +266,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         var selectedEdges = CyTableUtil.getEdgesInState(network, CyNetwork.SELECTED, true);
         this.traces = this.calculateTraces(selectedNodes, selectedEdges, network);
         // TODO: make range itself an observable attribute, -> dont poll number of traces from panel
-        this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                this.traces));
+        this.pcs.firePropertyChange(TracesEdgeDisplayController.TRACES, null, this.traces);
         drawTraces();
     }
 

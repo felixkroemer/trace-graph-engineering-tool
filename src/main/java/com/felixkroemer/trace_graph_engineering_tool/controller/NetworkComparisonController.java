@@ -235,6 +235,10 @@ public class NetworkComparisonController extends NetworkController implements Se
         }
     }
 
+
+    // TODO: what happens when the base or delta change but the comparison does not
+    // the info would become inconsistent or may lead to an error if the node no longer exists in
+    // the base or delta
     @Override
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
