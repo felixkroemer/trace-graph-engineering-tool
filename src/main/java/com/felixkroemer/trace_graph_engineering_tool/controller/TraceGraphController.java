@@ -155,6 +155,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.removeTable(this.traceGraph.getNetwork(), CyNode.class, "" + table.hashCode());
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
+        this.renderingController.prepareForMergeOrSplit();
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
         this.renderingController.onNetworkChanged();
         return new TraceGraphController(registrar, newTg);
@@ -166,6 +167,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         controller.dispose();
         var network = controller.getNetwork();
         networkManager.destroyNetwork(network);
+        this.renderingController.prepareForMergeOrSplit();
         for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
             networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + sourceTable.hashCode(), sourceTable);
             this.traceGraph.addSourceTable(sourceTable);

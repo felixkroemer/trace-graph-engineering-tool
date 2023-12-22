@@ -62,6 +62,11 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         });
     }
 
+    @Override
+    public void prepareForMergeOrSplit() {
+        this.networkView.getModel().removeEdges(this.multiEdges);
+        this.multiEdges.clear();
+    }
 
     public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable,
                                      int length, boolean up) {

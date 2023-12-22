@@ -11,6 +11,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.event.CyEventHelper;
@@ -298,6 +299,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph,
                     e.getTrace(), this));
         }
+    }
+
+    public void prepareForMergeOrSplit() {
+        Util.deselectAll(this.view);
+        this.displayController.prepareForMergeOrSplit();
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {

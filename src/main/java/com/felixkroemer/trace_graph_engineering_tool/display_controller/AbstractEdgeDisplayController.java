@@ -52,6 +52,9 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     public void onNetworkChanged() {
     }
 
+    public void prepareForMergeOrSplit() {
+    }
+
     protected void hideAllEdges() {
         for (var edgeView : networkView.getEdgeViews()) {
             edgeView.setVisualProperty(EDGE_VISIBLE, false);
