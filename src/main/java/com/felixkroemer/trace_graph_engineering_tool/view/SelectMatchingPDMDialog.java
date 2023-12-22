@@ -21,8 +21,10 @@ public class SelectMatchingPDMDialog extends JDialog {
     private ButtonGroup pdmRadioButtonGroup;
     private Map<AbstractButton, ParameterDiscretizationModel> pdmRadioButtonMap;
 
+
     public SelectMatchingPDMDialog(List<ParameterDiscretizationModel> pdms, Runnable createNewNetwork,
-                                   Consumer<ParameterDiscretizationModel> addToExistingNetworkRunnable) {
+                                   Consumer<ParameterDiscretizationModel> addToExistingNetworkRunnable,
+                                   boolean allowDefault) {
         this.confirmButton = new JButton("Confirm");
         this.cancelButton = new JButton("Cancel");
         this.pdms = pdms;
@@ -31,10 +33,10 @@ public class SelectMatchingPDMDialog extends JDialog {
         this.pdmRadioButtonGroup = new ButtonGroup();
         this.pdmRadioButtonMap = new HashMap<>();
 
-        this.init();
+        this.init(allowDefault);
     }
 
-    private void init() {
+    private void init(boolean allowDefault) {
         setLayout(new BorderLayout());
 
         JPanel innerPanel = new JPanel();
@@ -52,8 +54,10 @@ public class SelectMatchingPDMDialog extends JDialog {
         JRadioButton newPDMButton = new JRadioButton("Create new network");
         newPDMButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.pdmRadioButtonGroup.add(newPDMButton);
-        this.pdmRadioButtonMap.put(newPDMButton, null);
-        innerPanel.add(newPDMButton);
+        if(allowDefault) {
+            this.pdmRadioButtonMap.put(newPDMButton, null);
+            innerPanel.add(newPDMButton);
+        }
 
         this.pdmRadioButtonGroup.getElements().nextElement().setSelected(true);
 

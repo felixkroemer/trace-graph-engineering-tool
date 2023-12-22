@@ -75,7 +75,7 @@ public class LoadPDMTask extends AbstractTask {
 
     private void updatePDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto) {
         pdm.setParameterBins(dto.getParameters());
-        if(dto.getCsvs() != null) {
+        if (dto.getCsvs() != null) {
             var subNetwork = Util.createSubNetwork(pdm);
             TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
             loadTracesToTraceGraph(dto, traceGraph);
@@ -84,37 +84,30 @@ public class LoadPDMTask extends AbstractTask {
         }
     }
 
-    public void loadPDM(ParameterDiscretizationModelDTO dto) {
+    public void importPDM(ParameterDiscretizationModelDTO dto) {
+        TraceGraph traceGraph = createTraceGraphAndPDM(dto);
+        loadTracesToTraceGraph(dto, traceGraph);
+        TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+        manager.registerTraceGraph(traceGraph.getPDM(), controller);
+    }
+
+    public void loadPDM(ParameterDiscretizationModelDTO dto) throws Exception {
         var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
         var matchingPDMs = manager.findPDM(params);
         if (!matchingPDMs.isEmpty()) {
             SwingUtilities.invokeLater(() -> {
                 new SelectMatchingPDMDialog(matchingPDMs, () -> {
-                    TraceGraph traceGraph = createTraceGraphAndPDM(dto);
-                    if(dto.getCsvs() != null) {
-                        loadTracesToTraceGraph(dto, traceGraph);
-                    } else {
-                        traceGraph.setPlaceholder();
-                    }
-                    TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-                    manager.registerTraceGraph(traceGraph.getPDM(), controller);
+                    this.importPDM(dto);
                 }, (pdm) -> {
-                    try {
-                        updatePDM(pdm, dto);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }).showDialog();
+                    this.updatePDM(pdm, dto);
+                }, dto.getCsvs() != null).showDialog();
             });
         } else {
-            TraceGraph traceGraph = this.createTraceGraphAndPDM(dto);
             if(dto.getCsvs() != null) {
-                loadTracesToTraceGraph(dto, traceGraph);
+                this.importPDM(dto);
             } else {
-                traceGraph.setPlaceholder();
+                throw new Exception("PDM must have a list of Traces to load initially.");
             }
-            TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-            manager.registerTraceGraph(traceGraph.getPDM(), controller);
         }
     }
 
@@ -156,7 +149,7 @@ public class LoadPDMTask extends AbstractTask {
                     this.loadTraceToTraceGraph(sourceTable, traceGraph);
                     TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
                     manager.registerTraceGraph(traceGraph.getPDM(), controller);
-                }).showDialog();
+                }, true).showDialog();
             });
         }
     }
