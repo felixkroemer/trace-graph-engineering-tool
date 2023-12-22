@@ -62,13 +62,13 @@ public class LoadPDMTask extends AbstractTask {
     }
 
     public TraceGraph createTraceGraphAndPDM(ParameterDiscretizationModelDTO dto) {
-        var pdm = new ParameterDiscretizationModel(dto);
+        var pdm = new ParameterDiscretizationModel(this.registrar, dto);
         var subNetwork = createRootNetworkForPDM(pdm, dto.getName());
         return new TraceGraph(subNetwork, pdm);
     }
 
     public TraceGraph createTraceGraphAndPDM(List<String> parameters) {
-        var pdm = new ParameterDiscretizationModel(parameters);
+        var pdm = new ParameterDiscretizationModel(this.registrar, parameters);
         var subNetwork = createRootNetworkForPDM(pdm, "PDM");
         return new TraceGraph(subNetwork, pdm);
     }

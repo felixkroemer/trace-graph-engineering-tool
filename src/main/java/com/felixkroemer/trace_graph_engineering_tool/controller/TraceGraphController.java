@@ -1,6 +1,8 @@
 package com.felixkroemer.trace_graph_engineering_tool.controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -28,7 +30,7 @@ import java.util.*;
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
 public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable,
-        PropertyChangeListener {
+        PropertyChangeListener, UpdatedPDMEventListener {
 
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;
@@ -36,11 +38,11 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public TraceGraphController(CyServiceRegistrar registrar, TraceGraph traceGraph) {
         super(registrar, traceGraph.getNetwork(), traceGraph.getPDM());
         this.traceGraph = traceGraph;
-        //TODO set initial filtered state
         this.renderingController = new RenderingController(registrar, this);
-        pdm.getParameters().forEach(p -> p.addObserver(this));
+        this.pdm.getParameters().forEach(p -> p.addObserver(this));
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
+        this.registrar.registerService(this, UpdatedPDMEventListener.class, new Properties());
         this.registerNetwork();
     }
 
@@ -93,7 +95,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
                 this.updateNetwork((Parameter) evt.getSource());
             }
             case Parameter.BINS -> {
-                this.updateNetwork((Parameter) evt.getSource());
+                if (!this.pdm.isUpdating()) {
+                    this.updateNetwork((Parameter) evt.getSource());
+                }
             }
         }
     }
@@ -182,9 +186,16 @@ public class TraceGraphController extends NetworkController implements SetCurren
         pdm.getParameters().forEach(p -> p.removeObserver(this));
         this.renderingController.dispose();
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
+        this.registrar.unregisterService(this, UpdatedPDMEventListener.class);
     }
 
     public FilteredState getFilteredState() {
         return this.renderingController.getFilteredState();
+    }
+
+    @Override
+    public void handleEvent(UpdatedPDMEvent e) {
+        traceGraph.refresh();
+        renderingController.onNetworkChanged();
     }
 }

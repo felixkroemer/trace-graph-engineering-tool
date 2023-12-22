@@ -1,9 +1,13 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.javatuples.Pair;
 
 import java.beans.PropertyChangeListener;
@@ -15,13 +19,15 @@ public class ParameterDiscretizationModel {
 
     public static final String PERCENTILE_FILTER = "percentileFilter";
 
+    private CyServiceRegistrar registrar;
     private PropertyChangeSupport pcs;
     private List<Parameter> parameters;
     private Map<Long, Long> suidHashMapping;
     private CyRootNetwork rootNetwork;
     private Pair<String, Double> percentile;
+    private boolean updating;
 
-    public ParameterDiscretizationModel(ParameterDiscretizationModelDTO dto) {
+    public ParameterDiscretizationModel(CyServiceRegistrar registrar, ParameterDiscretizationModelDTO dto) {
         this.parameters = new ArrayList<>(dto.getParameterCount());
         for (ParameterDTO paramDto : dto.getParameters()) {
             Parameter parameter = new Parameter(paramDto, this);
@@ -30,9 +36,10 @@ public class ParameterDiscretizationModel {
         this.suidHashMapping = new HashMap<>();
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
+        this.registrar = registrar;
     }
 
-    public ParameterDiscretizationModel(List<String> parameterNames) {
+    public ParameterDiscretizationModel(CyServiceRegistrar registrar, List<String> parameterNames) {
         this.parameters = new ArrayList<>(parameterNames.size());
         for (String parameterName : parameterNames) {
             Parameter parameter = new Parameter(parameterName, this);
@@ -41,6 +48,7 @@ public class ParameterDiscretizationModel {
         this.suidHashMapping = new HashMap<>();
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
+        this.registrar = registrar;
     }
 
     public List<Parameter> getParameters() {
@@ -57,12 +65,21 @@ public class ParameterDiscretizationModel {
     }
 
     public void setParameterBins(List<ParameterDTO> parameters) {
+        this.updating = true;
         for(var paramDTO : parameters) {
             var parameter = this.getParameter(paramDTO.getName());
             if(parameter != null) {
                 parameter.setBins(paramDTO.getBins());
+                parameter.setVisibleBins(new HashSet<>());
             }
         }
+        this.updating = false;
+        var eventHelper = this.registrar.getService(CyEventHelper.class);
+        eventHelper.fireEvent(new UpdatedPDMEvent(this, this));
+    }
+
+    public boolean isUpdating() {
+        return this.updating;
     }
 
     public int getParameterCount() {

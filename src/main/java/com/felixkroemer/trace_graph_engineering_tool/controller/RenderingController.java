@@ -76,7 +76,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         var mapper = registrar.getService(VisualMappingManager.class);
         mapper.setVisualStyle(this.defaultStyle, this.view);
 
-        // TODO: set initial FilteredState
         this.filteredState = new FilteredState(this.view);
         this.hideNodes();
     }

@@ -215,6 +215,13 @@ public class TraceGraph {
         return this.pdm;
     }
 
+    public void refresh() {
+        this.clearNodes();
+        for(CyTable trace : this.sourceTables) {
+            this.addSourceTable(trace);
+        }
+    }
+
     public void onParameterChanged(Parameter changedParameter) {
         clearEdges();
         int changedParameterIndex = -1;
@@ -322,6 +329,12 @@ public class TraceGraph {
 
     public void clearEdges() {
         this.network.removeEdges(this.network.getEdgeList());
+        this.edgeInfo.clear();
+    }
+
+    public void clearNodes() {
+        this.network.removeNodes(this.network.getNodeList());
+        this.nodeInfo.clear();
         this.edgeInfo.clear();
     }
 
