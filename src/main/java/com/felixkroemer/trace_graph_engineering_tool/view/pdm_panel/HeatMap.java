@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 // based on https://github.com/matthewbeckler/HeatMap
+// and adjusted to work for one-dimensional arrays + smoothing using gaussian filter
 
 /**
  * <p><strong>Title:</strong> HeatMap</p>
@@ -61,8 +62,8 @@ import java.awt.image.BufferedImage;
  */
 
 public class HeatMap {
-    private double[][] data;
-    private int[][] dataColorIndices;
+    private final double[] data;
+    private int[] dataColorIndices;
 
     private Color[] colors;
 
@@ -143,13 +144,11 @@ public class HeatMap {
      * @param colors A variable of the type Color[]. See also {@link #createMultiGradient} and
      *               {@link #createGradient}.
      */
-    public HeatMap(double[][] data, Color[] colors) {
-        super();
-        this.data = data;
-
+    public HeatMap(double[] data, Color[] colors) {
+        this.data = smoothArray(data, 6.0);
 
         updateGradient(colors);
-        updateData(data);
+        updateDataColors();
     }
 
     /**
@@ -159,12 +158,10 @@ public class HeatMap {
      * @param colors A variable of type Color[]
      */
     public void updateGradient(Color[] colors) {
-        this.colors = (Color[]) colors.clone();
+        this.colors = colors.clone();
 
         if (data != null) {
             updateDataColors();
-
-            drawData();
         }
     }
 
@@ -179,37 +176,21 @@ public class HeatMap {
         double largest = Double.MIN_VALUE;
         double smallest = Double.MAX_VALUE;
         for (int x = 0; x < data.length; x++) {
-            for (int y = 0; y < data[0].length; y++) {
-                largest = Math.max(data[x][y], largest);
-                smallest = Math.min(data[x][y], smallest);
-            }
+            largest = Math.max(data[x], largest);
+            smallest = Math.min(data[x], smallest);
         }
         double range = largest - smallest;
 
         // dataColorIndices is the same size as the data array
         // It stores an int index into the color array
-        dataColorIndices = new int[data.length][data[0].length];
+        dataColorIndices = new int[data.length];
 
         //assign a Color to each data point
         for (int x = 0; x < data.length; x++) {
-            for (int y = 0; y < data[0].length; y++) {
-                double norm = (data[x][y] - smallest) / range; // 0 < norm < 1
-                int colorIndex = (int) Math.floor(norm * (colors.length - 1));
-                dataColorIndices[x][y] = colorIndex;
-            }
+            double norm = (data[x] - smallest) / range; // 0 < norm < 1
+            int colorIndex = (int) Math.floor(norm * (colors.length - 1));
+            dataColorIndices[x] = colorIndex;
         }
-    }
-
-    /**
-     * Updates the data display, calls drawData() to do the expensive re-drawing
-     * of the data plot, and then calls repaint().
-     *
-     * @param data The data to display, must be a complete array (non-ragged)
-     */
-    public void updateData(double[][] data) {
-        updateDataColors();
-
-        drawData();
     }
 
     /**
@@ -233,16 +214,62 @@ public class HeatMap {
      * This function should be called whenever the data or the gradient changes.
      */
     public BufferedImage drawData() {
-        var bufferedImage = new BufferedImage(data.length, data[0].length, BufferedImage.TYPE_INT_ARGB);
+        var bufferedImage = new BufferedImage(data.length, 1, BufferedImage.TYPE_INT_ARGB);
         var bufferedGraphics = bufferedImage.createGraphics();
 
         for (int x = 0; x < data.length; x++) {
-            for (int y = 0; y < data[0].length; y++) {
-                bufferedGraphics.setColor(colors[dataColorIndices[x][y]]);
-                bufferedGraphics.fillRect(x, y, 1, 1);
-            }
+            bufferedGraphics.setColor(colors[dataColorIndices[x]]);
+            bufferedGraphics.fillRect(x, 0, 1, 1);
         }
         return bufferedImage;
+    }
+
+    public static double[] smoothArray(double[] inputArray, double sigma) {
+        if (inputArray == null || inputArray.length == 0 || sigma <= 0) {
+            // Handle invalid input
+            return new double[0];
+        }
+
+        int n = inputArray.length;
+        double[] smoothedArray = new double[n];
+
+        double[] kernel = generateGaussianKernel(sigma);
+
+        for (int i = 0; i < n; i++) {
+            double sum = 0.0;
+            for (int j = 0; j < kernel.length; j++) {
+                int index = i + j - kernel.length / 2;
+                if (index >= 0 && index < n) {
+                    sum += inputArray[index] * kernel[j];
+                }
+            }
+            smoothedArray[i] = sum;
+        }
+
+        return smoothedArray;
+    }
+
+    private static double[] generateGaussianKernel(double sigma) {
+        int size = (int) Math.ceil(sigma * 6);
+        if (size % 2 == 0) {
+            size++; // Ensure the size is odd
+        }
+
+        double[] kernel = new double[size];
+        double sum = 0.0;
+
+        for (int i = 0; i < size; i++) {
+            double x = i - size / 2;
+            kernel[i] = Math.exp(-0.5 * (x * x) / (sigma * sigma));
+            sum += kernel[i];
+        }
+
+        // Normalize the kernel
+        for (int i = 0; i < size; i++) {
+            kernel[i] /= sum;
+        }
+
+        return kernel;
     }
 
 }

@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 // based on org/cytoscape/view/vizmap/gui/internal/view/editor/mappingeditor/DiscreteTrackRenderer.java
 
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.jdesktop.swingx.JXMultiThumbSlider;
 import org.jdesktop.swingx.multislider.Thumb;
@@ -13,12 +14,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
-    private static final int ICON_SIZE = 32;
     private static final int THUMB_WIDTH = 12;
-
     static final BasicStroke STROKE1 = new BasicStroke(1.0f);
     static final Color BORDER_COLOR = Color.BLACK;
     static final Color LABEL_COLOR = Color.BLACK;
@@ -41,24 +39,23 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         this.visibleBins = visibleBins;
         this.name = name;
         this.sourceTable = sourceTable;
-
         this.highlightColor = new Color(0, 255, 0, 127);
-
-        this.initHeatMap();
+        this.heatMap = this.initHeatMap().drawData();
     }
 
-    public void initHeatMap() {
+    public HeatMap initHeatMap() {
         var allRows = sourceTable.getAllRows();
-        double[][] array = new double[1000][1];
-        for (int i = 0; i < allRows.size(); i++) {
-            double value = allRows.get(i).get(this.name, Double.class);
+        double[] array = new double[1000];
+        for (CyRow allRow : allRows) {
+            double value = allRow.get(this.name, Double.class);
             int bucket = (int) (999 * (value - this.minValue) / (this.maxValue - this.minValue));
-            array[bucket][0]++;
+            array[bucket]++;
         }
+
         Color[] palette = new Color[]{new Color(255, 255, 255), new Color(240, 184, 110), new Color(237, 123, 123),
                 new Color(131, 96, 150)};
         Color[] gradient = HeatMap.createMultiGradient(palette, 100);
-        this.heatMap = new HeatMap(array, gradient).drawData();
+        return new HeatMap(array, gradient);
     }
 
     @Override
@@ -149,9 +146,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         if (width < (int) (trackWidth * stops.get(0).getPosition())) {
             g.drawString(frequency, pos, (float) trackHeight / 2);
         }
-/*        int diff = newDist[0] - initialDistribution[0];
-        g.setColor(diff > 0 ? Color.GREEN : Color.RED);
-        g.drawString("" + diff, pos, (float) trackHeight / 2 + 20);*/
 
         // Draw Icons
         for (int i = 0; i < stops.size(); i++) {
