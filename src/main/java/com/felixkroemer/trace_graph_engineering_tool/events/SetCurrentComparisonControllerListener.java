@@ -4,5 +4,5 @@ import org.cytoscape.event.CyListener;
 
 public interface SetCurrentComparisonControllerListener extends CyListener {
 
-    public void handleEvent(SetCurrentComparisonControllerEvent e);
+    void handleEvent(SetCurrentComparisonControllerEvent e);
 }

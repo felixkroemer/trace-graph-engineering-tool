@@ -22,7 +22,6 @@ import org.cytoscape.model.events.SelectedNodesAndEdgesListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
@@ -67,9 +66,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.setMode(RENDERING_MODE_FOLLOW);
 
         this.traceGraph.getPDM().addObserver(this);
-        this.traceGraph.getPDM().forEach(p -> {
-            p.addObserver(this);
-        });
+        this.traceGraph.getPDM().forEach(p -> p.addObserver(this));
 
         registrar.registerService(this, SelectedNodesAndEdgesListener.class);
         registrar.registerService(this, ShowTraceEventListener.class);
@@ -84,9 +81,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default-tracegraph");
-
-        VisualMappingFunctionFactory visualMappingFunctionFactory =
-                registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
 
         int maxFrequency = -1;
         int maxVisits = -1;
@@ -142,9 +136,10 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            //UIState
             case Parameter.VISIBLE_BINS, ParameterDiscretizationModel.PERCENTILE_FILTER -> {
-                this.onNetworkChanged();
+                if (!traceGraph.getPDM().isUpdating()) {
+                    this.onNetworkChanged();
+                }
             }
         }
     }
@@ -162,12 +157,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
             var value = 0;
             switch (percentile.getValue0()) {
-                case "visits" -> {
-                    value = this.traceGraph.getNodeAux(node).getVisits();
-                }
-                case "frequency" -> {
-                    value = this.traceGraph.getNodeAux(node).getFrequency();
-                }
+                case "visits" -> value = this.traceGraph.getNodeAux(node).getVisits();
+                case "frequency" -> value = this.traceGraph.getNodeAux(node).getFrequency();
             }
             pairs.add(new Pair<>(node.getSUID(), value));
             valueSum += value;
@@ -254,16 +245,14 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public void setMode(String mode) {
         switch (mode) {
-            case RENDERING_MODE_FULL -> {
-                this.setDisplayController(new DefaultEdgeDisplayController(registrar, view, this.traceGraph, this));
-            }
-            case RENDERING_MODE_FOLLOW -> {
-                this.setDisplayController(new FollowEdgeDisplayController(registrar, view, this.traceGraph, this));
-            }
-            case RENDERING_MODE_TRACES -> {
-                this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2,
-                        this));
-            }
+            case RENDERING_MODE_FULL ->
+                    this.setDisplayController(new DefaultEdgeDisplayController(registrar, view, this.traceGraph, this));
+            case RENDERING_MODE_FOLLOW ->
+                    this.setDisplayController(new FollowEdgeDisplayController(registrar, view, this.traceGraph, this));
+            case RENDERING_MODE_TRACES ->
+                    this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2,
+                            this));
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
 
@@ -284,9 +273,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
         this.traceGraph.getPDM().removeObserver(this);
-        this.traceGraph.getPDM().forEach(p -> {
-            p.removeObserver(this);
-        });
+        this.traceGraph.getPDM().forEach(p -> p.removeObserver(this));
     }
 
     @Override

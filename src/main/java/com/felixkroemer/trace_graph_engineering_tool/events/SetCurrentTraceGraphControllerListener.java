@@ -4,5 +4,5 @@ import org.cytoscape.event.CyListener;
 
 public interface SetCurrentTraceGraphControllerListener extends CyListener {
 
-    public void handleEvent(SetCurrentTraceGraphControllerEvent e);
+    void handleEvent(SetCurrentTraceGraphControllerEvent e);
 }

@@ -4,5 +4,5 @@ import org.cytoscape.event.CyListener;
 
 public interface ShowTraceEventListener extends CyListener {
 
-    public void handleEvent(ShowTraceEvent e);
+    void handleEvent(ShowTraceEvent e);
 }

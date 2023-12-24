@@ -4,7 +4,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingControl
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import org.cytoscape.model.CyDisposable;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
@@ -12,7 +11,7 @@ import org.cytoscape.view.vizmap.VisualStyle;
 
 import java.beans.PropertyChangeSupport;
 
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 
 public abstract class AbstractEdgeDisplayController implements CyDisposable {
 
@@ -42,12 +41,6 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     @Override
     public abstract void dispose();
 
-    protected void showAllEdges() {
-        for (var edgeView : networkView.getEdgeViews()) {
-            edgeView.setVisualProperty(EDGE_VISIBLE, true);
-        }
-    }
-
     public void onNetworkChanged() {
     }
 
@@ -62,7 +55,7 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
 
     abstract public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle);
 
-    protected CyNode findFartherNode(CyNode source, CyNode target) {
+/*    protected CyNode findFartherNode(CyNode source, CyNode target) {
         var sourceX = networkView.getNodeView(source).getVisualProperty(NODE_X_LOCATION);
         var sourceY = networkView.getNodeView(source).getVisualProperty(NODE_Y_LOCATION);
         var targetX = networkView.getNodeView(target).getVisualProperty(NODE_X_LOCATION);
@@ -74,7 +67,7 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
         var distTarget = Math.sqrt(Math.pow(targetX - centerX, 2) + Math.pow(targetY - centerY, 2));
 
         return distSource < distTarget ? target : source;
-    }
+    }*/
 
     public CyNetworkView getNetworkView() {
         return this.networkView;

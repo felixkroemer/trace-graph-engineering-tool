@@ -4,7 +4,6 @@ import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizati
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -16,11 +15,9 @@ public class ExportPDMTask extends AbstractTask {
 
     @Tunable(description = "Select destination", params = "input=false", required = true)
     public File pdmFile;
-    private CyServiceRegistrar reg;
     private ParameterDiscretizationModel pdm;
 
-    public ExportPDMTask(CyServiceRegistrar reg, ParameterDiscretizationModel pdm) {
-        this.reg = reg;
+    public ExportPDMTask(ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
     }
 

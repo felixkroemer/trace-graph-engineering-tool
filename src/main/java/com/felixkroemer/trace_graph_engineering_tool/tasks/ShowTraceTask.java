@@ -4,26 +4,21 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphContro
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
 public class ShowTraceTask extends AbstractTask {
 
     private CyServiceRegistrar registrar;
-    private Logger logger;
     private CyNetwork network;
 
     public ShowTraceTask(CyServiceRegistrar reg, CyNetwork network) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.registrar = reg;
         this.network = network;
     }

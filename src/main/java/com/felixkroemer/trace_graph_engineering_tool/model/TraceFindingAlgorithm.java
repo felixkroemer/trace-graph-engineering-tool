@@ -97,12 +97,12 @@ public class TraceFindingAlgorithm {
                 for (var y : sourcesB) {
                     if (window == null) {
                         var lowerBound = x < y ? x : y;
-                        var upperBound = lowerBound == x ? y : x;
+                        var upperBound = lowerBound.equals(x) ? y : x;
                         window = new Pair<>(lowerBound, upperBound);
                     } else {
                         if (Math.abs(x - y) < window.getValue1() - window.getValue0()) {
                             var lowerBound = x < y ? x : y;
-                            var upperBound = lowerBound == x ? y : x;
+                            var upperBound = lowerBound.equals(x) ? y : x;
                             window = new Pair<>(lowerBound, upperBound);
                         }
                     }

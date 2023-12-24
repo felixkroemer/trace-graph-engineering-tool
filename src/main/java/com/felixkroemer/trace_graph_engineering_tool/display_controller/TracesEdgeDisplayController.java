@@ -106,7 +106,6 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
                 TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph,
                         getNextColor());
-                trace.setPrimaryNode(startNode);
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
@@ -160,8 +159,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         if (event.getSelectedNodes().isEmpty()) {
             this.traces = null;
             this.displayRange = null;
-            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                    this.traces));
+            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null, null));
         }
     }
 

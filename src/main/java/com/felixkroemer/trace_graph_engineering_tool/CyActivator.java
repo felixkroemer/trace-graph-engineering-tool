@@ -3,7 +3,6 @@ package com.felixkroemer.trace_graph_engineering_tool;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.*;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -12,8 +11,6 @@ import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
@@ -23,10 +20,8 @@ import static com.felixkroemer.trace_graph_engineering_tool.display_controller.F
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.work.ServiceProperties.*;
 
-
 public class CyActivator extends AbstractCyActivator {
 
-    private Logger logger;
     private TraceGraphManager manager;
 
     public CyActivator() {
@@ -34,9 +29,6 @@ public class CyActivator extends AbstractCyActivator {
     }
 
     public void start(BundleContext bundleContext) {
-
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
-
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);
 
         this.manager = new TraceGraphManager(reg);
@@ -52,11 +44,6 @@ public class CyActivator extends AbstractCyActivator {
         ExportPDMTaskFactory exportPDMTaskFactory = new ExportPDMTaskFactory(reg);
         registerService(bundleContext, exportPDMTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "File.Export", TITLE, "Export PDM to json")));
-
-/*        LoadTraceTaskFactory loadTraceTaskFactory = new LoadTraceTaskFactory(reg);
-        registerService(bundleContext, loadTraceTaskFactory, TaskFactory.class,
-                Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import Trace",
-                        INSERT_SEPARATOR_BEFORE, "true")));*/
 
         RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
         registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class,
@@ -74,7 +61,6 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));
 
-
         var compareTraceGraphsTaskFactory = new CompareTraceGraphsTaskFactory(reg);
         registerService(bundleContext, compareTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class,
                 Util.genProperties(Map.of(TITLE, "Compare Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
@@ -91,15 +77,12 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, setPercentileFilterTaskFactory, NetworkViewTaskFactory.class,
                 Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Set Percentile Filter")));
 
-
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
-
     }
 
     @Override
     public void shutDown() {
         this.manager.dispose();
     }
-
 }
 

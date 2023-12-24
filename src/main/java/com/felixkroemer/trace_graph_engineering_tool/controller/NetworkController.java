@@ -71,7 +71,7 @@ public abstract class NetworkController implements CyDisposable {
     private TaskIterator createStyleTask() {
         return new TaskIterator(new AbstractTask() {
             @Override
-            public void run(TaskMonitor taskMonitor) throws Exception {
+            public void run(TaskMonitor taskMonitor) {
                 getVisualStyle().apply(getView());
             }
         });
@@ -80,7 +80,7 @@ public abstract class NetworkController implements CyDisposable {
     public void applyStyleAndLayout() {
         TaskIterator iterator = new TaskIterator();
         // applying the style would not be necessary if the style mappings used table values because the RowsSetEvent
-        // would trigger a style refresh in NetworkMediator and RowsSetViewUpdater. Setting a aux value will not trigger
+        // would trigger a style refresh in NetworkMediator and RowsSetViewUpdater. Setting an aux value will not trigger
         // a refresh automatically
         iterator.append(this.createStyleTask());
         iterator.append(this.createLayoutTask());

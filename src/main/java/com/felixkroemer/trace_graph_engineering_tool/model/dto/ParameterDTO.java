@@ -18,15 +18,7 @@ public class ParameterDTO {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<Double> getBins() {
         return bins;
-    }
-
-    public void setBins(List<Double> bins) {
-        this.bins = bins;
     }
 }

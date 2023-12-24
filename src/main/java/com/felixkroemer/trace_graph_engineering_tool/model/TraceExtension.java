@@ -7,7 +7,6 @@ import java.awt.*;
 
 public class TraceExtension extends Trace {
 
-    private CyNode primaryNode;
     private Color color;
     private TraceGraph traceGraph;
 
@@ -19,7 +18,6 @@ public class TraceExtension extends Trace {
 
     public TraceExtension(Trace trace, TraceGraph traceGraph, Color color) {
         super(trace);
-        this.primaryNode = null;
         this.traceGraph = traceGraph;
         this.color = color;
     }
@@ -50,13 +48,5 @@ public class TraceExtension extends Trace {
             weight += visits + frequency;
         }
         return weight;
-    }
-
-    public CyNode getPrimaryNode() {
-        return this.primaryNode;
-    }
-
-    public void setPrimaryNode(CyNode node) {
-        this.primaryNode = node;
     }
 }

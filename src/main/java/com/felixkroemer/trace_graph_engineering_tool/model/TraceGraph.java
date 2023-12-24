@@ -50,9 +50,9 @@ public class TraceGraph {
 
         int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
-        CyNode currentNode = null;
-        CyRow currentRow = null;
-        AuxiliaryInformation currentNodeInfo = null;
+        CyNode currentNode;
+        CyRow currentRow;
+        AuxiliaryInformation currentNodeInfo;
         for (CyRow sourceRow : sourceTable.getAllRows()) {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
@@ -292,7 +292,7 @@ public class TraceGraph {
                             this.nodeInfo.put(newNode, newNodeAux);
                         }
                         iterator.remove();
-                        oldNodeAux.getSourceRows(sourceTable).remove((Object) j);
+                        oldNodeAux.getSourceRows(sourceTable).remove(j);
                         newNodeAux.addSourceRow(sourceTable, j);
                         this.nodeMapping.get(sourceTable)[j] = newNode;
                     }

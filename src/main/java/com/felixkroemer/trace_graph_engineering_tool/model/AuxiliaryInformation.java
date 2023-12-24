@@ -24,20 +24,12 @@ public class AuxiliaryInformation {
         this.visits += 1;
     }
 
-    public void resetVisits() {
-        this.visits = 1;
-    }
-
     public int getVisits() {
         return this.visits;
     }
 
     public void increaseFrequency() {
         this.frequency += 1;
-    }
-
-    public void resetFrequency() {
-        this.frequency = 0;
     }
 
     public int getFrequency() {
@@ -47,10 +39,6 @@ public class AuxiliaryInformation {
     public void addSourceRow(CyTable sourceTable, int index) {
         this.source_rows.computeIfAbsent(sourceTable, k -> new LinkedList<>());
         this.source_rows.get(sourceTable).add(index);
-    }
-
-    public void removeSourceRows(CyTable table) {
-        this.source_rows.remove(table);
     }
 
     public List<Integer> getSourceRows(CyTable sourceTable) {

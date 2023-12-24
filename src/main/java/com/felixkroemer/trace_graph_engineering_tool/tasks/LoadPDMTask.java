@@ -93,13 +93,7 @@ public class LoadPDMTask extends AbstractTask {
         var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
         var matchingPDMs = manager.findPDM(params);
         if (!matchingPDMs.isEmpty()) {
-            SwingUtilities.invokeLater(() -> {
-                new SelectMatchingPDMDialog(matchingPDMs, () -> {
-                    this.importPDM(dto);
-                }, (pdm) -> {
-                    this.updatePDM(pdm, dto);
-                }, dto.getCsvs() != null).showDialog();
-            });
+            SwingUtilities.invokeLater(() -> new SelectMatchingPDMDialog(matchingPDMs, () -> this.importPDM(dto), (pdm) -> this.updatePDM(pdm, dto), dto.getCsvs() != null).showDialog());
         } else {
             if (dto.getCsvs() != null) {
                 this.importPDM(dto);
@@ -138,17 +132,13 @@ public class LoadPDMTask extends AbstractTask {
         if (pdms.isEmpty()) {
             this.loadTraceToNewPDM(sourceTable);
         } else {
-            SwingUtilities.invokeLater(() -> {
-                new SelectMatchingPDMDialog(pdms, () -> {
-                    this.loadTraceToNewPDM(sourceTable);
-                }, (pdm) -> {
-                    var subNetwork = Util.createSubNetwork(pdm);
-                    TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
-                    this.loadTraceToTraceGraph(sourceTable, traceGraph);
-                    TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
-                    manager.registerTraceGraph(traceGraph.getPDM(), controller);
-                }, true).showDialog();
-            });
+            SwingUtilities.invokeLater(() -> new SelectMatchingPDMDialog(pdms, () -> this.loadTraceToNewPDM(sourceTable), (pdm) -> {
+                var subNetwork = Util.createSubNetwork(pdm);
+                TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
+                this.loadTraceToTraceGraph(sourceTable, traceGraph);
+                TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
+                manager.registerTraceGraph(traceGraph.getPDM(), controller);
+            }, true).showDialog());
         }
     }
 
@@ -187,7 +177,6 @@ public class LoadPDMTask extends AbstractTask {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
         String pdmString = Files.readString(traceFile.toPath());
-        ParameterDiscretizationModelDTO dto = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
-        return dto;
+        return gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
     }
 }

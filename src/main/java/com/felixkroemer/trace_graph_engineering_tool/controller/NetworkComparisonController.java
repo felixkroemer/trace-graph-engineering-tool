@@ -203,30 +203,18 @@ public class NetworkComparisonController extends NetworkController implements Se
             var edge = edgeView.getModel();
             var group = this.network.getRow(edge).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
             switch (group) {
-                case 2 -> {
-                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseDeltaVisible);
-                }
-                case 1 -> {
-                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesDeltaOnlyVisible);
-                }
-                case 0 -> {
-                    edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseOnlyVisible);
-                }
+                case 2 -> edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseDeltaVisible);
+                case 1 -> edgeView.setVisualProperty(EDGE_VISIBLE, edgesDeltaOnlyVisible);
+                case 0 -> edgeView.setVisualProperty(EDGE_VISIBLE, edgesBaseOnlyVisible);
             }
         }
         for (var nodeView : this.view.getNodeViews()) {
             var node = nodeView.getModel();
             var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
             switch (group) {
-                case 2 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseDeltaVisible);
-                }
-                case 1 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesDeltaOnlyVisible);
-                }
-                case 0 -> {
-                    nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseOnlyVisible);
-                }
+                case 2 -> nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseDeltaVisible);
+                case 1 -> nodeView.setVisualProperty(NODE_VISIBLE, nodesDeltaOnlyVisible);
+                case 0 -> nodeView.setVisualProperty(NODE_VISIBLE, nodesBaseOnlyVisible);
             }
         }
     }
@@ -283,7 +271,7 @@ public class NetworkComparisonController extends NetworkController implements Se
         return true;
     }
 
-    public void setGroupVisibiliy(String group, boolean node, boolean visible) {
+    public void setGroupVisibility(String group, boolean node, boolean visible) {
         switch (group) {
             case BO -> {
                 if (node) {

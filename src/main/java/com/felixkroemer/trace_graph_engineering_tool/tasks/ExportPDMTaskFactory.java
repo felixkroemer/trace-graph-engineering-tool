@@ -25,6 +25,6 @@ public class ExportPDMTaskFactory extends AbstractNetworkViewTaskFactory {
     public TaskIterator createTaskIterator(CyNetworkView networkView) {
         var manager = this.reg.getService(TraceGraphManager.class);
         var pdm = manager.findPDMForNetwork(networkView.getModel());
-        return new TaskIterator(new ExportPDMTask(this.reg, pdm));
+        return new TaskIterator(new ExportPDMTask(pdm));
     }
 }

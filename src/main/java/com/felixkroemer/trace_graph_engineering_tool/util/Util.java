@@ -29,10 +29,6 @@ public class Util {
         return network.getDefaultNetworkTable().getColumn(NETWORK_COMPARISON_MARKER) != null;
     }
 
-    public static boolean isTraceDetailsNetwork(CyNetwork network) {
-        return network.getDefaultNetworkTable().getColumn(NETWORK_TRACE_DETAILS_MARKER) != null;
-    }
-
     public static void parseCSV(CyTable table, File csv) throws Exception {
         List<String> params = new ArrayList<>();
         boolean header = true;

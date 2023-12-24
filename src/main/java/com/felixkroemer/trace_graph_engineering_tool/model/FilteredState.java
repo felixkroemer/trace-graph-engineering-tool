@@ -10,7 +10,6 @@ import java.beans.PropertyChangeSupport;
 public class FilteredState {
 
     private int hiddenNodeCount;
-    private int totalNodeCount;
     private CyNetworkView networkView;
     private PropertyChangeSupport pcs;
 
@@ -50,7 +49,6 @@ public class FilteredState {
 
     public void update() {
         this.hiddenNodeCount = getHiddenNodeCount(networkView);
-        this.totalNodeCount = networkView.getModel().getNodeCount();
         this.pcs.firePropertyChange("filteredState", null, this);
     }
 }

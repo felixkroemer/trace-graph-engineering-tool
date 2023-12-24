@@ -4,5 +4,5 @@ import org.cytoscape.event.CyListener;
 
 public interface SetCurrentEdgeDisplayControllerEventListener extends CyListener {
 
-    public void handleEvent(SetCurrentEdgeDisplayControllerEvent e);
+    void handleEvent(SetCurrentEdgeDisplayControllerEvent e);
 }

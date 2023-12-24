@@ -21,32 +21,16 @@ public class ParameterDiscretizationModelDTO {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<String> getCsvs() {
         return csvs;
-    }
-
-    public void setCsvs(String csv) {
-        this.csvs = csvs;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public List<ParameterDTO> getParameters() {
         return parameters;
-    }
-
-    public void setParameters(List<ParameterDTO> parameters) {
-        this.parameters = parameters;
     }
 
     public int getParameterCount() {

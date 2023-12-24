@@ -4,5 +4,5 @@ import org.cytoscape.event.CyListener;
 
 public interface UpdatedPDMEventListener extends CyListener {
 
-    public void handleEvent(UpdatedPDMEvent e);
+    void handleEvent(UpdatedPDMEvent e);
 }

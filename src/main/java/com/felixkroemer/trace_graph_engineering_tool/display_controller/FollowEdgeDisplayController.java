@@ -74,7 +74,7 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
                     Parameter param = this.traceGraph.getPDM().getParameters().get(i);
                     var sourceValue = nodeTable.getRow(edge.getSource().getSUID()).get(param.getName(), Integer.class);
                     var targetValue = nodeTable.getRow(edge.getTarget().getSUID()).get(param.getName(), Integer.class);
-                    if (sourceValue != targetValue) {
+                    if (!sourceValue.equals(targetValue)) {
                         sb.append(param.getName()).append(" : ").append(sourceValue - targetValue).append("\n");
                     }
                 }
