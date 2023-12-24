@@ -46,12 +46,8 @@ public class SelectBinsPanel extends JPanel {
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
         var parameter = controller.getParameter();
-        this.minimum = controller.getSourceTable().getAllRows().stream().min(Comparator.comparingDouble(o -> {
-            return o.get(parameter.getName(), Double.class);
-        })).get().get(parameter.getName(), Double.class).floatValue();
-        this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> {
-            return o.get(parameter.getName(), Double.class);
-        })).get().get(parameter.getName(), Double.class).floatValue();
+        this.minimum = controller.getSourceTable().getAllRows().stream().min(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get().get(parameter.getName(), Double.class).floatValue();
+        this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get().get(parameter.getName(), Double.class).floatValue();
         this.visibleBins = new ArrayList<>();
         for (int i = 0; i < parameter.getBins().size() + 1; i++) {
             this.visibleBins.add(false);
@@ -98,9 +94,7 @@ public class SelectBinsPanel extends JPanel {
             }
         });
 
-        this.cancelButton.addActionListener(e -> {
-            ((Window) getRootPane().getParent()).dispose();
-        });
+        this.cancelButton.addActionListener(e -> ((Window) getRootPane().getParent()).dispose());
 
         String key = "removeSelectedThumb";
         this.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), key);

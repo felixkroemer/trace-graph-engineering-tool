@@ -20,13 +20,10 @@ import static com.felixkroemer.trace_graph_engineering_tool.display_controller.F
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.work.ServiceProperties.*;
 
+@SuppressWarnings("unused")
 public class CyActivator extends AbstractCyActivator {
 
     private TraceGraphManager manager;
-
-    public CyActivator() {
-        super();
-    }
 
     public void start(BundleContext bundleContext) {
         CyServiceRegistrar reg = getService(bundleContext, CyServiceRegistrar.class);

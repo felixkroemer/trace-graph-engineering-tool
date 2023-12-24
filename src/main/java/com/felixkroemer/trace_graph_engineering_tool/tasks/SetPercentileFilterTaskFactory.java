@@ -18,6 +18,6 @@ public class SetPercentileFilterTaskFactory extends AbstractNetworkViewTaskFacto
     public TaskIterator createTaskIterator(CyNetworkView networkView) {
         var manager = reg.getService(TraceGraphManager.class);
         var controller = manager.findControllerForNetwork(networkView.getModel());
-        return new TaskIterator(new SetPercentileFilterTask(this.reg, controller));
+        return new TaskIterator(new SetPercentileFilterTask(controller));
     }
 }

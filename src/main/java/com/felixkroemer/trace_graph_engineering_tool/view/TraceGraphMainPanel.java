@@ -34,7 +34,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.tabs = new JTabbedPane(JTabbedPane.BOTTOM);
 
         this.pdmPanel = new PDMPanel(reg);
-        this.nodeInfoPanel = new NodeInfoPanel(reg);
+        this.nodeInfoPanel = new NodeInfoPanel();
         this.traceGraphComparisonPanel = new TraceGraphComparisonPanel();
         this.nodeComparisonPanel = new NodeComparisonPanel(reg);
         this.edgeDisplayControllerPanel = null;
@@ -149,12 +149,12 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         if (this.edgeDisplayControllerPanel != null) {
             var displayMode = this.edgeDisplayControllerPanel.getDisplayLocation();
             switch (displayMode) {
-                case PANEL -> {
-                    this.hidePanel(this.edgeDisplayControllerPanel);
-                }
+                case PANEL -> this.hidePanel(this.edgeDisplayControllerPanel);
                 case NORTH -> {
                     BorderLayout layout = (BorderLayout) this.getLayout();
                     this.remove(layout.getLayoutComponent(BorderLayout.NORTH));
+                }
+                case SOUTH -> {
                 }
             }
         }
@@ -162,12 +162,8 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         if (newPanel != null) {
             var displayMode = this.edgeDisplayControllerPanel.getDisplayLocation();
             switch (displayMode) {
-                case PANEL -> {
-                    this.showPanel(newPanel);
-                }
-                case NORTH -> {
-                    this.add(newPanel, BorderLayout.NORTH);
-                }
+                case PANEL -> this.showPanel(newPanel);
+                case NORTH -> this.add(newPanel, BorderLayout.NORTH);
             }
         }
     }
@@ -199,7 +195,6 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
 
     @Override
     public void handleEvent(SetCurrentEdgeDisplayControllerEvent e) {
-        var previous = e.getPreviousController();
         var current = e.getCurrentController();
         this.replaceEdgeDisplayControllerPanel(current.getSettingsPanel());
     }

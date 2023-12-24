@@ -9,7 +9,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
-import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMDialog;
+import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMPanel;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -93,7 +93,7 @@ public class LoadPDMTask extends AbstractTask {
         var params = dto.getParameters().stream().map(ParameterDTO::getName).collect(Collectors.toSet());
         var matchingPDMs = manager.findPDM(params);
         if (!matchingPDMs.isEmpty()) {
-            SwingUtilities.invokeLater(() -> new SelectMatchingPDMDialog(matchingPDMs, () -> this.importPDM(dto), (pdm) -> this.updatePDM(pdm, dto), dto.getCsvs() != null).showDialog());
+            SwingUtilities.invokeLater(() -> Util.showDialog(new SelectMatchingPDMPanel(matchingPDMs, () -> this.importPDM(dto), (pdm) -> this.updatePDM(pdm, dto), dto.getCsvs() != null), "Select matching PDM"));
         } else {
             if (dto.getCsvs() != null) {
                 this.importPDM(dto);
@@ -132,13 +132,13 @@ public class LoadPDMTask extends AbstractTask {
         if (pdms.isEmpty()) {
             this.loadTraceToNewPDM(sourceTable);
         } else {
-            SwingUtilities.invokeLater(() -> new SelectMatchingPDMDialog(pdms, () -> this.loadTraceToNewPDM(sourceTable), (pdm) -> {
+            SwingUtilities.invokeLater(() -> Util.showDialog(new SelectMatchingPDMPanel(pdms, () -> this.loadTraceToNewPDM(sourceTable), (pdm) -> {
                 var subNetwork = Util.createSubNetwork(pdm);
                 TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
                 this.loadTraceToTraceGraph(sourceTable, traceGraph);
                 TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
                 manager.registerTraceGraph(traceGraph.getPDM(), controller);
-            }, true).showDialog());
+            }, true), "Select matching PDM"));
         }
     }
 

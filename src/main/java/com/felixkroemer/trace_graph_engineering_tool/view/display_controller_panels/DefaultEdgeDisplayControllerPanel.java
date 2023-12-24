@@ -65,9 +65,7 @@ public class DefaultEdgeDisplayControllerPanel extends EdgeDisplayControllerPane
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
-            case DefaultEdgeDisplayController.MAX_TRAVERSALS -> {
-                this.slider.setMaximum((int) evt.getNewValue());
-            }
+            case DefaultEdgeDisplayController.MAX_TRAVERSALS -> this.slider.setMaximum((int) evt.getNewValue());
             case DefaultEdgeDisplayController.DISPLAY_RANGE -> {
                 var range = (Pair<Integer, Integer>) evt.getNewValue();
                 //TODO: fix displayRange semantics

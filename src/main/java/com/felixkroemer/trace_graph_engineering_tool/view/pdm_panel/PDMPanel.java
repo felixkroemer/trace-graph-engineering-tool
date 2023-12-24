@@ -4,12 +4,9 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkControlle
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
-import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +15,6 @@ import java.beans.PropertyChangeListener;
 
 public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener {
 
-    private Logger logger;
     private CustomTreeTable infoTreeTable;
     private JPanel pdmPanel;
     private JPanel resetFilterPanel;
@@ -28,7 +24,6 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     private NetworkController controller;
 
     public PDMPanel(CyServiceRegistrar reg) {
-        this.logger = LoggerFactory.getLogger(CyUserLog.NAME);
         this.reg = reg;
 
         this.infoTreeTable = new CustomTreeTable();
@@ -60,9 +55,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
         this.initInfoPanel();
         this.initPDMPanel();
 
-        this.resetFilterButton.addActionListener(e -> {
-            this.controller.getPDM().resetFilters();
-        });
+        this.resetFilterButton.addActionListener(e -> this.controller.getPDM().resetFilters());
     }
 
     public void registerCallbacks(NetworkController controller) {
@@ -118,10 +111,8 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case "filteredState" -> {
-                this.updateResetPanel();
-            }
+        if (evt.getPropertyName().equals("filteredState")) {
+            this.updateResetPanel();
         }
     }
 

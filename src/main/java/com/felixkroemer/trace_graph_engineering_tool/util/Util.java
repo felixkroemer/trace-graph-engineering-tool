@@ -7,11 +7,15 @@ import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
 import java.util.*;
+import java.util.List;
 
-import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.*;
+import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.NETWORK_COMPARISON_MARKER;
+import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.NETWORK_TG_MARKER;
 
 public class Util {
 
@@ -92,5 +96,28 @@ public class Util {
         for (var nodeView : view.getNodeViews()) {
             view.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
+    }
+
+    public static void showDialog(JPanel panel, String title, Dimension dimension) {
+        var dialog = createDialog(panel, title);
+        dialog.setPreferredSize(dimension);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
+    public static void showDialog(JPanel panel, String title) {
+        var dialog = createDialog(panel, title);
+        dialog.setVisible(true);
+    }
+
+    private static JDialog createDialog(JPanel panel, String title) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle(title);
+        dialog.setContentPane(panel);
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        return dialog;
     }
 }

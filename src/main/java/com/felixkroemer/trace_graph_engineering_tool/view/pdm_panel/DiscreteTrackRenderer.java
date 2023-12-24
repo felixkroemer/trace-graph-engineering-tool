@@ -125,7 +125,7 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         // Draw Icons
         for (int i = 0; i < stops.size(); i++) {
             int x = (int) (trackWidth * stops.get(i).getPosition());
-            int nextX = x;
+            int nextX;
             if (i < stops.size() - 1) {
                 nextX = (int) (trackWidth * stops.get(i + 1).getPosition());
             } else {
@@ -138,10 +138,6 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
             if (width < nextX - x) {
                 g.drawString(frequency, pos, trackHeight / 2);
             }
-/*            diff = newDist[i + 1] - initialDistribution[i + 1];
-            g.setColor(diff > 0 ? Color.GREEN : Color.red);
-            g.drawString("" + diff, pos, (float) trackHeight / 2 + 20);
-            g.setColor(LABEL_COLOR);*/
             final float valueRange = maxValue - minValue;
             final Float curPositionValue = ((Number) ((stops.get(i).getPosition() * valueRange) + minValue)).floatValue();
             final String valueString = String.format("%.5f", curPositionValue);

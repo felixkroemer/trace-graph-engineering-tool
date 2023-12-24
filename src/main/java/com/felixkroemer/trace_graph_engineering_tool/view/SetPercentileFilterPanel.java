@@ -1,15 +1,13 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
-import org.cytoscape.service.util.CyServiceRegistrar;
 
 import javax.swing.*;
 import java.awt.*;
 
 // TODO: validation, etc.
-public class SetPercentileFilterDialog extends JPanel {
+public class SetPercentileFilterPanel extends JPanel {
 
-    private CyServiceRegistrar registrar;
     private NetworkController controller;
     private JRadioButton visitsRadioButton;
     private JRadioButton frequencyRadioButton;
@@ -17,8 +15,7 @@ public class SetPercentileFilterDialog extends JPanel {
     private JButton confirmButton;
     private JButton cancelButton;
 
-    public SetPercentileFilterDialog(CyServiceRegistrar registrar, NetworkController controller) {
-        this.registrar = registrar;
+    public SetPercentileFilterPanel(NetworkController controller) {
         this.controller = controller;
 
         this.visitsRadioButton = new JRadioButton("Visits");

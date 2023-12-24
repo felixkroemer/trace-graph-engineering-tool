@@ -140,10 +140,8 @@ public class TraceGraphComparisonPanel extends TraceGraphPanel {
             }
             entry.getKey().setSelected(controller.getGroupVisibility(entry.getValue().getValue0(),
                     entry.getValue().getValue1()));
-            entry.getKey().addItemListener(e -> {
-                controller.setGroupVisibility(entry.getValue().getValue0(), entry.getValue().getValue1(),
-                        e.getStateChange() == ItemEvent.SELECTED);
-            });
+            entry.getKey().addItemListener(e -> controller.setGroupVisibility(entry.getValue().getValue0(), entry.getValue().getValue1(),
+                    e.getStateChange() == ItemEvent.SELECTED));
         }
     }
 

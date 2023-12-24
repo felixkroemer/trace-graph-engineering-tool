@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class SelectMatchingPDMDialog extends JDialog {
+public class SelectMatchingPDMPanel extends JPanel {
 
     private JButton confirmButton;
     private JButton cancelButton;
@@ -19,9 +19,9 @@ public class SelectMatchingPDMDialog extends JDialog {
     private ButtonGroup pdmRadioButtonGroup;
     private Map<AbstractButton, ParameterDiscretizationModel> pdmRadioButtonMap;
 
-    public SelectMatchingPDMDialog(List<ParameterDiscretizationModel> pdms, Runnable createNewNetwork,
-                                   Consumer<ParameterDiscretizationModel> addToExistingNetworkRunnable,
-                                   boolean allowDefault) {
+    public SelectMatchingPDMPanel(List<ParameterDiscretizationModel> pdms, Runnable createNewNetwork,
+                                  Consumer<ParameterDiscretizationModel> addToExistingNetworkRunnable,
+                                  boolean allowDefault) {
         this.confirmButton = new JButton("Confirm");
         this.cancelButton = new JButton("Cancel");
         this.pdms = pdms;
@@ -82,17 +82,8 @@ public class SelectMatchingPDMDialog extends JDialog {
             }
         }));
 
-        this.cancelButton.addActionListener((e) -> {
-            ((Window) getRootPane().getParent()).dispose();
-        });
+        this.cancelButton.addActionListener((e) -> ((Window) getRootPane().getParent()).dispose());
 
         add(bottomButtonPanel, BorderLayout.SOUTH);
-    }
-
-    public void showDialog() {
-        this.pack();
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
-        this.setVisible(true);
     }
 }

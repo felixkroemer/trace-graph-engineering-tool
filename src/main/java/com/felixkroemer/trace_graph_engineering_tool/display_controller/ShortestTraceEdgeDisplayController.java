@@ -95,7 +95,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {
-        return new ShortestTracePanel(registrar, this, this.trace);
+        return new ShortestTracePanel(this, this.trace);
     }
 
     public void addObserver(PropertyChangeListener l) {

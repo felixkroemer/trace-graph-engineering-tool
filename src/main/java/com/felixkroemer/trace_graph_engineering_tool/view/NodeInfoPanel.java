@@ -4,7 +4,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkControlle
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
@@ -15,17 +14,12 @@ import java.awt.*;
 
 public class NodeInfoPanel extends TraceGraphPanel {
 
-    private CyServiceRegistrar reg;
-    private CyNode node;
     private CustomTreeTable infoTreeTable;
     private JPanel nodeInfoPanel;
     private JTable nodeInfoTable;
     private DefaultTableModel nodeInfoTableModel;
 
-    public NodeInfoPanel(CyServiceRegistrar reg) {
-        this.reg = reg;
-        this.node = null;
-
+    public NodeInfoPanel() {
         this.nodeInfoPanel = new JPanel();
         this.nodeInfoTableModel = new TableModel(0, 2);
         this.nodeInfoTable = new JTable(this.nodeInfoTableModel);

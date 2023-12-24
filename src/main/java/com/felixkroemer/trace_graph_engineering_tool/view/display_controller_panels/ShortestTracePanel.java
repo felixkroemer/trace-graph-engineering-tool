@@ -6,7 +6,6 @@ import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.Cust
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
@@ -20,14 +19,12 @@ import java.beans.PropertyChangeListener;
 
 public class ShortestTracePanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
 
-    private CyServiceRegistrar reg;
     private CustomTreeTable traceInfoTable;
     private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;
 
-    public ShortestTracePanel(CyServiceRegistrar reg, ShortestTraceEdgeDisplayController controller,
+    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller,
                               TraceExtension trace) {
-        this.reg = reg;
         this.controller = controller;
         this.traceInfoTable = new CustomTreeTable();
         this.traceSequenceTable = new CustomTreeTable();
@@ -86,10 +83,8 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case ShortestTraceEdgeDisplayController.TRACE -> {
-                this.updatePanels((TraceExtension) evt.getNewValue());
-            }
+        if (evt.getPropertyName().equals(ShortestTraceEdgeDisplayController.TRACE)) {
+            this.updatePanels((TraceExtension) evt.getNewValue());
         }
     }
 

@@ -2,6 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.IconManager;
 
@@ -12,12 +13,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
 
-import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 import static org.cytoscape.util.swing.IconManager.ICON_EDIT;
 
 public class ParameterCell extends JPanel implements PropertyChangeListener {
 
-    private JCheckBox checkBox;
     private JLabel label;
     private JButton editButton;
     private JLabel filterIndicator;
@@ -26,9 +25,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         IconManager iconManager = reg.getService(IconManager.class);
 
         setLayout(new BorderLayout());
-        this.checkBox = new JCheckBox();
-        this.add(this.checkBox, BorderLayout.WEST);
-        this.checkBox.setSelected(parameter.isEnabled());
+        JCheckBox checkBox = new JCheckBox();
+        this.add(checkBox, BorderLayout.WEST);
+        checkBox.setSelected(parameter.isEnabled());
         this.label = new JLabel(parameter.getName());
         this.add(this.label, BorderLayout.CENTER);
         this.label.setHorizontalAlignment(JLabel.CENTER);
@@ -41,16 +40,8 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         this.add(containerPanel, BorderLayout.EAST);
 
         this.editButton.setFont(iconManager.getIconFont(14.0f));
-        this.editButton.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                SelectBinsDialog d = new SelectBinsDialog();
-                d.setTitle("Select Bins");
-                d.setContentPane(new SelectBinsPanel(controller.createSelectBinsController(parameter)));
-                d.setModalityType(APPLICATION_MODAL);
-                d.showDialog();
-            });
-        });
-        this.checkBox.addItemListener(e -> {
+        this.editButton.addActionListener(e -> SwingUtilities.invokeLater(() -> Util.showDialog(new SelectBinsPanel(controller.createSelectBinsController(parameter)), "Select bins")));
+        checkBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 parameter.enable();
             } else {
@@ -61,10 +52,6 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
 
         this.label.setEnabled(parameter.isEnabled());
         this.editButton.setEnabled(parameter.isEnabled());
-    }
-
-    public JCheckBox getCheckBox() {
-        return this.checkBox;
     }
 
     public JLabel getLabel() {
@@ -80,9 +67,7 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
             }
             case Parameter.BINS -> {
             }
-            case Parameter.VISIBLE_BINS -> {
-                this.setHighlightIndicator((Set<Integer>) evt.getNewValue());
-            }
+            case Parameter.VISIBLE_BINS -> this.setHighlightIndicator((Set<Integer>) evt.getNewValue());
         }
     }
 

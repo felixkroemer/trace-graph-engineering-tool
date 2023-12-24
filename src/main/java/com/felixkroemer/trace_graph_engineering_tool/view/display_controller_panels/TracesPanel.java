@@ -166,15 +166,13 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        switch (evt.getPropertyName()) {
-            case TracesEdgeDisplayController.TRACES -> {
-                this.loading = true;
-                var traces = (List<TraceExtension>) evt.getNewValue();
-                this.updateNumberSlider(traces);
-                this.updateLengthSlider(traces);
-                this.updateInfoTable(traces);
-                this.loading = false;
-            }
+        if (evt.getPropertyName().equals(TracesEdgeDisplayController.TRACES)) {
+            this.loading = true;
+            var traces = (List<TraceExtension>) evt.getNewValue();
+            this.updateNumberSlider(traces);
+            this.updateLengthSlider(traces);
+            this.updateInfoTable(traces);
+            this.loading = false;
         }
     }
 

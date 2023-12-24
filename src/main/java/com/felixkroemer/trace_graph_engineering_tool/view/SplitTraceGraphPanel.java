@@ -14,9 +14,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SplitTraceGraphDialog extends JPanel {
+public class SplitTraceGraphPanel extends JPanel {
 
-    private CyServiceRegistrar registrar;
     private DefaultListModel<CyTable> leftListModel;
     private DefaultListModel<CyTable> rightListModel;
     private JList<CyTable> leftList;
@@ -25,11 +24,8 @@ public class SplitTraceGraphDialog extends JPanel {
     private JButton rightToLeftButton;
     private JButton confirmButton;
     private JButton cancelButton;
-    private TraceGraphController controller;
 
-    public SplitTraceGraphDialog(TraceGraphController controller, CyServiceRegistrar registrar) {
-        this.registrar = registrar;
-        this.controller = controller;
+    public SplitTraceGraphPanel(TraceGraphController controller, CyServiceRegistrar registrar) {
 
         this.leftListModel = new DefaultListModel<>();
         this.rightListModel = new DefaultListModel<>();
@@ -67,7 +63,7 @@ public class SplitTraceGraphDialog extends JPanel {
             var taskManager = registrar.getService(TaskManager.class);
             taskManager.execute(new TaskIterator(new AbstractTask() {
                 @Override
-                public void run(TaskMonitor taskMonitor) throws Exception {
+                public void run(TaskMonitor taskMonitor) {
                     var newController = controller.splitTraceGraph(toRemove);
                     var manager = registrar.getService(TraceGraphManager.class);
                     manager.registerTraceGraph(controller.getPDM(), newController);
@@ -75,9 +71,7 @@ public class SplitTraceGraphDialog extends JPanel {
             }));
         });
 
-        this.cancelButton.addActionListener(e -> {
-            ((Window) getRootPane().getParent()).dispose();
-        });
+        this.cancelButton.addActionListener(e -> ((Window) getRootPane().getParent()).dispose());
 
         var sourceTables = controller.getTraceGraph().getSourceTables();
         for (CyTable table : sourceTables) {

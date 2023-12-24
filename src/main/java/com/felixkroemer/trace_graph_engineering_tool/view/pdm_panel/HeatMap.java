@@ -89,10 +89,10 @@ public class HeatMap {
         int b2 = two.getBlue();
         int a2 = two.getAlpha();
 
-        int newR = 0;
-        int newG = 0;
-        int newB = 0;
-        int newA = 0;
+        int newR;
+        int newG;
+        int newB;
+        int newA;
 
         Color[] gradient = new Color[numSteps];
         double iNorm;
@@ -122,7 +122,6 @@ public class HeatMap {
         int numSections = colors.length - 1;
         int gradientIndex = 0; //points to the next open spot in the final gradient
         Color[] gradient = new Color[numSteps];
-        Color[] temp;
 
         if (numSections <= 0) {
             throw new IllegalArgumentException("You must pass in at least 2 colors in the array!");
@@ -130,10 +129,9 @@ public class HeatMap {
 
         for (int section = 0; section < numSections; section++) {
             //we divide the gradient into (n - 1) sections, and do a regular gradient for each
-            temp = createGradient(colors[section], colors[section + 1], numSteps / numSections);
-            for (int i = 0; i < temp.length; i++) {
+            for (Color color : createGradient(colors[section], colors[section + 1], numSteps / numSections)) {
                 //copy the sub-gradient into the overall gradient
-                gradient[gradientIndex++] = temp[i];
+                gradient[gradientIndex++] = color;
             }
         }
 
@@ -221,9 +219,9 @@ public class HeatMap {
         // in order to assign proper colors.
         double largest = Double.MIN_VALUE;
         double smallest = Double.MAX_VALUE;
-        for (int x = 0; x < data.length; x++) {
-            largest = Math.max(data[x], largest);
-            smallest = Math.min(data[x], smallest);
+        for (double datum : data) {
+            largest = Math.max(datum, largest);
+            smallest = Math.min(datum, smallest);
         }
         double range = largest - smallest;
 
