@@ -11,13 +11,11 @@ public class SetPercentileFilterDialog extends JPanel {
 
     private CyServiceRegistrar registrar;
     private NetworkController controller;
-
     private JRadioButton visitsRadioButton;
     private JRadioButton frequencyRadioButton;
     private JTextField percentileField;
     private JButton confirmButton;
     private JButton cancelButton;
-
 
     public SetPercentileFilterDialog(CyServiceRegistrar registrar, NetworkController controller) {
         this.registrar = registrar;
@@ -76,7 +74,6 @@ public class SetPercentileFilterDialog extends JPanel {
         constraints.gridx = 0;
         constraints.gridy = 1;
         this.add(percentileLabel, constraints);
-
 
         constraints.gridx = 1;
         constraints.gridwidth = 2;

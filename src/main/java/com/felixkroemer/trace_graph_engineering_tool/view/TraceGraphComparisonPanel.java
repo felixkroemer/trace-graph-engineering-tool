@@ -20,7 +20,6 @@ public class TraceGraphComparisonPanel extends TraceGraphPanel {
     private JToggleButton edgesBOButton;
     private JToggleButton edgesDOButton;
     private JToggleButton edgesBDButton;
-
     private JPanel togglePanel;
 
     public TraceGraphComparisonPanel() {
@@ -41,6 +40,13 @@ public class TraceGraphComparisonPanel extends TraceGraphPanel {
         this.togglePanel = new JPanel();
 
         this.init();
+    }
+
+    static JLabel createCenteredJLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setVerticalAlignment(SwingConstants.CENTER);
+        return label;
     }
 
     public void init() {
@@ -116,14 +122,6 @@ public class TraceGraphComparisonPanel extends TraceGraphPanel {
         gbc.gridx = 3;
         gbc.gridy = 2;
         togglePanel.add(edgesBDButton, gbc);
-
-    }
-
-    static JLabel createCenteredJLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setVerticalAlignment(SwingConstants.CENTER);
-        return label;
     }
 
     public void setComparisonController(NetworkComparisonController controller) {

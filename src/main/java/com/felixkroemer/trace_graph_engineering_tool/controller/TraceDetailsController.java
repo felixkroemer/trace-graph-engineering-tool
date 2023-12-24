@@ -26,14 +26,13 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class TraceDetailsController implements ShowTraceSetEventListener, SetCurrentNetworkListener, CyDisposable {
 
+    boolean dirty = false;
     private CyServiceRegistrar registrar;
     private CyNetwork network;
     private CyNetworkView networkView;
     private Map<CyNode, CyNode> nodeMapping;
     private Collection<TraceExtension> traces;
     private CyNetwork correspondingNetwork;
-    boolean dirty = false;
-
 
     public TraceDetailsController(CyServiceRegistrar registrar) {
         this.registrar = registrar;

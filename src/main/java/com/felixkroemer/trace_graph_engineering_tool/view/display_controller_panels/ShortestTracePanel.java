@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
-
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
@@ -22,7 +21,6 @@ import java.beans.PropertyChangeListener;
 public class ShortestTracePanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
 
     private CyServiceRegistrar reg;
-
     private CustomTreeTable traceInfoTable;
     private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;

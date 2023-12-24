@@ -14,7 +14,6 @@ public class TraceGraph {
     private CyTable localEdgeTable;
     private CyTable defaultNodeTable;
     private CyTable defaultEdgeTable;
-
     // hash to node suid
     //TODO: map directly to node
     private Map<Long, Long> suidHashMapping;
@@ -202,7 +201,6 @@ public class TraceGraph {
         return arr == null ? null : arr[sourceTableIndex];
     }
 
-
     public CyNetwork getNetwork() {
         return this.network;
     }
@@ -217,7 +215,7 @@ public class TraceGraph {
 
     public void refresh() {
         this.clearNodes();
-        for(CyTable trace : this.sourceTables) {
+        for (CyTable trace : this.sourceTables) {
             this.addSourceTable(trace);
         }
     }
@@ -379,7 +377,6 @@ public class TraceGraph {
             return TraceFindingAlgorithm.findTraceEfficient(this, nodes);
         }
     }
-
 
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();

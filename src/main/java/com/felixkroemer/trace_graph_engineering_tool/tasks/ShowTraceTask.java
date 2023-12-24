@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 
 public class ShowTraceTask extends AbstractTask {
+
     private CyServiceRegistrar registrar;
     private Logger logger;
     private CyNetwork network;
@@ -46,5 +47,4 @@ public class ShowTraceTask extends AbstractTask {
             }
         }
     }
-
 }

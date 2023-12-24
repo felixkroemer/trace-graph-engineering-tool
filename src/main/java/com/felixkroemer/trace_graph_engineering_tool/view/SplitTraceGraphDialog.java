@@ -17,17 +17,14 @@ import java.util.List;
 public class SplitTraceGraphDialog extends JPanel {
 
     private CyServiceRegistrar registrar;
-
     private DefaultListModel<CyTable> leftListModel;
     private DefaultListModel<CyTable> rightListModel;
-
     private JList<CyTable> leftList;
     private JList<CyTable> rightList;
     private JButton leftToRightButton;
     private JButton rightToLeftButton;
     private JButton confirmButton;
     private JButton cancelButton;
-
     private TraceGraphController controller;
 
     public SplitTraceGraphDialog(TraceGraphController controller, CyServiceRegistrar registrar) {

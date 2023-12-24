@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ParameterDiscretizationModelDTO {
+
     private String name;
     private List<String> csvs;
     private String description;
@@ -51,6 +52,5 @@ public class ParameterDiscretizationModelDTO {
     public int getParameterCount() {
         return this.parameters.size();
     }
-
 }
 

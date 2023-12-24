@@ -20,7 +20,6 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     protected CyNetworkView networkView;
     protected TraceGraph traceGraph;
     protected RenderingController renderingController;
-
     protected PropertyChangeSupport pcs;
 
     // assumes the network has the default style applied (besides EDGE_VISIBLE / NODE_VISIBLE)
@@ -90,5 +89,4 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     public RenderingController getRenderingController() {
         return this.renderingController;
     }
-
 }

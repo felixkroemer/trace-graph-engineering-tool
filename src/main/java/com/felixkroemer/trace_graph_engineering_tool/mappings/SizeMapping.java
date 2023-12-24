@@ -11,13 +11,14 @@ import java.util.Collections;
 import java.util.Map;
 
 public class SizeMapping implements PassthroughMapping<CyRow, Double> {
+
     private Map<Long, Integer> frequency;
     private double max, min;
 
     public SizeMapping(Map<Long, Integer> frequency) {
         this.frequency = frequency;
 
-        if(!frequency.isEmpty()) {
+        if (!frequency.isEmpty()) {
             this.max = Collections.max(frequency.values());
             this.min = Collections.min(frequency.values());
             this.min += 1;
@@ -27,7 +28,6 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
             this.max = 1;
         }
     }
-
 
     @Override
     public String getMappingColumnName() {
@@ -66,5 +66,4 @@ public class SizeMapping implements PassthroughMapping<CyRow, Double> {
         double b = Math.exp((yMax * Math.log(this.min) - yMin * Math.log(this.max)) / (yMin - yMax));
         return min == max ? 100 : a * Math.log(b * linValue);
     }
-
 }

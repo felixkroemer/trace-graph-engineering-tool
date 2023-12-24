@@ -10,6 +10,7 @@ import org.cytoscape.work.TaskIterator;
 import java.util.Collection;
 
 public class CombineTraceGraphsTaskFactory implements NetworkCollectionTaskFactory {
+
     private CyServiceRegistrar reg;
 
     public CombineTraceGraphsTaskFactory(CyServiceRegistrar reg) {

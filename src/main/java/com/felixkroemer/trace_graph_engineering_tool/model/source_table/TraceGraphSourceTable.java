@@ -9,15 +9,15 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import java.util.*;
 
 public class TraceGraphSourceTable implements CyTable {
+
+    private final CyServiceRegistrar registrar;
+    private final Long suid;
+    private final Object lock = new Object();
     private String title;
     private Map<String, CyColumn> columns;
     private Map<String, double[]> data;
-    private final CyServiceRegistrar registrar;
-    private final Long suid;
     private boolean isPublic;
     private int rowCount;
-
-    private final Object lock = new Object();
 
     public TraceGraphSourceTable(String title, long rowCount, CyServiceRegistrar registrar) {
         this.title = title;
@@ -196,7 +196,13 @@ public class TraceGraphSourceTable implements CyTable {
         return this.suid;
     }
 
+    @Override
+    public String toString() {
+        return this.getTitle();
+    }
+
     private final class TraceGraphSourceRow implements CyRow {
+
         private long index;
         private Long suid = SUIDFactory.getNextSUID();
 
@@ -261,10 +267,5 @@ public class TraceGraphSourceTable implements CyTable {
         public Long getSUID() {
             return this.suid;
         }
-    }
-
-    @Override
-    public String toString() {
-        return this.getTitle();
     }
 }

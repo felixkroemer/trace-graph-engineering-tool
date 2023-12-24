@@ -17,10 +17,8 @@ import java.util.*;
 
 public class SelectBinsPanel extends JPanel {
 
-
     private SelectBinsController controller;
     private JXMultiThumbSlider<Void> slider;
-
     private JPanel buttonPanel;
     private JButton confirmButton;
     private JButton cancelButton;
@@ -28,7 +26,6 @@ public class SelectBinsPanel extends JPanel {
     private List<Boolean> visibleBins;
     private float minimum;
     private float maximum;
-
     private JPopupMenu popupMenu;
     private JMenuItem toggleHiddenStateMenuItem;
     private int clickXPosition;

@@ -9,6 +9,7 @@ import org.cytoscape.work.TaskIterator;
 import java.util.Collection;
 
 public class CompareTraceGraphsTaskFactory implements NetworkCollectionTaskFactory {
+
     private CyServiceRegistrar reg;
 
     public CompareTraceGraphsTaskFactory(CyServiceRegistrar reg) {

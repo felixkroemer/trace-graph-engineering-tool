@@ -17,7 +17,6 @@ import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
 
     public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
-
     private CyNode previousNode;
 
     public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
@@ -88,7 +87,6 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
                     edgeView.setVisualProperty(EDGE_WIDTH, 5.0);
                     edgeView.setVisualProperty(EDGE_TOOLTIP, sb.toString());
                 }
-
             }
         }
     }

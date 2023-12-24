@@ -22,7 +22,6 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
 
     private CyServiceRegistrar reg;
     private JTabbedPane tabs;
-
     private PDMPanel pdmPanel;
     private NodeInfoPanel nodeInfoPanel;
     private TraceGraphComparisonPanel traceGraphComparisonPanel;

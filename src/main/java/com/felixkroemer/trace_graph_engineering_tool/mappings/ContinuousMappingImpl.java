@@ -56,21 +56,17 @@ import java.util.Map;
  */
 public class ContinuousMappingImpl implements ContinuousMapping<Integer, Paint> {
 
-    private Map<Long, Integer> mappedValues;
-
-    /**
-     * Contains List of Data Points
-     */
-    private List<ContinuousMappingPoint<Integer, Paint>> points;
-
     /**
      * Visual Property used in this mapping.
      */
     private final VisualProperty<Paint> vp;
-
     private final CyEventHelper eventHelper;
-
     private final Object lock = new Object();
+    private Map<Long, Integer> mappedValues;
+    /**
+     * Contains List of Data Points
+     */
+    private List<ContinuousMappingPoint<Integer, Paint>> points;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public ContinuousMappingImpl(final Map<Long, Integer> mappedValues, final VisualProperty<Paint> vp,
@@ -132,7 +128,6 @@ public class ContinuousMappingImpl implements ContinuousMapping<Integer, Paint> 
             value = getRangeValue(attrValue);
         } catch (ClassCastException e) {
         }
-
 
         return value;
     }

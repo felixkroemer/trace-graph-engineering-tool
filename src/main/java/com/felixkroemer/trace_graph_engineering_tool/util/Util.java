@@ -97,5 +97,4 @@ public class Util {
             view.getModel().getRow(nodeView.getModel()).set(CyNetwork.SELECTED, false);
         }
     }
-
 }

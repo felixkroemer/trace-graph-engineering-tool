@@ -32,11 +32,9 @@ public class ColorMapping extends ContinuousMappingImpl {
 
         BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
 
-
         this.addPoint(min, boundarySmall);
         this.addPoint(stepMedium, boundaryMedium);
         this.addPoint(stepLarge, boundaryLarge);
         this.addPoint(max, boundaryMax);
     }
-
 }

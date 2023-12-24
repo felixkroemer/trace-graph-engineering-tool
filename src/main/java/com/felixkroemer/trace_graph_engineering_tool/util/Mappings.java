@@ -17,7 +17,6 @@ public class Mappings {
                 (ContinuousMapping<Integer, Paint>) factory.createVisualMappingFunction(Columns.EDGE_TRAVERSALS,
                         Integer.class, BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT);
 
-
         BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
 
         int stepMedium = (int) Math.round((xMax - xMin) * 0.05);
@@ -28,7 +27,6 @@ public class Mappings {
 
         BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
 
-
         mapping.addPoint(xMin, boundarySmall);
         mapping.addPoint(stepMedium, boundaryMedium);
         mapping.addPoint(stepLarge, boundaryLarge);
@@ -36,5 +34,4 @@ public class Mappings {
 
         return mapping;
     }
-
 }

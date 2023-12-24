@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Trace {
+
     protected LinkedList<CyNode> sequence;
     protected int startIndex;
     protected CyTable sourceTable;

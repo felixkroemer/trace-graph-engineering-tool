@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ViewDefaultViewTask extends AbstractTask {
+
     private CyServiceRegistrar registrar;
     private Logger logger;
     private CyNetworkView networkView;

@@ -5,7 +5,6 @@ import org.cytoscape.model.CyTable;
 
 import java.awt.*;
 
-
 public class TraceExtension extends Trace {
 
     private CyNode primaryNode;
@@ -53,11 +52,11 @@ public class TraceExtension extends Trace {
         return weight;
     }
 
-    public void setPrimaryNode(CyNode node) {
-        this.primaryNode = node;
-    }
-
     public CyNode getPrimaryNode() {
         return this.primaryNode;
+    }
+
+    public void setPrimaryNode(CyNode node) {
+        this.primaryNode = node;
     }
 }

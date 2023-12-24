@@ -12,13 +12,12 @@ import java.io.File;
 
 public class LoadTraceTask extends AbstractTask {
 
-    @Tunable(description = "The trace to load", params = "input=true", required = true)
-    public File traceFile;
-
     private final TraceGraphManager manager;
     private final CyNetworkTableManager networkTableManager;
     private final CyTableManager tableManager;
     private final CyServiceRegistrar registrar;
+    @Tunable(description = "The trace to load", params = "input=true", required = true)
+    public File traceFile;
 
     public LoadTraceTask(CyServiceRegistrar reg) {
         this.manager = reg.getService(TraceGraphManager.class);

@@ -10,6 +10,7 @@ import org.cytoscape.work.TaskIterator;
 import java.util.Collection;
 
 public class SplitTraceGraphTaskFactory implements NetworkCollectionTaskFactory {
+
     private CyServiceRegistrar reg;
 
     public SplitTraceGraphTaskFactory(CyServiceRegistrar reg) {

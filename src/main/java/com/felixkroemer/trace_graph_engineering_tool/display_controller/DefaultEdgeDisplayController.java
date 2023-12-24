@@ -27,7 +27,6 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
     public static final String DISPLAY_RANGE = "display_range";
     public static final String MAX_TRAVERSALS = "max_traversals";
-
     private Pair<Integer, Integer> displayRange;
     private int maxTraversals;
 

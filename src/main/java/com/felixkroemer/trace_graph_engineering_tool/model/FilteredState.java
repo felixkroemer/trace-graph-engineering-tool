@@ -8,6 +8,7 @@ import java.beans.PropertyChangeSupport;
 
 // needs to be updated whenever the network changes, in order to keep the clear filter button updated
 public class FilteredState {
+
     private int hiddenNodeCount;
     private int totalNodeCount;
     private CyNetworkView networkView;
@@ -16,6 +17,19 @@ public class FilteredState {
     public FilteredState(CyNetworkView networkView) {
         this.networkView = networkView;
         this.pcs = new PropertyChangeSupport(this);
+    }
+
+    // from org/cytoscape/internal/view/util/ViewUtil.java
+    public static int getHiddenNodeCount(CyNetworkView view) {
+        int count = 0;
+
+        if (view != null) {
+            for (var nv : view.getNodeViews()) {
+                if (nv.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE) == Boolean.FALSE) count++;
+            }
+        }
+
+        return count;
     }
 
     public int getHiddenNodeCount() {
@@ -38,18 +52,5 @@ public class FilteredState {
         this.hiddenNodeCount = getHiddenNodeCount(networkView);
         this.totalNodeCount = networkView.getModel().getNodeCount();
         this.pcs.firePropertyChange("filteredState", null, this);
-    }
-
-    // from org/cytoscape/internal/view/util/ViewUtil.java
-    public static int getHiddenNodeCount(CyNetworkView view) {
-        int count = 0;
-
-        if (view != null) {
-            for (var nv : view.getNodeViews()) {
-                if (nv.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE) == Boolean.FALSE) count++;
-            }
-        }
-
-        return count;
     }
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
  * Auxiliary node/edge information that is not contained in the local tables
  */
 public class AuxiliaryInformation {
+
     private Map<CyTable, List<Integer>> source_rows;
     private int visits;
     private int frequency;
@@ -83,5 +84,4 @@ public class AuxiliaryInformation {
         this.visits = visits;
         this.frequency = frequency;
     }
-
 }

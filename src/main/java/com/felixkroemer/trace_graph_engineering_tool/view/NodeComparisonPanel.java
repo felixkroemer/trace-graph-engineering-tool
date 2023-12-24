@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.view;
 
-
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
 import com.felixkroemer.trace_graph_engineering_tool.tasks.ShowTraceTask;
 import org.cytoscape.model.CyNetwork;
@@ -21,7 +20,6 @@ import java.util.Collection;
 public class NodeComparisonPanel extends TraceGraphPanel {
 
     private CyServiceRegistrar reg;
-
     private JPanel showTracePanel;
     private JButton showTraceButton;
     private JXTable comparisonTable;
@@ -90,7 +88,6 @@ public class NodeComparisonPanel extends TraceGraphPanel {
         }
 
         this.comparisonTable.packAll();
-
 
         this.updateShowTraceButton(network);
     }

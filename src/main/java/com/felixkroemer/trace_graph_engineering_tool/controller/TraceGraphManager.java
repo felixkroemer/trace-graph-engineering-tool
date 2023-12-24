@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, CyDisposable {
 
+    private final TraceGraphMainPanel panel;
     private CyServiceRegistrar registrar;
     private Map<ParameterDiscretizationModel, Set<NetworkController>> controllers;
-    private final TraceGraphMainPanel panel;
     private boolean destroying;
 
     public TraceGraphManager(CyServiceRegistrar registrar) {
@@ -138,5 +138,4 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, CyD
         }
         return name;
     }
-
 }

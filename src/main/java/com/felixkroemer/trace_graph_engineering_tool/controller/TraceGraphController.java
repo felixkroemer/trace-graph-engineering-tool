@@ -29,8 +29,7 @@ import java.util.*;
 
 import static org.cytoscape.view.presentation.property.table.BasicTableVisualLexicon.COLUMN_VISIBLE;
 
-public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable,
-        PropertyChangeListener, UpdatedPDMEventListener {
+public class TraceGraphController extends NetworkController implements SetCurrentNetworkListener, CyDisposable, PropertyChangeListener, UpdatedPDMEventListener {
 
     private final TraceGraph traceGraph;
     private final RenderingController renderingController;

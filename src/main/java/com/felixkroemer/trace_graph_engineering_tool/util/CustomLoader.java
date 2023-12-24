@@ -10,7 +10,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package com.felixkroemer.trace_graph_engineering_tool.util;
 
 import com.sun.jna.Platform;
@@ -32,7 +31,12 @@ import java.util.Objects;
  * Load native libraries needed for using ortools-java.
  */
 public class CustomLoader {
+
     private static final String RESOURCE_PATH = "ortools-" + Platform.RESOURCE_PREFIX + "/jniortools.dll";
+    /**
+     * Unpack and Load the native libraries needed for using ortools-java.
+     */
+    private static boolean loaded = false;
 
     /**
      * Try to locate the native libraries directory.
@@ -50,11 +54,6 @@ public class CustomLoader {
             throw new IOException(e);
         }
         return resourceURL;
-    }
-
-    @FunctionalInterface
-    private interface PathConsumer<T extends IOException> {
-        void accept(Path path) throws T;
     }
 
     /**
@@ -105,11 +104,6 @@ public class CustomLoader {
         return tempPath;
     }
 
-    /**
-     * Unpack and Load the native libraries needed for using ortools-java.
-     */
-    private static boolean loaded = false;
-
     public static synchronized void loadNativeLibraries() {
         if (!loaded) {
             try {
@@ -133,5 +127,11 @@ public class CustomLoader {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @FunctionalInterface
+    private interface PathConsumer<T extends IOException> {
+
+        void accept(Path path) throws T;
     }
 }

@@ -19,9 +19,8 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.File;
@@ -32,15 +31,14 @@ import java.util.stream.Collectors;
 
 public class LoadPDMTask extends AbstractTask {
 
-    @Tunable(description = "The trace to load", params = "input=true", required = true)
-    public File traceFile;
-
     private final Logger logger;
     private final TraceGraphManager manager;
     private final CyNetworkFactory networkFactory;
     private final CyNetworkTableManager networkTableManager;
     private final CyTableManager tableManager;
     private final CyServiceRegistrar registrar;
+    @Tunable(description = "The trace to load", params = "input=true", required = true)
+    public File traceFile;
 
     public LoadPDMTask(CyServiceRegistrar reg) {
         this.logger = LoggerFactory.getLogger(CyNetwork.NAME);
@@ -103,7 +101,7 @@ public class LoadPDMTask extends AbstractTask {
                 }, dto.getCsvs() != null).showDialog();
             });
         } else {
-            if(dto.getCsvs() != null) {
+            if (dto.getCsvs() != null) {
                 this.importPDM(dto);
             } else {
                 throw new Exception("PDM must have a list of Traces to load initially.");
@@ -162,7 +160,6 @@ public class LoadPDMTask extends AbstractTask {
         manager.registerTraceGraph(traceGraph.getPDM(), controller);
     }
 
-
     /*
     Create a and set a root network for a pdm with the preferred name, create all parameter columns in the shared
     node table and set the TG network marker in the network table.
@@ -193,5 +190,4 @@ public class LoadPDMTask extends AbstractTask {
         ParameterDiscretizationModelDTO dto = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
         return dto;
     }
-
 }

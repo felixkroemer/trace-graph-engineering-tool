@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ShowTraceDetailsTask extends AbstractTask {
+
     private CyServiceRegistrar registrar;
     private Logger logger;
     private View<? extends CyIdentifiable> view;
@@ -30,5 +31,4 @@ public class ShowTraceDetailsTask extends AbstractTask {
         var manager = this.registrar.getService(TraceGraphManager.class);
         //manager.showTraceDetailsNetwork();
     }
-
 }

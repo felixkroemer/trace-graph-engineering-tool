@@ -13,11 +13,11 @@ import java.io.File;
 import java.io.FileWriter;
 
 public class ExportPDMTask extends AbstractTask {
-    private CyServiceRegistrar reg;
-    private ParameterDiscretizationModel pdm;
 
     @Tunable(description = "Select destination", params = "input=false", required = true)
     public File pdmFile;
+    private CyServiceRegistrar reg;
+    private ParameterDiscretizationModel pdm;
 
     public ExportPDMTask(CyServiceRegistrar reg, ParameterDiscretizationModel pdm) {
         this.reg = reg;
@@ -31,7 +31,5 @@ public class ExportPDMTask extends AbstractTask {
             gson.toJson(new ParameterDiscretizationModelDTO(this.pdm), writer);
             writer.flush();
         }
-
     }
-
 }

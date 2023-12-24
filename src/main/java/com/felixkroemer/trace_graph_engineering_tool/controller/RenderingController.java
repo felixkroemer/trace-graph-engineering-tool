@@ -81,7 +81,6 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.hideNodes();
     }
 
-
     public VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
         VisualStyle style = VisualStyleFactory.createVisualStyle("default-tracegraph");

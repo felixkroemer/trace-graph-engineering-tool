@@ -8,6 +8,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskMonitor;
 
 public class RenderingModeTask extends AbstractNetworkViewTask {
+
     private CyServiceRegistrar reg;
     private String renderingMode;
 
@@ -25,5 +26,4 @@ public class RenderingModeTask extends AbstractNetworkViewTask {
         TraceGraphController controller = (TraceGraphController) manager.findControllerForNetwork(view.getModel());
         controller.setMode(this.renderingMode);
     }
-
 }

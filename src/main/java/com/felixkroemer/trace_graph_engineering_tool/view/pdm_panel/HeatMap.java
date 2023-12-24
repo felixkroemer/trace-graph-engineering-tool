@@ -60,12 +60,23 @@ import java.awt.image.BufferedImage;
  * @author J. Keller (jpaulkeller@gmail.com), Added transparency (alpha) support, data ordering bug fix.
  * @version 1.6
  */
-
 public class HeatMap {
+
     private final double[] data;
     private int[] dataColorIndices;
-
     private Color[] colors;
+
+    /**
+     * @param data   The data to display, must be a complete array (non-ragged)
+     * @param colors A variable of the type Color[]. See also {@link #createMultiGradient} and
+     *               {@link #createGradient}.
+     */
+    public HeatMap(double[] data, Color[] colors) {
+        this.data = smoothArray(data, 6.0);
+
+        updateGradient(colors);
+        updateDataColors();
+    }
 
     public static Color[] createGradient(final Color one, final Color two, final int numSteps) {
         int r1 = one.getRed();
@@ -138,17 +149,52 @@ public class HeatMap {
         return gradient;
     }
 
+    public static double[] smoothArray(double[] inputArray, double sigma) {
+        if (inputArray == null || inputArray.length == 0 || sigma <= 0) {
+            // Handle invalid input
+            return new double[0];
+        }
 
-    /**
-     * @param data   The data to display, must be a complete array (non-ragged)
-     * @param colors A variable of the type Color[]. See also {@link #createMultiGradient} and
-     *               {@link #createGradient}.
-     */
-    public HeatMap(double[] data, Color[] colors) {
-        this.data = smoothArray(data, 6.0);
+        int n = inputArray.length;
+        double[] smoothedArray = new double[n];
 
-        updateGradient(colors);
-        updateDataColors();
+        double[] kernel = generateGaussianKernel(sigma);
+
+        for (int i = 0; i < n; i++) {
+            double sum = 0.0;
+            for (int j = 0; j < kernel.length; j++) {
+                int index = i + j - kernel.length / 2;
+                if (index >= 0 && index < n) {
+                    sum += inputArray[index] * kernel[j];
+                }
+            }
+            smoothedArray[i] = sum;
+        }
+
+        return smoothedArray;
+    }
+
+    private static double[] generateGaussianKernel(double sigma) {
+        int size = (int) Math.ceil(sigma * 6);
+        if (size % 2 == 0) {
+            size++; // Ensure the size is odd
+        }
+
+        double[] kernel = new double[size];
+        double sum = 0.0;
+
+        for (int i = 0; i < size; i++) {
+            double x = i - size / 2;
+            kernel[i] = Math.exp(-0.5 * (x * x) / (sigma * sigma));
+            sum += kernel[i];
+        }
+
+        // Normalize the kernel
+        for (int i = 0; i < size; i++) {
+            kernel[i] /= sum;
+        }
+
+        return kernel;
     }
 
     /**
@@ -223,53 +269,4 @@ public class HeatMap {
         }
         return bufferedImage;
     }
-
-    public static double[] smoothArray(double[] inputArray, double sigma) {
-        if (inputArray == null || inputArray.length == 0 || sigma <= 0) {
-            // Handle invalid input
-            return new double[0];
-        }
-
-        int n = inputArray.length;
-        double[] smoothedArray = new double[n];
-
-        double[] kernel = generateGaussianKernel(sigma);
-
-        for (int i = 0; i < n; i++) {
-            double sum = 0.0;
-            for (int j = 0; j < kernel.length; j++) {
-                int index = i + j - kernel.length / 2;
-                if (index >= 0 && index < n) {
-                    sum += inputArray[index] * kernel[j];
-                }
-            }
-            smoothedArray[i] = sum;
-        }
-
-        return smoothedArray;
-    }
-
-    private static double[] generateGaussianKernel(double sigma) {
-        int size = (int) Math.ceil(sigma * 6);
-        if (size % 2 == 0) {
-            size++; // Ensure the size is odd
-        }
-
-        double[] kernel = new double[size];
-        double sum = 0.0;
-
-        for (int i = 0; i < size; i++) {
-            double x = i - size / 2;
-            kernel[i] = Math.exp(-0.5 * (x * x) / (sigma * sigma));
-            sum += kernel[i];
-        }
-
-        // Normalize the kernel
-        for (int i = 0; i < size; i++) {
-            kernel[i] /= sum;
-        }
-
-        return kernel;
-    }
-
 }

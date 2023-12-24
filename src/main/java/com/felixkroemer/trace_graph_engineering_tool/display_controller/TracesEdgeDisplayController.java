@@ -27,9 +27,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
     public static final String TRACES = "traces";
     private static final Color[] colors = generateColorList();
-
-    private int length;
     private static int colorIndex = 0;
+    private int length;
     private CyServiceRegistrar registrar;
     private List<TraceExtension> traces;
     private Pair<Integer, Integer> displayRange;
@@ -51,21 +50,6 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 new Color(29, 105, 20), new Color(129, 74, 25), new Color(129, 38, 192), new Color(160, 160, 160),
                 new Color(129, 197, 122), new Color(157, 175, 255), new Color(41, 208, 208), new Color(255, 146, 51),
                 new Color(255, 238, 51), new Color(233, 222, 187), new Color(255, 205, 243), new Color(255, 255, 255)};
-    }
-
-    private void colorEdge(CyEdge e, Color color) {
-        networkView.getEdgeView(e).batch(v -> {
-            v.setVisualProperty(EDGE_WIDTH, 2.0);
-            v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, color);
-            v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
-            v.setVisualProperty(EDGE_VISIBLE, true);
-        });
-    }
-
-    @Override
-    public void prepareForMergeOrSplit() {
-        this.networkView.getModel().removeEdges(this.multiEdges);
-        this.multiEdges.clear();
     }
 
     public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable,
@@ -132,6 +116,29 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
             }
         }
         return traces;
+    }
+
+    private static Color getNextColor() {
+        if (colorIndex == colors.length) {
+            colorIndex = 0;
+        }
+        colorIndex++;
+        return colors[colorIndex - 1];
+    }
+
+    private void colorEdge(CyEdge e, Color color) {
+        networkView.getEdgeView(e).batch(v -> {
+            v.setVisualProperty(EDGE_WIDTH, 2.0);
+            v.setVisualProperty(EDGE_STROKE_UNSELECTED_PAINT, color);
+            v.setVisualProperty(EDGE_TARGET_ARROW_UNSELECTED_PAINT, color);
+            v.setVisualProperty(EDGE_VISIBLE, true);
+        });
+    }
+
+    @Override
+    public void prepareForMergeOrSplit() {
+        this.networkView.getModel().removeEdges(this.multiEdges);
+        this.multiEdges.clear();
     }
 
     public void handleNodesSelected(SelectedNodesAndEdgesEvent event) {
@@ -237,14 +244,6 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
             }
         }
-    }
-
-    private static Color getNextColor() {
-        if (colorIndex == colors.length) {
-            colorIndex = 0;
-        }
-        colorIndex++;
-        return colors[colorIndex - 1];
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {

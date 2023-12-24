@@ -13,14 +13,11 @@ public class SelectMatchingPDMDialog extends JDialog {
 
     private JButton confirmButton;
     private JButton cancelButton;
-
     private List<ParameterDiscretizationModel> pdms;
     private Runnable createNewNetwork;
     private Consumer<ParameterDiscretizationModel> addToExistingNetwork;
-
     private ButtonGroup pdmRadioButtonGroup;
     private Map<AbstractButton, ParameterDiscretizationModel> pdmRadioButtonMap;
-
 
     public SelectMatchingPDMDialog(List<ParameterDiscretizationModel> pdms, Runnable createNewNetwork,
                                    Consumer<ParameterDiscretizationModel> addToExistingNetworkRunnable,
@@ -54,7 +51,7 @@ public class SelectMatchingPDMDialog extends JDialog {
         JRadioButton newPDMButton = new JRadioButton("Create new network");
         newPDMButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.pdmRadioButtonGroup.add(newPDMButton);
-        if(allowDefault) {
+        if (allowDefault) {
             this.pdmRadioButtonMap.put(newPDMButton, null);
             innerPanel.add(newPDMButton);
         }

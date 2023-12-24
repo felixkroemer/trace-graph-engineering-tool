@@ -1,6 +1,5 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
-import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparisonControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
@@ -18,7 +17,6 @@ import java.util.function.Consumer;
 public class ParameterDiscretizationModel {
 
     public static final String PERCENTILE_FILTER = "percentileFilter";
-
     private CyServiceRegistrar registrar;
     private PropertyChangeSupport pcs;
     private List<Parameter> parameters;
@@ -56,8 +54,8 @@ public class ParameterDiscretizationModel {
     }
 
     public Parameter getParameter(String name) {
-        for(var param : parameters) {
-            if(param.getName().equals(name)) {
+        for (var param : parameters) {
+            if (param.getName().equals(name)) {
                 return param;
             }
         }
@@ -66,9 +64,9 @@ public class ParameterDiscretizationModel {
 
     public void setParameterBins(List<ParameterDTO> parameters) {
         this.updating = true;
-        for(var paramDTO : parameters) {
+        for (var paramDTO : parameters) {
             var parameter = this.getParameter(paramDTO.getName());
-            if(parameter != null) {
+            if (parameter != null) {
                 parameter.setBins(paramDTO.getBins());
                 parameter.setVisibleBins(new HashSet<>());
             }
@@ -103,7 +101,6 @@ public class ParameterDiscretizationModel {
     public Map<Long, Long> getSuidHashMapping() {
         return this.suidHashMapping;
     }
-
 
     public CyRootNetwork getRootNetwork() {
         return this.rootNetwork;

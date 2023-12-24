@@ -4,6 +4,7 @@ import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 public class CustomTreeTableModel extends AbstractTreeTableModel {
+
     private int columns;
 
     public CustomTreeTableModel(DefaultMutableTreeTableNode root, int columns) {
@@ -47,5 +48,4 @@ public class CustomTreeTableModel extends AbstractTreeTableModel {
         var childNode = (DefaultMutableTreeTableNode) parent;
         return node.getIndex(childNode);
     }
-
 }

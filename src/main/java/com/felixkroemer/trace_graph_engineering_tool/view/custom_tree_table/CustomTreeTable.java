@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 public class CustomTreeTable extends JPanel {
+
     private JXTreeTable table;
     private JScrollPane scrollPane;
 

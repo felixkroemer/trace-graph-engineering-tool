@@ -5,6 +5,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import java.util.List;
 
 public class ParameterDTO {
+
     private String name;
     private List<Double> bins;
 

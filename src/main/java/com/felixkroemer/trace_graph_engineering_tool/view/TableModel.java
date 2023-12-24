@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 import javax.swing.table.DefaultTableModel;
 
 public class TableModel extends DefaultTableModel {
+
     public TableModel(int rows, int cols) {
         super(rows, cols);
     }
@@ -15,5 +16,4 @@ public class TableModel extends DefaultTableModel {
     public boolean isCellEditable(int row, int column) {
         return false;
     }
-    
 }

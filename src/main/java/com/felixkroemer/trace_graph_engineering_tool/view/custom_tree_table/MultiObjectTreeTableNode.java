@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 public class MultiObjectTreeTableNode extends DefaultMutableTreeTableNode {
+
     private Object[] objects;
 
     public MultiObjectTreeTableNode(Object... objects) {

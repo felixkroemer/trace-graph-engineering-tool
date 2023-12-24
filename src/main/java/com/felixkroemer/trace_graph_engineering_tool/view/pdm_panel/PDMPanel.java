@@ -19,9 +19,7 @@ import java.beans.PropertyChangeListener;
 public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener {
 
     private Logger logger;
-
     private CustomTreeTable infoTreeTable;
-
     private JPanel pdmPanel;
     private JPanel resetFilterPanel;
     private JButton resetFilterButton;

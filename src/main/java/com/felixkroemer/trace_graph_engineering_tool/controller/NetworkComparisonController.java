@@ -39,21 +39,18 @@ public class NetworkComparisonController extends NetworkController implements Se
     public static final String BO = "BO";
     public static final String DO = "DO";
     public static final String BD = "BD";
-
     private TraceGraphController baseController;
     private TraceGraphController deltaController;
     private CyNetwork base;
     private CyNetwork delta;
     private CySubNetwork network;
     private CyNetworkView view;
-
     private boolean nodesBaseOnlyVisible;
     private boolean nodesDeltaOnlyVisible;
     private boolean nodesBaseDeltaVisible;
     private boolean edgesBaseOnlyVisible;
     private boolean edgesDeltaOnlyVisible;
     private boolean edgesBaseDeltaVisible;
-
     private VisualStyle defaultVisualStyle;
 
     public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController,
@@ -174,7 +171,6 @@ public class NetworkComparisonController extends NetworkController implements Se
         edgeColorMapping.putMapValue(2, Color.BLUE);
         style.addVisualMappingFunction(edgeColorMapping);
 
-
         var baseMapping = new HashMap<Long, Integer>();
         for (CyNode node : this.base.getNodeList()) {
             baseMapping.put(node.getSUID(), this.baseController.getTraceGraph().getNodeAux(node).getFrequency());
@@ -234,7 +230,6 @@ public class NetworkComparisonController extends NetworkController implements Se
             }
         }
     }
-
 
     // TODO: what happens when the base or delta change but the comparison does not
     // the info would become inconsistent or may lead to an error if the node no longer exists in

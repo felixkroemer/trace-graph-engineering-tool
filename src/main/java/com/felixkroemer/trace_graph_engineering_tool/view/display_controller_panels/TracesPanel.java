@@ -24,13 +24,12 @@ import java.util.concurrent.TimeUnit;
 
 public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyChangeListener {
 
+    private final ScheduledExecutorService scheduler;
     private TracesEdgeDisplayController controller;
     private JSlider numberSlider;
     private JSlider lengthSlider;
-    private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> future;
     private CustomTreeTable tracesInfoTable;
-
     private boolean loading;
 
     public TracesPanel(TracesEdgeDisplayController controller) {

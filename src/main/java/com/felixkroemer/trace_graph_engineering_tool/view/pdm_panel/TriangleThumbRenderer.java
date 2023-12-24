@@ -10,12 +10,10 @@ import java.awt.*;
 
 public final class TriangleThumbRenderer extends JComponent implements ThumbRenderer {
 
+    private static final int STROKE_WIDTH = 1;
     private final Color FOCUS_COLOR = Color.GRAY;
     private final Color SELECTION_COLOR = Color.BLACK;
     private final Color DEFAULT_COLOR = Color.BLACK;
-
-    private static final int STROKE_WIDTH = 1;
-
     // Keep the last selected thumb.
     private boolean selected;
     private int selectedIndex;
@@ -66,7 +64,6 @@ public final class TriangleThumbRenderer extends JComponent implements ThumbRend
 
         if (selected || selectedIndex == currentIndex) setForeground(FOCUS_COLOR);
         else setForeground(DEFAULT_COLOR);
-
 
         return this;
     }

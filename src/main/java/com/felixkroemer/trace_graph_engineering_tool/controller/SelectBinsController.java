@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class SelectBinsController {
+
     private CyServiceRegistrar registrar;
     private Parameter parameter;
 
@@ -33,5 +34,4 @@ public class SelectBinsController {
     public void setVisibleBins(Set<Integer> visibleBins) {
         this.parameter.setVisibleBins(visibleBins);
     }
-
 }

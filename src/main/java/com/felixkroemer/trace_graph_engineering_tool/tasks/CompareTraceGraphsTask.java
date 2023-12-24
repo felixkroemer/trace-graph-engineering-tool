@@ -38,7 +38,6 @@ public class CompareTraceGraphsTask extends AbstractNetworkCollectionTask {
         TraceGraphController baseTG = (TraceGraphController) manager.findControllerForNetwork(base);
         TraceGraphController deltaTG = (TraceGraphController) manager.findControllerForNetwork(delta);
 
-
         NetworkComparisonController networkComparisonController = new NetworkComparisonController(baseTG, deltaTG,
                 subNetwork, pdm, registrar);
         manager.registerTraceGraph(pdm, networkComparisonController);

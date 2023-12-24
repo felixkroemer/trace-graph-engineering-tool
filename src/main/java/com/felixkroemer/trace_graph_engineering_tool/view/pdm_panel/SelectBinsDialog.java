@@ -8,16 +8,15 @@ import javax.swing.*;
 
 public class SelectBinsDialog extends JDialog {
 
+    private Logger logger;
+
     public SelectBinsDialog() {
         this.logger = LoggerFactory.getLogger(CyUserLog.class);
     }
-
-    private Logger logger;
 
     public void showDialog() {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
-
 }

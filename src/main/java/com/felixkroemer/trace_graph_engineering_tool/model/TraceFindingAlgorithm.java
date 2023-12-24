@@ -22,7 +22,6 @@ public class TraceFindingAlgorithm {
             nodes.forEach(n -> histogram.put(n, 0));
             Collection<Integer> values = histogram.values();
 
-
             int start = 1;
             int end = sourceTable.getRowCount();
 
@@ -62,14 +61,12 @@ public class TraceFindingAlgorithm {
                                 minimumWindow = new Pair<>(start, end - 1);
                                 minimumSourceTable = sourceTable;
                             }
-
                         }
                     }
                     start += 1;
                     prevNodeStart = node;
                 }
             }
-
         }
 
         return createTrace(traceGraph, minimumWindow, minimumSourceTable);
@@ -121,8 +118,6 @@ public class TraceFindingAlgorithm {
         }
 
         return createTrace(traceGraph, minimumWindow, minimumSourceTable);
-
-
     }
 
     private static boolean isSolutionInfeasible(Collection<CyNode> nodes, CyTable sourceTable, TraceGraph traceGraph) {
@@ -182,7 +177,6 @@ public class TraceFindingAlgorithm {
             solver.getParameters().setLogSearchProgress(true);
             CpSolverStatus status = solver.solve(model);
 
-
             if (status == CpSolverStatus.OPTIMAL) {
                 int start = -1;
                 int end = vars.length - 1;
@@ -201,7 +195,6 @@ public class TraceFindingAlgorithm {
                     minimumWindow = new Pair<>(start, end);
                     minimumSourceTable = sourceTable;
                 }
-
             }
         }
 
@@ -220,6 +213,4 @@ public class TraceFindingAlgorithm {
             return null;
         }
     }
-
-
 }

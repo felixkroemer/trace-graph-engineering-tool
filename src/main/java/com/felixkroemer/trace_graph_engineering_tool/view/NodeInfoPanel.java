@@ -17,13 +17,10 @@ public class NodeInfoPanel extends TraceGraphPanel {
 
     private CyServiceRegistrar reg;
     private CyNode node;
-
     private CustomTreeTable infoTreeTable;
-
     private JPanel nodeInfoPanel;
     private JTable nodeInfoTable;
     private DefaultTableModel nodeInfoTableModel;
-
 
     public NodeInfoPanel(CyServiceRegistrar reg) {
         this.reg = reg;

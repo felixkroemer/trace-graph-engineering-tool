@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 
 public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> {
+
     private Map<Long, Integer> baseMapping;
     private Map<Long, Integer> deltaMapping;
     private double min, max;
@@ -31,7 +32,6 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
         this.min += 1;
         this.max += 1;
     }
-
 
     @Override
     public String getMappingColumnName() {
@@ -80,5 +80,4 @@ public class ComparisonSizeMapping implements PassthroughMapping<CyRow, Double> 
         double b = Math.exp((yMax * Math.log(min) - yMin * Math.log(max)) / (yMin - yMax));
         return a * Math.log(b * linValue);
     }
-
 }
