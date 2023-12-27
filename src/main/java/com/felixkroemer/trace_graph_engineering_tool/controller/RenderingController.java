@@ -6,7 +6,6 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.ColorMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.SizeMapping;
-import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
@@ -103,7 +102,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         style.addVisualMappingFunction(new SizeMapping(frequencyMapping));
         style.addVisualMappingFunction(new ColorMapping(visitsMapping, registrar.getService(CyEventHelper.class)));
-        style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
+        //style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
         // visible is only set in fireViewChangedEvent in response to setVisualProperty

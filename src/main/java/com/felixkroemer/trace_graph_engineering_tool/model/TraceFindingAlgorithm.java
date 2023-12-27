@@ -11,6 +11,33 @@ import java.util.*;
 public class TraceFindingAlgorithm {
 
     public static Trace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
+        Pair<Integer, Integer> minimumWindow = new Pair<>(0, Integer.MAX_VALUE);
+        CyTable minimumSourceTable = null;
+        for (CyTable sourceTable : traceGraph.getSourceTables()) {
+            if (isSolutionInfeasible(nodes, sourceTable, traceGraph)) {
+                continue;
+            }
+            Map<CyNode, Integer> index = new LinkedHashMap<>();
+
+            for (int i = 0; i < sourceTable.getRowCount(); i++) {
+                var node = traceGraph.findNode(sourceTable, i);
+                if (nodes.contains(node)) {
+                    index.remove(node);
+                    index.put(node, i);
+                    if (index.size() == nodes.size()) {
+                        int j = index.values().iterator().next();
+                        if (minimumWindow.getValue1() - minimumWindow.getValue0() > i - j) {
+                            minimumWindow = new Pair<>(j, i);
+                            minimumSourceTable = sourceTable;
+                        }
+                    }
+                }
+            }
+        }
+        return createTrace(traceGraph, minimumWindow, minimumSourceTable);
+    }
+
+    /*public static Trace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
         CyTable minimumSourceTable = null;
         for (CyTable sourceTable : traceGraph.getSourceTables()) {
@@ -70,7 +97,7 @@ public class TraceFindingAlgorithm {
         }
 
         return createTrace(traceGraph, minimumWindow, minimumSourceTable);
-    }
+    }*/
 
     public static Trace findTraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
