@@ -1,24 +1,20 @@
 package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
-import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.EdgeTraversalMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
-import com.felixkroemer.trace_graph_engineering_tool.util.Mappings;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.DefaultEdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyRow;
 import org.cytoscape.model.events.SelectedNodesAndEdgesEvent;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.javatuples.Pair;
 
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 
@@ -60,8 +56,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
 
     public void updateMaxTraversals() {
         int maxTraversals = 0;
-        for (CyRow row : this.traceGraph.getNetwork().getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS).getAllRows()) {
-            int traversals = row.get(Columns.EDGE_TRAVERSALS, Integer.class);
+        for (CyEdge edge : this.traceGraph.getNetwork().getEdgeList()) {
+            int traversals = this.traceGraph.getEdgeAux(edge).getTraversals();
             if (traversals > maxTraversals) maxTraversals = traversals;
         }
         this.maxTraversals = maxTraversals;
@@ -72,11 +68,11 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
     public VisualStyle adjustVisualStyle(VisualStyle defaultVisualStyle) {
         this.updateMaxTraversals();
 
-        VisualMappingFunctionFactory visualMappingFunctionFactory =
-                registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=continuous)");
-
-        var traversalMapping = Mappings.createEdgeTraversalMapping(1, maxTraversals, visualMappingFunctionFactory);
-        defaultVisualStyle.addVisualMappingFunction(traversalMapping);
+        var traversalsMapping = new HashMap<Long, Integer>();
+        for (CyEdge edge : this.traceGraph.getNetwork().getEdgeList()) {
+            traversalsMapping.put(edge.getSUID(), this.traceGraph.getEdgeAux(edge).getTraversals());
+        }
+        defaultVisualStyle.addVisualMappingFunction(new EdgeTraversalMapping(traversalsMapping, registrar.getService(CyEventHelper.class)));
 
         return defaultVisualStyle;
     }
@@ -100,17 +96,12 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
     }
 
     private void hideEdges() {
-        var edgeTable = traceGraph.getNetwork().getDefaultEdgeTable();
-        var suids = edgeTable.getColumn("SUID").getValues(Long.class);
-        var values = edgeTable.getColumn(Columns.EDGE_TRAVERSALS).getValues(Integer.class);
-        List<Pair<Long, Integer>> pairs = new ArrayList<>(suids.size());
-        for (int i = 0; i < suids.size(); i++) {
-            pairs.add(new Pair<>(suids.get(i), values.get(i)));
-        }
-        for (var pair : pairs) {
-            var edge = traceGraph.getNetwork().getEdge(pair.getValue0());
+        CyEventHelper helper = registrar.getService(CyEventHelper.class);
+        helper.flushPayloadEvents();
+        for (CyEdge edge : this.traceGraph.getNetwork().getEdgeList()) {
+            var traversals = this.traceGraph.getEdgeAux(edge).getTraversals();
             networkView.getEdgeView(edge).setVisualProperty(EDGE_VISIBLE,
-                    pair.getValue1() >= displayRange.getValue0() && pair.getValue1() <= displayRange.getValue1());
+                    traversals >= displayRange.getValue0() && traversals <= displayRange.getValue1());
         }
     }
 
