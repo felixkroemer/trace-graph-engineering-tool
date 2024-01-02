@@ -1,28 +1,30 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
+import java.util.Collections;
+
 /*
  * Auxiliary node/edge information that is not contained in the local tables
  */
 public class NodeAuxiliaryInformation extends AuxiliaryInformation {
 
-    private int visits;
+    private int visitDuration;
     private int frequency;
 
     public NodeAuxiliaryInformation() {
         super();
-        this.visits = 1;
+        this.visitDuration = 0;
         this.frequency = 0;
     }
 
-    public void increaseVisits() {
-        this.visits += 1;
+    public void incrementVisitDuration() {
+        this.visitDuration += 1;
     }
 
-    public int getVisits() {
-        return this.visits;
+    public int getVisitDuration() {
+        return this.visitDuration;
     }
 
-    public void increaseFrequency() {
+    public void incrementFrequency() {
         this.frequency += 1;
     }
 
@@ -30,21 +32,23 @@ public class NodeAuxiliaryInformation extends AuxiliaryInformation {
         return this.frequency;
     }
 
-    public void fixVisitsAndFrequency() {
-        int visits = 0;
+    public void fixVisitDurationAndFrequency() {
+        int visitDuration = 0;
         int frequency = 0;
+
         for (var list : this.source_rows.values()) {
+            Collections.sort(list);
             int prev = Integer.MIN_VALUE;
             for (int i : list) {
                 if (i == prev + 1) {
-                    frequency += 1;
+                    visitDuration += 1;
                 } else {
-                    visits += 1;
+                    frequency += 1;
                 }
                 prev = i;
             }
         }
-        this.visits = visits;
+        this.visitDuration = visitDuration;
         this.frequency = frequency;
     }
 }

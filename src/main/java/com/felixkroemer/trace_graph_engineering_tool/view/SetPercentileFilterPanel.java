@@ -9,7 +9,7 @@ import java.awt.*;
 public class SetPercentileFilterPanel extends JPanel {
 
     private NetworkController controller;
-    private JRadioButton visitsRadioButton;
+    private JRadioButton visitDurationRadioButton;
     private JRadioButton frequencyRadioButton;
     private JTextField percentileField;
     private JButton confirmButton;
@@ -18,7 +18,7 @@ public class SetPercentileFilterPanel extends JPanel {
     public SetPercentileFilterPanel(NetworkController controller) {
         this.controller = controller;
 
-        this.visitsRadioButton = new JRadioButton("Visits");
+        this.visitDurationRadioButton = new JRadioButton("Visit Duration");
         this.frequencyRadioButton = new JRadioButton("Frequency");
         this.percentileField = new JTextField(20);
         this.confirmButton = new JButton("Confirm");
@@ -30,8 +30,8 @@ public class SetPercentileFilterPanel extends JPanel {
             ((Window) getRootPane().getParent()).dispose();
 
             String column;
-            if (this.visitsRadioButton.isSelected()) {
-                column = "visits";
+            if (this.visitDurationRadioButton.isSelected()) {
+                column = "visitDuration";
             } else {
                 column = "frequency";
             }
@@ -57,15 +57,15 @@ public class SetPercentileFilterPanel extends JPanel {
         this.add(typeLabel, constraints);
 
         constraints.gridx = 1;
-        this.add(this.visitsRadioButton, constraints);
+        this.add(this.visitDurationRadioButton, constraints);
 
         constraints.gridx = 2;
         this.add(this.frequencyRadioButton, constraints);
 
         ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(this.visitsRadioButton);
+        buttonGroup.add(this.visitDurationRadioButton);
         buttonGroup.add(this.frequencyRadioButton);
-        this.visitsRadioButton.setSelected(true);
+        this.visitDurationRadioButton.setSelected(true);
 
         JLabel percentileLabel = new JLabel("Percentile:");
         constraints.gridx = 0;

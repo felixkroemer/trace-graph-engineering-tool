@@ -82,12 +82,12 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         VisualStyle style = VisualStyleFactory.createVisualStyle("default-tracegraph");
 
         int maxFrequency = -1;
-        int maxVisits = -1;
+        int maxVisitDuraton = -1;
         for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
             int frequency = this.traceGraph.getNodeAux(node).getFrequency();
             if (frequency > maxFrequency) maxFrequency = frequency;
-            int visits = this.traceGraph.getNodeAux(node).getVisits();
-            if (visits > maxVisits) maxVisits = visits;
+            int visitDuration = this.traceGraph.getNodeAux(node).getVisitDuration();
+            if (visitDuration > maxVisitDuraton) maxVisitDuraton = visitDuration;
         }
 
         var frequencyMapping = new HashMap<Long, Integer>();
@@ -95,13 +95,13 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             frequencyMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getFrequency());
         }
 
-        var visitsMapping = new HashMap<Long, Integer>();
+        var visitDurationMapping = new HashMap<Long, Integer>();
         for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
-            visitsMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getVisits());
+            visitDurationMapping.put(node.getSUID(), this.traceGraph.getNodeAux(node).getVisitDuration());
         }
 
         style.addVisualMappingFunction(new SizeMapping(frequencyMapping));
-        style.addVisualMappingFunction(new ColorMapping(visitsMapping, registrar.getService(CyEventHelper.class)));
+        style.addVisualMappingFunction(new ColorMapping(visitDurationMapping, registrar.getService(CyEventHelper.class)));
         //style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
@@ -156,7 +156,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
             var value = 0;
             switch (percentile.getValue0()) {
-                case "visits" -> value = this.traceGraph.getNodeAux(node).getVisits();
+                case "visitDuration" -> value = this.traceGraph.getNodeAux(node).getVisitDuration();
                 case "frequency" -> value = this.traceGraph.getNodeAux(node).getFrequency();
             }
             pairs.add(new Pair<>(node.getSUID(), value));

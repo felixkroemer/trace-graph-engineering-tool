@@ -67,11 +67,6 @@ public class TraceGraph {
                 } else {
                     currentNodeInfo = this.nodeInfo.get(currentNode);
                 }
-                if (prevNode != currentNode) { // prevNode cannot be null here
-                    currentNodeInfo.increaseVisits();
-                } else {
-                    currentNodeInfo.increaseFrequency();
-                }
             } else { // node does not exist yet
                 currentNode = network.addNode();
                 suidHashMapping.put(hash, currentNode.getSUID());
@@ -82,8 +77,15 @@ public class TraceGraph {
                 currentNodeInfo = new NodeAuxiliaryInformation();
                 this.nodeInfo.put(currentNode, currentNodeInfo);
             }
+
             this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
             currentNodeInfo.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
+
+            if (prevNode != currentNode) {
+                currentNodeInfo.incrementFrequency();
+            } else {
+                currentNodeInfo.incrementVisitDuration();
+            }
 
             if (prevNode != null && prevNode != currentNode) {
                 CyEdge edge;
@@ -102,6 +104,7 @@ public class TraceGraph {
         }
 
         this.fixNetworkName();
+        this.fixAux();
     }
 
     /**
@@ -294,7 +297,7 @@ public class TraceGraph {
 
     private void fixAux() {
         for (CyNode node : this.network.getNodeList()) {
-            this.nodeInfo.get(node).fixVisitsAndFrequency();
+            this.nodeInfo.get(node).fixVisitDurationAndFrequency();
         }
         for (CyEdge edge : this.network.getEdgeList()) {
             this.edgeInfo.get(edge).fixTraversals();
@@ -362,7 +365,7 @@ public class TraceGraph {
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
         var aux = this.nodeInfo.get(node);
-        map.put("Visits", "" + aux.getVisits());
+        map.put("Visit Duration", "" + aux.getVisitDuration());
         map.put("Frequency", "" + aux.getFrequency());
         return map;
     }

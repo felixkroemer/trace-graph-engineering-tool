@@ -10,13 +10,13 @@ import java.util.Map;
 
 public class ColorMapping extends ContinuousMappingImpl {
 
-    public ColorMapping(Map<Long, Integer> visitsMap, CyEventHelper eventHelper) {
-        super(visitsMap, BasicVisualLexicon.NODE_FILL_COLOR, eventHelper);
+    public ColorMapping(Map<Long, Integer> visitDurationMap, CyEventHelper eventHelper) {
+        super(visitDurationMap, BasicVisualLexicon.NODE_FILL_COLOR, eventHelper);
 
         int min, max;
-        if (!visitsMap.isEmpty()) {
-            max = Collections.max(visitsMap.values());
-            min = Math.max(Collections.min(visitsMap.values()), 1);
+        if (!visitDurationMap.isEmpty()) {
+            max = Collections.max(visitDurationMap.values());
+            min = Math.max(Collections.min(visitDurationMap.values()), 1);
         } else {
             max = 1;
             min = 1;

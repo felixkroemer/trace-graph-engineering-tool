@@ -43,9 +43,9 @@ public class TraceExtension extends Trace {
     public int getWeight() {
         int weight = 0;
         for (var node : this.sequence) {
-            var visits = this.traceGraph.getNodeAux(node).getVisits();
+            var visitDuration = this.traceGraph.getNodeAux(node).getVisitDuration();
             var frequency = this.traceGraph.getNodeAux(node).getFrequency();
-            weight += visits + frequency;
+            weight += visitDuration + frequency;
         }
         return weight;
     }
