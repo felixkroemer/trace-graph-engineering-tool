@@ -6,6 +6,7 @@ import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.ColorMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.SizeMapping;
+import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
@@ -33,8 +34,7 @@ import java.util.*;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
-import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_VISIBLE;
+import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
 public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener, ShowTraceEventListener, CyDisposable {
 
@@ -45,12 +45,14 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private AbstractEdgeDisplayController displayController;
     private TraceGraph traceGraph;
     private FilteredState filteredState;
+    private Set<CyNode> labeledNodes;
 
     public RenderingController(CyServiceRegistrar registrar, TraceGraphController traceGraphController) {
         this.registrar = registrar;
         this.traceGraphController = traceGraphController;
         this.traceGraph = this.traceGraphController.getTraceGraph();
         this.defaultStyle = createDefaultVisualStyle();
+        this.labeledNodes = new HashSet<>();
 
         // NetworkViewRenderer gets added to manager on registration, mapped to id
         // reg.getService(CyNetworkViewFactory.class, "(id=org.cytoscape.ding-extension)") does not work,
@@ -103,7 +105,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
         style.addVisualMappingFunction(new SizeMapping(frequencyMapping));
         style.addVisualMappingFunction(new ColorMapping(visitDurationMapping, registrar.getService(CyEventHelper.class)));
-        //style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
+        style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
         // visible is only set in fireViewChangedEvent in response to setVisualProperty
@@ -259,6 +261,18 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     public void handleEvent(SelectedNodesAndEdgesEvent event) {
         if (event.getNetwork() == this.traceGraph.getNetwork()) {
             this.displayController.handleNodesSelected(event);
+            for (CyNode node : this.labeledNodes) {
+                view.getNodeView(node).setVisualProperty(NODE_LABEL, null);
+            }
+            if (event.getSelectedNodes().size() > 1 && event.getSelectedNodes().size() < 6) {
+                int i = 1;
+                for (var node : event.getSelectedNodes()) {
+                    labeledNodes.add(node);
+                    var nodeView = view.getNodeView(node);
+                    nodeView.setVisualProperty(NODE_LABEL, "" + i);
+                    i++;
+                }
+            }
         }
     }
 

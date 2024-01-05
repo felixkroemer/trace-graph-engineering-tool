@@ -24,7 +24,8 @@ public class FilteredState {
 
         if (view != null) {
             for (var nv : view.getNodeViews()) {
-                if (nv.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE) == Boolean.FALSE) count++;
+                if (nv.getVisualProperty(BasicVisualLexicon.NODE_VISIBLE) == Boolean.FALSE)
+                    count++;
             }
         }
 
