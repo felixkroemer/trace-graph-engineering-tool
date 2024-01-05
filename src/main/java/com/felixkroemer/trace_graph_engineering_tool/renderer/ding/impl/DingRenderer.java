@@ -10,24 +10,19 @@ import org.cytoscape.view.presentation.RenderingEngineFactory;
 
 public class DingRenderer implements NetworkViewRenderer {
 
-    public static final String ID = "org.cytoscape.ding-extension";
+    public static final String ID = "org.cytoscape.ding";
     public static final String DISPLAY_NAME = "Cytoscape 2D";
-
     private final DingNetworkViewFactory viewFactory;
-
     private final DingRenderingEngineFactory defaultEngineFactory;
     private final DingNavigationRenderingEngineFactory navigationEngineFactory;
     private final DingRenderingEngineFactory vsRenderingFactory;
     private final DingThumbnailRenderingEngineFactory thumbnailEngineFactory;
 
-
-    public DingRenderer(DingNetworkViewFactory viewFactory, DVisualLexicon dVisualLexicon,
-						CyServiceRegistrar serviceRegistrar) {
+    public DingRenderer(DingNetworkViewFactory viewFactory, DVisualLexicon dVisualLexicon, CyServiceRegistrar serviceRegistrar) {
         this.viewFactory = viewFactory;
 
         defaultEngineFactory = new DingRenderingEngineFactory(viewFactory, dVisualLexicon);
-        navigationEngineFactory = new DingNavigationRenderingEngineFactory(viewFactory, serviceRegistrar,
-				dVisualLexicon);
+        navigationEngineFactory = new DingNavigationRenderingEngineFactory(viewFactory, serviceRegistrar, dVisualLexicon);
         vsRenderingFactory = new DingVisualStyleRenderingEngineFactory(viewFactory, dVisualLexicon);
         thumbnailEngineFactory = new DingThumbnailRenderingEngineFactory(viewFactory, dVisualLexicon, serviceRegistrar);
     }
@@ -66,5 +61,4 @@ public class DingRenderer implements NetworkViewRenderer {
     public String toString() {
         return DISPLAY_NAME;
     }
-
 }

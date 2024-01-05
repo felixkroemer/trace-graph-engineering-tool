@@ -193,7 +193,7 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     public void initView() {
         var manager = this.registrar.getService(CyApplicationManager.class);
-        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding-extension");
+        var tgNetworkViewRenderer = manager.getNetworkViewRenderer("org.cytoscape.ding");
         var networkViewFactory = tgNetworkViewRenderer.getNetworkViewFactory();
         this.view = networkViewFactory.createNetworkView(this.network);
     }

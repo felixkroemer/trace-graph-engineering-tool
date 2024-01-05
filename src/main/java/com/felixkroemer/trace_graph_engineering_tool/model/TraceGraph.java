@@ -107,7 +107,6 @@ public class TraceGraph {
         }
 
         this.fixNetworkName();
-        this.fixAux();
     }
 
     /**
@@ -218,7 +217,7 @@ public class TraceGraph {
         this.refresh();
     }
 
-    public void onParameterChanged(Parameter changedParameter) {
+    public void onParameterChangedSemiEfficient(Parameter changedParameter) {
         clearEdges();
         int changedParameterIndex = -1;
         for (int j = 0; j < pdm.getParameterCount(); j++) {
@@ -230,9 +229,7 @@ public class TraceGraph {
         int[] state = new int[this.pdm.getParameterCount()];
         for (var source : this.nodeMapping.entrySet()) {
             CyTable sourceTable = source.getKey();
-            boolean[] visited = new boolean[sourceTable.getRowCount() + 1];
             for (int i = 1; i <= sourceTable.getRowCount(); i++) {
-                if (visited[i]) continue;
                 // old node, may contain source rows that don't belong to this node anymore (if bucket of source row
                 // changes)
                 // uses source row index to node map, not influenced by already changed parameter bins
@@ -240,33 +237,24 @@ public class TraceGraph {
                 var oldNodeRow = this.defaultNodeTable.getRow(oldNode.getSUID());
                 var oldNodeAux = this.nodeInfo.get(oldNode);
                 int oldNodeBucket = oldNodeRow.get(changedParameter.getName(), Integer.class);
-                // set of rows in the source table that map to the old node
-                // also contains source row index i
-                var iterator = this.nodeInfo.get(oldNode).getSourceRows(sourceTable).iterator();
-                while (iterator.hasNext()) {
-                    var j = iterator.next();
-                    visited[j] = true;
+                var sourceRow = sourceTable.getRow((long) i);
+                double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
+                var bucket = changedParameter.isEnabled() ? findBucket(sourceRowValue, changedParameter) : 0;
 
-                    var sourceRow = sourceTable.getRow((long) j);
-                    double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
-                    var bucket = changedParameter.isEnabled() ? findBucket(sourceRowValue, changedParameter) : 0;
-
-                    // source row j does not belong to this node anymore
-                    // create state of j, hash it, check if a node with that hash exists, add j to it,
-                    // otherwise create a new node with the state of j
-                    // move ingoing and outgoing edges belonging to j from oldNode to newNode
-                    if (bucket != oldNodeBucket) {
-                        for (int k = 0; k < pdm.getParameterCount(); k++) {
-                            state[k] = oldNodeRow.get(this.pdm.getParameters().get(k).getName(), Integer.class);
-                        }
-                        state[changedParameterIndex] = bucket;
-                        CyNode newNode = getOrCreateNode(state);
-                        NodeAuxiliaryInformation newNodeAux = this.nodeInfo.get(newNode);
-                        iterator.remove();
-                        oldNodeAux.getSourceRows(sourceTable).remove(j);
-                        newNodeAux.addSourceRow(sourceTable, j);
-                        this.nodeMapping.get(sourceTable)[j] = newNode;
+                // source row j does not belong to this node anymore
+                // create state of j, hash it, check if a node with that hash exists, add j to it,
+                // otherwise create a new node with the state of j
+                // move ingoing and outgoing edges belonging to j from oldNode to newNode
+                if (bucket != oldNodeBucket) {
+                    for (int k = 0; k < pdm.getParameterCount(); k++) {
+                        state[k] = oldNodeRow.get(this.pdm.getParameters().get(k).getName(), Integer.class);
                     }
+                    state[changedParameterIndex] = bucket;
+                    CyNode newNode = getOrCreateNode(state);
+                    NodeAuxiliaryInformation newNodeAux = this.nodeInfo.get(newNode);
+                    oldNodeAux.getSourceRows(sourceTable).remove((Object) i);
+                    newNodeAux.addSourceRow(sourceTable, i);
+                    this.nodeMapping.get(sourceTable)[i] = newNode;
                 }
             }
         }
@@ -278,9 +266,6 @@ public class TraceGraph {
     private void fixAux() {
         for (CyNode node : this.network.getNodeList()) {
             this.nodeInfo.get(node).fixVisitDurationAndFrequency();
-        }
-        for (CyEdge edge : this.network.getEdgeList()) {
-            this.edgeInfo.get(edge).fixTraversals();
         }
     }
 
@@ -311,12 +296,12 @@ public class TraceGraph {
     }
 
     public void generateEdges() {
-        CyNode prevNode = null;
+        CyNode prevNode;
         CyNode currentNode;
         for (CyTable sourceTable : this.sourceTables) {
+            prevNode = null;
             for (CyRow sourceRow : sourceTable.getAllRows()) {
-                currentNode =
-                        this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
+                currentNode = this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     EdgeAuxiliaryInformation edgeAux;
@@ -326,6 +311,7 @@ public class TraceGraph {
                         this.edgeInfo.put(edge, edgeAux);
                     } else {
                         edgeAux = this.edgeInfo.get(edge);
+                        edgeAux.increaseTraversals();
                     }
                     edgeAux.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
                 }

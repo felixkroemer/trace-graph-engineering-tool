@@ -36,8 +36,7 @@ import static com.felixkroemer.trace_graph_engineering_tool.display_controller.T
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.NODE_VISIBLE;
 
-public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
-        ShowTraceEventListener, CyDisposable {
+public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener, ShowTraceEventListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private TraceGraphController traceGraphController;
@@ -85,9 +84,11 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         int maxVisitDuraton = -1;
         for (CyNode node : this.traceGraph.getNetwork().getNodeList()) {
             int frequency = this.traceGraph.getNodeAux(node).getFrequency();
-            if (frequency > maxFrequency) maxFrequency = frequency;
+            if (frequency > maxFrequency)
+                maxFrequency = frequency;
             int visitDuration = this.traceGraph.getNodeAux(node).getVisitDuration();
-            if (visitDuration > maxVisitDuraton) maxVisitDuraton = visitDuration;
+            if (visitDuration > maxVisitDuraton)
+                maxVisitDuraton = visitDuration;
         }
 
         var frequencyMapping = new HashMap<Long, Integer>();
@@ -249,8 +250,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             case RENDERING_MODE_FOLLOW ->
                     this.setDisplayController(new FollowEdgeDisplayController(registrar, view, this.traceGraph, this));
             case RENDERING_MODE_TRACES ->
-                    this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2,
-                            this));
+                    this.setDisplayController(new TracesEdgeDisplayController(this.registrar, view, this.traceGraph, 2, this));
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
@@ -281,8 +281,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
             return;
         }
         if (!(this.displayController instanceof ShortestTraceEdgeDisplayController)) {
-            this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph,
-                    e.getTrace(), this));
+            this.setDisplayController(new ShortestTraceEdgeDisplayController(registrar, view, traceGraph, e.getTrace(), this));
         }
     }
 
