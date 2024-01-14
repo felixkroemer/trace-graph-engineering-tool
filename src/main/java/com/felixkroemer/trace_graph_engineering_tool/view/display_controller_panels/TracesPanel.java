@@ -56,6 +56,9 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
             this.numberSlider.setMinimum(0);
             this.numberSlider.setMaximum(traces.size());
             this.numberSlider.setValue(displayRange.getValue1());
+            this.numberSlider.setLabelTable(this.numberSlider.createStandardLabels(Math.max(traces.size() / 10, 1)));
+            this.numberSlider.setMajorTickSpacing(traces.size() / 10);
+            this.numberSlider.setMinorTickSpacing(traces.size() / 40);
         } else {
             this.numberSlider.setEnabled(false);
         }
@@ -63,9 +66,6 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
 
     private void initNumberSlider(List<TraceExtension> traces) {
         this.updateNumberSlider(traces);
-        this.numberSlider.setMajorTickSpacing(10);
-        this.numberSlider.setMinorTickSpacing(1);
-        this.numberSlider.setSnapToTicks(true);
         this.numberSlider.setPaintTrack(true);
         this.numberSlider.setPaintTicks(true);
         this.numberSlider.setPaintLabels(true);
