@@ -33,27 +33,24 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     private List<TraceExtension> traces;
     private Pair<Integer, Integer> displayRange;
     private Set<CyEdge> multiEdges;
+    private Set<CyEdge> highlightedEdges;
     private Map<CyEdge, TraceExtension> traceMapping;
 
-    public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                       int length, RenderingController renderingController) {
+    public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, int length, RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.registrar = registrar;
         this.length = length;
         this.multiEdges = new HashSet<>();
+        this.highlightedEdges = new HashSet<>();
         this.traceMapping = new HashMap<>();
     }
 
     // https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
     private static Color[] generateColorList() {
-        return new Color[]{new Color(0, 0, 0), new Color(87, 87, 87), new Color(173, 35, 35), new Color(42, 75, 215),
-                new Color(29, 105, 20), new Color(129, 74, 25), new Color(129, 38, 192), new Color(160, 160, 160),
-                new Color(129, 197, 122), new Color(157, 175, 255), new Color(41, 208, 208), new Color(255, 146, 51),
-                new Color(255, 238, 51), new Color(233, 222, 187), new Color(255, 205, 243), new Color(255, 255, 255)};
+        return new Color[]{new Color(0, 0, 0), new Color(87, 87, 87), new Color(173, 35, 35), new Color(42, 75, 215), new Color(29, 105, 20), new Color(129, 74, 25), new Color(129, 38, 192), new Color(160, 160, 160), new Color(129, 197, 122), new Color(157, 175, 255), new Color(41, 208, 208), new Color(255, 146, 51), new Color(255, 238, 51), new Color(233, 222, 187), new Color(255, 205, 243), new Color(255, 255, 255)};
     }
 
-    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable,
-                                     int length, boolean up) {
+    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable, int length, boolean up) {
         CyNode currentNode = traceGraph.findNode(sourceTable, index);
         CyNode nextNode;
         int found = 0;
@@ -77,8 +74,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         }
     }
 
-    public static List<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length
-            , boolean isEdge) {
+    public static List<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length, boolean isEdge) {
         List<TraceExtension> traces = new ArrayList<>();
         Collection<Integer> sourceRows;
         for (CyTable sourceTable : traceGraph.getSourceTables()) {
@@ -104,8 +100,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph,
-                        getNextColor());
+                TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph, getNextColor());
                 traces.add(trace);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
                 findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
@@ -160,6 +155,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
             this.traces = null;
             this.displayRange = null;
             this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null, null));
+            this.unhighlightEdges();
         }
     }
 
@@ -169,8 +165,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         this.traces = this.calculateTraces(selectedNodes, Collections.emptyList(), networkView.getModel());
         if (this.traces != null) {
             this.displayRange = new Pair<>(0, Math.min(traces.size(), 12));
-            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null,
-                    this.traces));
+            this.pcs.firePropertyChange(new PropertyChangeEvent(this, TracesEdgeDisplayController.TRACES, null, this.traces));
             drawTraces();
         }
     }
@@ -180,8 +175,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         networkView.getModel().removeEdges(this.multiEdges);
     }
 
-    public List<TraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges,
-                                                CyNetwork network) {
+    public List<TraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
         network.removeEdges(this.multiEdges);
         this.multiEdges.clear();
         this.traceMapping.clear();
@@ -242,6 +236,37 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 }
             }
         }
+    }
+
+    public void highlightTrace(TraceExtension trace) {
+        this.unhighlightEdges();
+        if (!traces.contains(trace)) {
+            throw new IllegalArgumentException("Trace does not exist");
+        }
+        var uniqueSequence = trace.getUniqueSequence();
+        for (int i = 0; i < uniqueSequence.size() - 1; i++) {
+            var source = uniqueSequence.get(i);
+            var target = uniqueSequence.get(i + 1);
+            List<CyEdge> edges = this.traceGraph.getNetwork().getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
+            for (CyEdge edge : edges) {
+                var view = networkView.getEdgeView(edge);
+                if (edge.getTarget() == target && edge.getSource() == source && view.getVisualProperty(EDGE_STROKE_UNSELECTED_PAINT) == trace.getColor()) {
+                    networkView.getEdgeView(edge).setVisualProperty(EDGE_WIDTH, 6.0);
+                    this.highlightedEdges.add(edge);
+                }
+            }
+        }
+    }
+
+    public void unhighlightEdges() {
+        for (CyEdge edge : this.highlightedEdges) {
+            // edge may have been deleted already
+            var view = networkView.getEdgeView(edge);
+            if (view != null) {
+                view.setVisualProperty(EDGE_WIDTH, 2.0);
+            }
+        }
+        this.highlightedEdges.clear();
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {

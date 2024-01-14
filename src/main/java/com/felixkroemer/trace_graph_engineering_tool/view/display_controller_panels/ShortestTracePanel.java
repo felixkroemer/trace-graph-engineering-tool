@@ -23,8 +23,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;
 
-    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller,
-                              TraceExtension trace) {
+    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller, TraceExtension trace) {
         this.controller = controller;
         this.traceInfoTable = new CustomTreeTable();
         this.traceSequenceTable = new CustomTreeTable();
@@ -55,7 +54,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
                         var nodeNode = (MultiObjectTreeTableNode) path.getLastPathComponent();
                         var networkController = controller.getRenderingController().getTraceGraphController();
                         var node = (CyNode) nodeNode.getValueAt(0);
-                        networkController.focusNode(node);
+                        networkController.focusNode(node, false);
                     }
                 }
             }

@@ -7,7 +7,6 @@ import org.javatuples.Pair;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Trace {
 
@@ -52,7 +51,13 @@ public class Trace {
     }
 
     public List<CyNode> getUniqueSequence() {
-        return this.sequence.stream().distinct().collect(Collectors.toList());
+        var list = new ArrayList<CyNode>();
+        for (CyNode node : this.sequence) {
+            if (list.isEmpty() || list.get(list.size() - 1) != node) {
+                list.add(node);
+            }
+        }
+        return list;
     }
 
     public List<Pair<CyNode, Pair<Integer, Integer>>> getIndices() {

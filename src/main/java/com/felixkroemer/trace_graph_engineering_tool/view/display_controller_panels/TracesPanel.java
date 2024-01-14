@@ -5,13 +5,17 @@ import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.util.swing.LookAndFeelUtil;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
@@ -126,6 +130,26 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         panel.add(numberSlider, BorderLayout.CENTER);
         panel.add(lengthSlider, BorderLayout.SOUTH);
         this.add(panel, BorderLayout.NORTH);
+
+        this.tracesInfoTable.getWrappedTreeTable().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
+                    int row = tracesInfoTable.getWrappedTreeTable().rowAtPoint(e.getPoint());
+                    TreePath path = tracesInfoTable.getWrappedTreeTable().getPathForRow(row);
+                    if (path != null) {
+                        var tableNode = (MultiObjectTreeTableNode) path.getLastPathComponent();
+                        var value = tableNode.getValueAt(0);
+                        var networkController = controller.getRenderingController().getTraceGraphController();
+                        if (value instanceof CyNode node) {
+                            networkController.focusNode(node, false);
+                        } else if (value instanceof TraceExtension trace) {
+                            controller.highlightTrace(trace);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void initInfoTable(List<TraceExtension> traces) {
@@ -144,9 +168,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
                     nodeMap.put(trace.getSourceTable(), tableNode);
                     root.add(tableNode);
                 }
-                var range =
-                        "[" + trace.getStartIndex() + " -> " + (trace.getStartIndex() + trace.getSequence().size() - 1) + "]";
-                var traceNode = new MultiObjectTreeTableNode(range);
+                var traceNode = new MultiObjectTreeTableNode(trace);
                 tableNode.add(traceNode);
                 for (var element : trace.getIndices()) {
                     traceNode.add(new MultiObjectTreeTableNode(element.getValue0(), element.getValue1()));

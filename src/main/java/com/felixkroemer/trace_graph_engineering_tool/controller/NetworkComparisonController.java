@@ -28,13 +28,15 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class NetworkComparisonController extends NetworkController implements SetCurrentNetworkListener {
+public class NetworkComparisonController extends NetworkController implements SetCurrentNetworkListener, PropertyChangeListener {
 
     public static final String BO = "BO";
     public static final String DO = "DO";
@@ -52,10 +54,9 @@ public class NetworkComparisonController extends NetworkController implements Se
     private boolean edgesDeltaOnlyVisible;
     private boolean edgesBaseDeltaVisible;
     private VisualStyle defaultVisualStyle;
+    private boolean invalid;
 
-    public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController,
-                                       CySubNetwork network, ParameterDiscretizationModel pdm,
-                                       CyServiceRegistrar registrar) {
+    public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController, CySubNetwork network, ParameterDiscretizationModel pdm, CyServiceRegistrar registrar) {
         super(registrar, network, pdm);
         this.baseController = baseController;
         this.deltaController = deltaController;
@@ -69,7 +70,9 @@ public class NetworkComparisonController extends NetworkController implements Se
         this.edgesDeltaOnlyVisible = true;
         this.edgesBaseDeltaVisible = true;
         this.defaultVisualStyle = createDefaultVisualStyle();
+        this.invalid = false;
 
+        this.pdm.getParameters().forEach(p -> p.addObserver(this));
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
 
         this.initTables();
@@ -84,7 +87,8 @@ public class NetworkComparisonController extends NetworkController implements Se
             this.network.addNode(node);
         }
         for (CyEdge edge : this.delta.getEdgeList()) {
-            if (!this.network.containsEdge(edge.getSource(), edge.getTarget())) this.network.addEdge(edge);
+            if (!this.network.containsEdge(edge.getSource(), edge.getTarget()))
+                this.network.addEdge(edge);
         }
 
         var defaultNodeTable = this.network.getDefaultNodeTable();
@@ -130,6 +134,7 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     @Override
     public void dispose() {
+        pdm.getParameters().forEach(p -> p.removeObserver(this));
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.removeVisualStyle(this.defaultVisualStyle);
@@ -137,7 +142,6 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     @Override
     public void updateNetwork(Parameter parameter) {
-        //TODO
     }
 
     @Override
@@ -154,18 +158,15 @@ public class NetworkComparisonController extends NetworkController implements Se
         var visualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
         VisualStyle style = visualStyleFactory.createVisualStyle("default-comparison");
 
-        VisualMappingFunctionFactory visualMappingFunctionFactory =
-                registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
+        VisualMappingFunctionFactory visualMappingFunctionFactory = registrar.getService(VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
 
-        DiscreteMapping<Integer, Paint> nodeColorMapping =
-                (DiscreteMapping<Integer, Paint>) visualMappingFunctionFactory.createVisualMappingFunction(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, BasicVisualLexicon.NODE_FILL_COLOR);
+        DiscreteMapping<Integer, Paint> nodeColorMapping = (DiscreteMapping<Integer, Paint>) visualMappingFunctionFactory.createVisualMappingFunction(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, BasicVisualLexicon.NODE_FILL_COLOR);
         nodeColorMapping.putMapValue(0, Color.GREEN);
         nodeColorMapping.putMapValue(1, Color.RED);
         nodeColorMapping.putMapValue(2, Color.BLUE);
         style.addVisualMappingFunction(nodeColorMapping);
 
-        DiscreteMapping<Integer, Paint> edgeColorMapping =
-                (DiscreteMapping<Integer, Paint>) visualMappingFunctionFactory.createVisualMappingFunction(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, EDGE_STROKE_UNSELECTED_PAINT);
+        DiscreteMapping<Integer, Paint> edgeColorMapping = (DiscreteMapping<Integer, Paint>) visualMappingFunctionFactory.createVisualMappingFunction(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class, EDGE_STROKE_UNSELECTED_PAINT);
         edgeColorMapping.putMapValue(0, Color.GREEN);
         edgeColorMapping.putMapValue(1, Color.RED);
         edgeColorMapping.putMapValue(2, Color.BLUE);
@@ -296,5 +297,10 @@ public class NetworkComparisonController extends NetworkController implements Se
             }
         }
         this.updateVisibility();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        this.invalid = true;
     }
 }
