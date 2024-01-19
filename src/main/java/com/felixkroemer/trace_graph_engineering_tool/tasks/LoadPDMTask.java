@@ -62,20 +62,20 @@ public class LoadPDMTask extends AbstractTask {
     public TraceGraph createTraceGraphAndPDM(ParameterDiscretizationModelDTO dto) {
         var pdm = new ParameterDiscretizationModel(this.registrar, dto);
         var subNetwork = createRootNetworkForPDM(pdm, dto.getName());
-        return new TraceGraph(subNetwork, pdm);
+        return new TraceGraph(registrar, subNetwork, pdm);
     }
 
     public TraceGraph createTraceGraphAndPDM(List<String> parameters) {
         var pdm = new ParameterDiscretizationModel(this.registrar, parameters);
         var subNetwork = createRootNetworkForPDM(pdm, "PDM");
-        return new TraceGraph(subNetwork, pdm);
+        return new TraceGraph(registrar, subNetwork, pdm);
     }
 
     private void updatePDM(ParameterDiscretizationModel pdm, ParameterDiscretizationModelDTO dto) {
         pdm.setParameterBins(dto.getParameters());
         if (dto.getCsvs() != null) {
             var subNetwork = Util.createSubNetwork(pdm);
-            TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
+            TraceGraph traceGraph = new TraceGraph(registrar, subNetwork, pdm);
             loadTracesToTraceGraph(dto, traceGraph);
             TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
             manager.registerTraceGraph(traceGraph.getPDM(), controller);
@@ -126,7 +126,8 @@ public class LoadPDMTask extends AbstractTask {
         Util.parseCSV(sourceTable, traceFile);
         List<String> params = new ArrayList<>();
         sourceTable.getColumns().forEach(c -> {
-            if (!c.getName().equals(Columns.SOURCE_ID)) params.add(c.getName());
+            if (!c.getName().equals(Columns.SOURCE_ID))
+                params.add(c.getName());
         });
         var pdms = manager.findPDM(params);
         if (pdms.isEmpty()) {
@@ -134,7 +135,7 @@ public class LoadPDMTask extends AbstractTask {
         } else {
             SwingUtilities.invokeLater(() -> Util.showDialog(new SelectMatchingPDMPanel(pdms, () -> this.loadTraceToNewPDM(sourceTable), (pdm) -> {
                 var subNetwork = Util.createSubNetwork(pdm);
-                TraceGraph traceGraph = new TraceGraph(subNetwork, pdm);
+                TraceGraph traceGraph = new TraceGraph(this.registrar, subNetwork, pdm);
                 this.loadTraceToTraceGraph(sourceTable, traceGraph);
                 TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
                 manager.registerTraceGraph(traceGraph.getPDM(), controller);

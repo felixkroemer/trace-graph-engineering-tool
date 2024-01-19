@@ -1,8 +1,11 @@
 package com.felixkroemer.trace_graph_engineering_tool.model;
 
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
+import org.apache.commons.lang3.time.StopWatch;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.undo.UndoSupport;
 
 import java.util.*;
 
@@ -20,8 +23,9 @@ public class TraceGraph {
     // node to node auxiliary information
     private Map<CyNode, NodeAuxiliaryInformation> nodeInfo;
     private Map<CyEdge, EdgeAuxiliaryInformation> edgeInfo;
+    private CyServiceRegistrar registrar;
 
-    public TraceGraph(CyNetwork network, ParameterDiscretizationModel pdm) {
+    public TraceGraph(CyServiceRegistrar registrar, CyNetwork network, ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
         this.sourceTables = new HashSet<>();
         this.network = network;
@@ -32,6 +36,7 @@ public class TraceGraph {
         this.nodeMapping = new HashMap<>();
         this.nodeInfo = new HashMap<>();
         this.edgeInfo = new HashMap<>();
+        this.registrar = registrar;
     }
 
     public CyNode getOrCreateNode(int[] state) {
@@ -43,15 +48,19 @@ public class TraceGraph {
         if (suid != null && (currentNode = rootNetwork.getNode(suid)) != null) { // node for the given state
             // node exists in root network, but not here
             if (!network.containsNode(currentNode)) {
+                Profiler.getInstance().addNodeNotFoundInSubnetwork();
                 // make node available from the default node table
                 ((CySubNetwork) network).addNode(currentNode);
                 currentNodeInfo = new NodeAuxiliaryInformation();
                 this.nodeInfo.put(currentNode, currentNodeInfo);
+            } else {
+                Profiler.getInstance().addNodeFound();
             }
         } else { // node does not exist yet
+            Profiler.getInstance().addNodeNotFoundInRootNetwork();
             currentNode = network.addNode();
             suidHashMapping.put(hash, currentNode.getSUID());
-            var currentRow = this.defaultNodeTable.getRow(currentNode.getSUID());
+            var currentRow = this.pdm.getRootNetwork().getSharedNodeTable().getRow(currentNode.getSUID());
             for (int j = 0; j < this.pdm.getParameters().size(); j++) {
                 currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);
             }
@@ -62,6 +71,8 @@ public class TraceGraph {
     }
 
     public void addSourceTable(CyTable sourceTable) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         this.sourceTables.add(sourceTable);
         this.nodeMapping.put(sourceTable, new CyNode[sourceTable.getRowCount() + 1]);
 
@@ -107,6 +118,9 @@ public class TraceGraph {
         }
 
         this.fixNetworkName();
+
+        long result = watch.getTime();
+        Profiler.getInstance().setAddSourceTableResult(result);
     }
 
     /**
@@ -117,7 +131,7 @@ public class TraceGraph {
     }
 
     public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTablesToRemove) {
-        TraceGraph traceGraph = new TraceGraph(newNetwork, this.pdm);
+        TraceGraph traceGraph = new TraceGraph(this.registrar, newNetwork, this.pdm);
         for (CyTable table : sourceTablesToRemove) {
             if (!this.sourceTables.contains(table)) {
                 throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
@@ -163,6 +177,9 @@ public class TraceGraph {
 
         fixNetworkName();
         fixAux();
+        registrar.getService(UndoSupport.class).reset();
+        System.runFinalization();
+        System.gc();
 
         return traceGraph;
     }
@@ -219,6 +236,8 @@ public class TraceGraph {
 
     public void onParameterChangedSemiEfficient(Parameter changedParameter) {
         clearEdges();
+        StopWatch watch = new StopWatch();
+        watch.start();
         int changedParameterIndex = -1;
         for (int j = 0; j < pdm.getParameterCount(); j++) {
             if (this.pdm.getParameters().get(j).equals(changedParameter)) {
@@ -234,7 +253,7 @@ public class TraceGraph {
                 // changes)
                 // uses source row index to node map, not influenced by already changed parameter bins
                 var oldNode = this.nodeMapping.get(sourceTable)[i];
-                var oldNodeRow = this.defaultNodeTable.getRow(oldNode.getSUID());
+                var oldNodeRow = this.pdm.getRootNetwork().getSharedNodeTable().getRow(oldNode.getSUID());
                 var oldNodeAux = this.nodeInfo.get(oldNode);
                 int oldNodeBucket = oldNodeRow.get(changedParameter.getName(), Integer.class);
                 var sourceRow = sourceTable.getRow((long) i);
@@ -246,6 +265,7 @@ public class TraceGraph {
                 // otherwise create a new node with the state of j
                 // move ingoing and outgoing edges belonging to j from oldNode to newNode
                 if (bucket != oldNodeBucket) {
+                    Profiler.getInstance().addImpactedSituation();
                     for (int k = 0; k < pdm.getParameterCount(); k++) {
                         state[k] = oldNodeRow.get(this.pdm.getParameters().get(k).getName(), Integer.class);
                     }
@@ -259,8 +279,15 @@ public class TraceGraph {
             }
         }
         this.generateEdges();
-        this.removeLeftoverNodes();
         this.fixAux();
+        registrar.getService(UndoSupport.class).reset();
+        System.runFinalization();
+        System.gc();
+
+        long result = watch.getTime();
+        Profiler.getInstance().setUpdateTraceGraphResult(result);
+
+        this.removeLeftoverNodes();
     }
 
     private void fixAux() {
@@ -279,6 +306,7 @@ public class TraceGraph {
                 this.nodeInfo.remove(node);
             }
         }
+        Profiler.getInstance().setLeftOverNodes(nodesToRemove.size());
         // need to be removed in batches, otherwise events take forever
         // also removes edges
         this.network.removeNodes(nodesToRemove);
@@ -291,6 +319,9 @@ public class TraceGraph {
 
     public void clearNodes() {
         this.network.removeNodes(this.network.getNodeList());
+        registrar.getService(UndoSupport.class).reset();
+        System.runFinalization();
+        System.gc();
         this.nodeInfo.clear();
         this.edgeInfo.clear();
     }

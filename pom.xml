@@ -83,7 +83,17 @@
 
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>work-impl</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
         <dependency>
             <groupId>org.cytoscape</groupId>
             <artifactId>table-presentation-impl</artifactId>

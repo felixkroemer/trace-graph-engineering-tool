@@ -4,10 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Parameter {
 
@@ -45,10 +42,11 @@ public class Parameter {
     }
 
     public List<Double> getBins() {
-        return bins;
+        return new ArrayList<>(bins);
     }
 
     public void setBins(List<Double> bins) {
+        Collections.sort(bins);
         this.bins = bins;
         pcs.firePropertyChange(Parameter.BINS, null, this.bins);
     }

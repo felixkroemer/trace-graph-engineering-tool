@@ -6,6 +6,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SelectBinsController {
 
@@ -28,7 +29,7 @@ public class SelectBinsController {
     }
 
     public void setNewBins(List<Float> bins) {
-        this.parameter.setBins(bins.stream().map(f -> (double) f).toList());
+        this.parameter.setBins(bins.stream().map(f -> (double) f).collect(Collectors.toList()));
     }
 
     public void setVisibleBins(Set<Integer> visibleBins) {
