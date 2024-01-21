@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
@@ -23,32 +24,34 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     private float maxValue;
     private List<Boolean> visibleBins;
     private String name;
-    private CyTable sourceTable;
+    private Collection<CyTable> tables;
     private BufferedImage heatMap;
     private Color highlightColor;
     private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue, String name, CyTable sourceTable, List<Boolean> visibleBins) {
+    public DiscreteTrackRenderer(float minValue, float maxValue, String name, Collection<CyTable> sourceTables,
+                                 List<Boolean> visibleBins) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.visibleBins = visibleBins;
         this.name = name;
-        this.sourceTable = sourceTable;
         this.highlightColor = new Color(0, 255, 0, 127);
-        this.heatMap = this.initHeatMap().drawData();
+        this.tables = sourceTables;
+        this.heatMap = this.initHeatMap();
     }
 
-    public HeatMap initHeatMap() {
-        var allRows = sourceTable.getAllRows();
+    public BufferedImage initHeatMap() {
         double[] array = new double[1000];
-        for (CyRow allRow : allRows) {
-            double value = allRow.get(this.name, Double.class);
-            int bucket = (int) (999 * (value - this.minValue) / (this.maxValue - this.minValue));
-            array[bucket]++;
+        for (CyTable table : this.tables) {
+            for (CyRow row : table.getAllRows()) {
+                double value = row.get(this.name, Double.class);
+                int bucket = (int) (999 * (value - this.minValue) / (this.maxValue - this.minValue));
+                array[bucket]++;
+            }
         }
         Color[] palette = new Color[]{new Color(255, 255, 255), new Color(240, 184, 110), new Color(237, 123, 123), new Color(131, 96, 150)};
         Color[] gradient = HeatMap.createMultiGradient(palette, 100);
-        return new HeatMap(array, gradient);
+        return new HeatMap(array, gradient).drawData();
     }
 
     @Override
@@ -59,20 +62,22 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
 
     private int[] getDistribution(List<Double> bins) {
         int[] dist = new int[bins.size() + 1];
-        this.sourceTable.getAllRows().forEach(row -> {
-            double value = row.get(this.name, Double.class);
-            int i = 0;
-            for (double d : bins) {
-                if (value <= d) {
-                    dist[i]++;
-                    break;
+        for (CyTable table : this.tables) {
+            table.getAllRows().forEach(row -> {
+                double value = row.get(this.name, Double.class);
+                int i = 0;
+                for (double d : bins) {
+                    if (value <= d) {
+                        dist[i]++;
+                        break;
+                    }
+                    i++;
                 }
-                i++;
-            }
-            if (value > bins.get(bins.size() - 1)) {
-                dist[bins.size()]++;
-            }
-        });
+                if (value > bins.get(bins.size() - 1)) {
+                    dist[bins.size()]++;
+                }
+            });
+        }
         return dist;
     }
 
@@ -115,7 +120,9 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
         g.setColor(LABEL_COLOR);
         g.setStroke(STROKE1);
         var positions = new ArrayList<>(slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList());
-        var newDist = getDistribution(positions.stream().map(f -> f * (this.maxValue * 1.0 - this.minValue) + this.minValue).toList());
+        var newDist = getDistribution(positions.stream()
+                                               .map(f -> f * (this.maxValue * 1.0 - this.minValue) + this.minValue)
+                                               .toList());
         String frequency = "" + newDist[0];
         var width = g.getFontMetrics().stringWidth(frequency);
         float pos = (trackWidth * stops.get(0).getPosition()) / 2 - width / 2;
@@ -139,7 +146,8 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
                 g.drawString(frequency, pos, trackHeight / 2);
             }
             final float valueRange = maxValue - minValue;
-            final Float curPositionValue = ((Number) ((stops.get(i).getPosition() * valueRange) + minValue)).floatValue();
+            final Float curPositionValue = ((Number) ((stops.get(i)
+                                                            .getPosition() * valueRange) + minValue)).floatValue();
             final String valueString = String.format("%.5f", curPositionValue);
             int flipLimit = 90;
             int borderVal = trackWidth - x;

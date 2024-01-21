@@ -4,6 +4,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,10 +23,9 @@ public class SelectBinsController {
         return this.parameter;
     }
 
-    public CyTable getSourceTable() {
+    public Collection<CyTable> getSourceTables() {
         var manager = registrar.getService(TraceGraphManager.class);
-        var tables = manager.getSourceTables(parameter.getPdm());
-        return tables.iterator().next();
+        return manager.getSourceTables(parameter.getPdm());
     }
 
     public void setNewBins(List<Float> bins) {

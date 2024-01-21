@@ -46,21 +46,20 @@ public class SelectBinsPanel extends JPanel {
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
         var parameter = controller.getParameter();
-        this.minimum = controller.getSourceTable().getAllRows().stream().min(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get().get(parameter.getName(), Double.class).floatValue();
-        this.maximum = controller.getSourceTable().getAllRows().stream().max(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get().get(parameter.getName(), Double.class).floatValue();
+        this.minimum = controller.getSourceTables().stream().flatMap(t -> t.getAllRows().stream())
+                                 .min(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get()
+                                 .get(parameter.getName(), Double.class).floatValue();
+        this.maximum = controller.getSourceTables().stream().flatMap(t -> t.getAllRows().stream())
+                                 .max(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get()
+                                 .get(parameter.getName(), Double.class).floatValue();
         this.visibleBins = new ArrayList<>();
         for (int i = 0; i < parameter.getBins().size() + 1; i++) {
-            this.visibleBins.add(false);
-        }
-        for (int i = 0; i < parameter.getBins().size() + 1; i++) {
-            if (parameter.getVisibleBins().contains(i)) {
-                this.visibleBins.set(i, true);
-            }
+            this.visibleBins.add(parameter.getVisibleBins().contains(i));
         }
 
         this.slider = new JXMultiThumbSlider<>();
         initButtons(controller.getParameter());
-        initSlider(controller.getParameter(), controller.getSourceTable());
+        initSlider(controller.getParameter(), controller.getSourceTables());
     }
 
     public void initButtons(Parameter param) {
@@ -77,8 +76,8 @@ public class SelectBinsPanel extends JPanel {
         this.confirmButton.addActionListener(e -> {
             ((Window) getRootPane().getParent()).dispose();
             List<Float> positions = slider.getModel().getSortedThumbs().stream().map(Thumb::getPosition).toList();
-            List<Float> newBuckets =
-                    positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum).toList();
+            List<Float> newBuckets = positions.stream().map(p -> (p * (this.maximum - this.minimum)) + this.minimum)
+                                              .toList();
             if (!newBuckets.equals(this.bins)) {
                 controller.setNewBins(newBuckets);
             }
@@ -118,12 +117,11 @@ public class SelectBinsPanel extends JPanel {
         this.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void initSlider(Parameter param, CyTable sourceTable) {
+    public void initSlider(Parameter param, Collection<CyTable> sourceTables) {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
-        DiscreteTrackRenderer trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(),
-                sourceTable, this.visibleBins);
+        DiscreteTrackRenderer trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(), sourceTables, this.visibleBins);
         this.slider.setTrackRenderer(trackRenderer);
         this.add(slider, BorderLayout.CENTER);
 
