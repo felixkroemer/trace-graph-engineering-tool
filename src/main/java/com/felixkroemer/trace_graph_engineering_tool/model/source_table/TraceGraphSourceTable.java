@@ -16,6 +16,7 @@ public class TraceGraphSourceTable implements CyTable {
     private String title;
     private Map<String, CyColumn> columns;
     private Map<String, double[]> data;
+    private CyRow[] rows;
     private boolean isPublic;
     private int rowCount;
 
@@ -27,6 +28,10 @@ public class TraceGraphSourceTable implements CyTable {
         this.suid = SUIDFactory.getNextSUID();
         this.isPublic = true;
         this.rowCount = (int) rowCount;
+        this.rows = new CyRow[(int) rowCount];
+        for (int i = 1; i <= rowCount; i++) {
+            rows[i - 1] = new TraceGraphSourceRow(i);
+        }
     }
 
     @Override
@@ -112,8 +117,8 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public CyRow getRow(Object primaryKey) {
-        int index = ((Long) primaryKey).intValue();
-        return new TraceGraphSourceRow(index);
+        var index = ((Long) primaryKey).intValue();
+        return this.rows[index - 1];
     }
 
     @Override
@@ -129,11 +134,7 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public List<CyRow> getAllRows() {
-        var rows = new ArrayList<CyRow>(this.rowCount);
-        for (int i = 1; i <= rowCount; i++) {
-            rows.add(new TraceGraphSourceRow(i));
-        }
-        return rows;
+        return Arrays.asList(this.rows);
     }
 
     @Override
@@ -162,8 +163,8 @@ public class TraceGraphSourceTable implements CyTable {
     }
 
     @Override
-    public String addVirtualColumn(String virtualColumn, String sourceColumn, CyTable sourceTable,
-                                   String targetJoinKey, boolean isImmutable) {
+    public String addVirtualColumn(String virtualColumn, String sourceColumn, CyTable sourceTable, String targetJoinKey,
+                                   boolean isImmutable) {
         throw new NotImplementedException("addVirtualColumn is not implemented for TraceGraphSourceTable");
     }
 

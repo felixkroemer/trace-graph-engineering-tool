@@ -68,14 +68,6 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
             System.out.println(i);
             System.out.println("---------------------------------------------------------------");
 
-            task = new LoadPDMTask(this.registrar);
-            iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(fileName)));
-            taskManager.execute(iter);
-            SwingUtilities.invokeAndWait(() -> {
-            });
-            controller = (TraceGraphController) registrar.getService(TraceGraphManager.class).findControllerForNetwork(this.createdNetwork);
-            param = controller.getPDM().getParameter("speed");
-
             var bins = new ArrayList<>(originalBins);
             bins.add(locs[i]);
             long sumTotal = 0;
@@ -83,6 +75,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
             int runs = 1;
             for (int j = 0; j < runs; j++) {
+
                 Thread.sleep(15000);
 
                 watch.start();
@@ -92,7 +85,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                 var algoResult = Profiler.getInstance().getUpdateTraceGraphResult();
                 sumTotal += watch.getTime();
                 sumAlgorithmic += algoResult;
-                if (j == runs - 4) {
+                if (j == runs - 1) {
                     this.results.get("situations").add(Profiler.getInstance().getImpactedSituations());
                     this.results.get("total").add(sumTotal / runs);
                     this.results.get("algo").add(sumAlgorithmic / runs);
@@ -156,6 +149,8 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                 }
 
                 this.reset();
+                var networkManager = registrar.getService(CyNetworkManager.class);
+                networkManager.destroyNetwork(this.createdNetwork);
                 watch.reset();
                 Thread.sleep(12000);
             }
@@ -176,8 +171,6 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
     public void reset() {
         Profiler.getInstance().resetImpactedSituations();
         Profiler.getInstance().resetFoundNodes();
-        var networkManager = registrar.getService(CyNetworkManager.class);
-        networkManager.destroyNetwork(this.createdNetwork);
         var eventHelper = registrar.getService(CyEventHelper.class);
         eventHelper.flushPayloadEvents();
         System.runFinalization();

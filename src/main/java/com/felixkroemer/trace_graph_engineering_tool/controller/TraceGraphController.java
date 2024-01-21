@@ -44,6 +44,12 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
         this.registrar.registerService(this, UpdatedPDMEventListener.class, new Properties());
         this.registerNetwork();
+        var tableManager = registrar.getService(CyTableManager.class);
+        var networkTableManager = registrar.getService(CyNetworkTableManager.class);
+        for (var table : traceGraph.getSourceTables()) {
+            tableManager.addTable(table);
+            networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, table.getTitle(), table);
+        }
     }
 
     @Override

@@ -169,8 +169,6 @@ public class LoadPDMTask extends AbstractTask {
     }
 
     public void loadTraceToTraceGraph(CyTable sourceTable, TraceGraph traceGraph) {
-        this.tableManager.addTable(sourceTable);
-        this.networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, sourceTable.getTitle(), sourceTable);
         traceGraph.addSourceTable(sourceTable);
     }
 

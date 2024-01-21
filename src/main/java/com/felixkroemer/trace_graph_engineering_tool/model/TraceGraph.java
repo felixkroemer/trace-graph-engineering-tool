@@ -178,8 +178,6 @@ public class TraceGraph {
         fixNetworkName();
         fixAux();
         registrar.getService(UndoSupport.class).reset();
-        System.runFinalization();
-        System.gc();
 
         return traceGraph;
     }
@@ -281,8 +279,6 @@ public class TraceGraph {
         this.generateEdges();
         this.fixAux();
         registrar.getService(UndoSupport.class).reset();
-        System.runFinalization();
-        System.gc();
 
         long result = watch.getTime();
         Profiler.getInstance().setUpdateTraceGraphResult(result);
@@ -320,8 +316,6 @@ public class TraceGraph {
     public void clearNodes() {
         this.network.removeNodes(this.network.getNodeList());
         registrar.getService(UndoSupport.class).reset();
-        System.runFinalization();
-        System.gc();
         this.nodeInfo.clear();
         this.edgeInfo.clear();
     }

@@ -19,8 +19,8 @@ public class EdgeAuxiliaryInformation extends AuxiliaryInformation {
 
     public void fixTraversals() {
         int traversals = 0;
-        for (var list : this.source_rows.values()) {
-            traversals += list.size();
+        for (var pair : this.source_rows) {
+            traversals += pair.getValue1().size();
         }
         this.traversals = traversals;
     }

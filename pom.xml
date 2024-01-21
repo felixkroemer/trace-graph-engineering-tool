@@ -85,6 +85,18 @@
     <dependencies>
         <dependency>
             <groupId>org.cytoscape</groupId>
+            <artifactId>viewmodel-impl</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
+            <artifactId>table-browser-impl</artifactId>
+            <version>${cytoscape.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cytoscape</groupId>
             <artifactId>work-impl</artifactId>
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>

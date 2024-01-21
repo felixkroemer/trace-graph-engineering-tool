@@ -36,10 +36,10 @@ public class NodeAuxiliaryInformation extends AuxiliaryInformation {
         int visitDuration = 0;
         int frequency = 0;
 
-        for (var list : this.source_rows.values()) {
-            Collections.sort(list);
+        for (var pair : this.source_rows) {
+            Collections.sort(pair.getValue1());
             int prev = Integer.MIN_VALUE;
-            for (int i : list) {
+            for (int i : pair.getValue1()) {
                 if (i == prev + 1) {
                     visitDuration += 1;
                 } else {
