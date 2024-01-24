@@ -3,7 +3,9 @@ package com.felixkroemer.trace_graph_engineering_tool.util;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
 import com.opencsv.CSVReader;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
@@ -11,8 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.NETWORK_COMPARISON_MARKER;
 import static com.felixkroemer.trace_graph_engineering_tool.model.Columns.NETWORK_TG_MARKER;
@@ -58,16 +60,6 @@ public class Util {
                 }
             }
         }
-    }
-
-    public static CyEdge getEdge(CyNetwork network, CyNode source, CyNode target) {
-        List<CyEdge> edges = network.getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
-        for (CyEdge edge : edges) {
-            if (edge.getTarget() == target && edge.getSource() == source) {
-                return edge;
-            }
-        }
-        return null;
     }
 
     public static CySubNetwork createSubNetwork(ParameterDiscretizationModel pdm) {

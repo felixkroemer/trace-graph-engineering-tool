@@ -229,13 +229,17 @@ public class TraceGraph {
     }
 
     public void onParameterChangedInefficient(Parameter changedParameter) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         this.refresh();
+        long result = watch.getTime();
+        Profiler.getInstance().setUpdateTraceGraphResult(result);
     }
 
     public void onParameterChangedSemiEfficient(Parameter changedParameter) {
-        clearEdges();
         StopWatch watch = new StopWatch();
         watch.start();
+        clearEdges();
         int changedParameterIndex = -1;
         for (int j = 0; j < pdm.getParameterCount(); j++) {
             if (this.pdm.getParameters().get(j).equals(changedParameter)) {
@@ -276,14 +280,13 @@ public class TraceGraph {
                 }
             }
         }
+        this.removeLeftoverNodes();
         this.generateEdges();
         this.fixAux();
         registrar.getService(UndoSupport.class).reset();
 
         long result = watch.getTime();
         Profiler.getInstance().setUpdateTraceGraphResult(result);
-
-        this.removeLeftoverNodes();
     }
 
     private void fixAux() {
@@ -326,7 +329,8 @@ public class TraceGraph {
         for (CyTable sourceTable : this.sourceTables) {
             prevNode = null;
             for (CyRow sourceRow : sourceTable.getAllRows()) {
-                currentNode = this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
+                currentNode = this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class)
+                                                                         .intValue()];
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     EdgeAuxiliaryInformation edgeAux;

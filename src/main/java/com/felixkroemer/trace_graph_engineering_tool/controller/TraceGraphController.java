@@ -23,6 +23,7 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
@@ -64,8 +65,17 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public void updateNetwork(Parameter changedParameter) {
-        traceGraph.onParameterChangedSemiEfficient(changedParameter);
-        renderingController.onNetworkChanged();
+        if (SwingUtilities.isEventDispatchThread()) {
+            //traceGraph.onParameterChangedInefficient(changedParameter);
+            traceGraph.onParameterChangedSemiEfficient(changedParameter);
+            renderingController.onNetworkChanged();
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                //traceGraph.onParameterChangedInefficient(changedParameter);
+                traceGraph.onParameterChangedSemiEfficient(changedParameter);
+                renderingController.onNetworkChanged();
+            });
+        }
     }
 
     @Override

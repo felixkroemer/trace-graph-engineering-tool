@@ -36,7 +36,8 @@ import static com.felixkroemer.trace_graph_engineering_tool.display_controller.F
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController.RENDERING_MODE_TRACES;
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener, ShowTraceEventListener, CyDisposable {
+public class RenderingController implements SelectedNodesAndEdgesListener, PropertyChangeListener,
+        ShowTraceEventListener, CyDisposable {
 
     private CyServiceRegistrar registrar;
     private TraceGraphController traceGraphController;
@@ -80,7 +81,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
 
     public VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
-        VisualStyle style = VisualStyleFactory.createVisualStyle("default-tracegraph");
+        VisualStyle style = this.defaultStyle == null ? VisualStyleFactory.createVisualStyle("default-tracegraph") : this.defaultStyle;
 
         int maxFrequency = -1;
         int maxVisitDuraton = -1;
@@ -283,6 +284,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.removeVisualStyle(this.defaultStyle);
+        registrar.unregisterAllServices(this.defaultStyle);
         registrar.unregisterService(this, SelectedNodesAndEdgesListener.class);
         registrar.unregisterService(this, ShowTraceEventListener.class);
         this.traceGraph.getPDM().removeObserver(this);
