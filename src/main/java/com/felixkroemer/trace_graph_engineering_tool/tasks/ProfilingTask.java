@@ -34,7 +34,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
     @Override
     public void run(TaskMonitor monitor) throws Exception {
-        this.profileTraceGraphUpdate();
+        this.profileTraceLoading();
         this.registrar.unregisterService(this, NetworkAddedListener.class);
     }
 
@@ -76,7 +76,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
         }
 
         //var locs = new double[]{10.66, 20.39, 20.7, 35.7, 40.82, 50.68, 61.358, 61.5355, 61.55044};
-        var locs = new double[]{10.66, 10.66, 10.66, 15, 20.39, 20.7, 28, 35.7, 40.82, 45, 50.68, 55, 61.358, 61.5355, 61.55044};
+        var locs = new double[]{10.66, 10.66, 15, 20.39, 20.7, 28, 35.7, 40.82, 45, 50.68, 55, 61.358, 61.5355, 61.55044};
         Profiler.getInstance().reset();
 
         for (int i = 0; i < locs.length; i++) {
@@ -98,10 +98,10 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
             long sumTotal = 0;
             long sumAlgorithmic = 0;
 
-            int runs = 5;
+            int runs = 10;
             for (int j = 0; j < runs; j++) {
 
-                Thread.sleep(10000);
+                Thread.sleep(12000);
 
                 watch.start();
                 param.setBins(bins);
@@ -141,54 +141,60 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
     public void profileTraceLoading() throws Exception {
         String fileName = "";
-        SynchronousTaskManager taskManager = this.registrar.getService(SynchronousTaskManager.class);
+        SynchronousTaskManager<?> taskManager = this.registrar.getService(SynchronousTaskManager.class);
         TunableSetter setter = this.registrar.getService(TunableSetter.class);
         StopWatch watch = new StopWatch();
-        List<Long> totalTimes = new ArrayList<>();
-        List<Long> algoTimes = new ArrayList<>();
-        int runs = 3;
-        for (int size = 1; size <= 18; size++) {
+
+        var params = new String[]{"size", "total", "algo", "nodes"};
+        for (var p : params) {
+            results.put(p, new ArrayList<>());
+        }
+
+        int preRuns = 1;
+        for (int size = 1; size <= 9; size++) {
+            System.out.println("---------------------------------------------------------------");
+            System.out.println(size);
+            System.out.println("---------------------------------------------------------------");
+
+            if (size > 1 && preRuns > 0) {
+                size = 1;
+                preRuns -= 1;
+            }
+
             long sumTotal = 0;
             long sumAlgorithmic = 0;
+            int runs = 10;
             for (int i = 0; i < runs; i++) {
-                var task = new LoadPDMTask(this.registrar);
 
+                Thread.sleep(12000);
+
+                var task = new LoadPDMTask(this.registrar);
                 var iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(String.format(fileName, size))));
                 watch.start();
                 taskManager.execute(iter);
                 SwingUtilities.invokeAndWait(watch::stop);
+
                 var algoResult = Profiler.getInstance().getAddSourceTableResult();
-                var totalResult = watch.getTime();
-                sumTotal += totalResult;
+                sumTotal += watch.getTime();
                 sumAlgorithmic += algoResult;
-                System.out.println("Time Elapsed: " + totalResult);
-                System.out.println("Time Elapsed Algo: " + algoResult);
-                System.out.println("Time Elapsed AVG " + i + ": " + (sumTotal / (i + 1)));
-                System.out.println("Time Elapsed Algo AVG " + i + ": " + (sumAlgorithmic / (i + 1)));
+
+                System.out.printf("Total: %d, Algorithmic: %d\n", watch.getTime(), algoResult);
 
                 if (i == runs - 1) {
-                    totalTimes.add(sumTotal / (i + 1));
-                    algoTimes.add(sumAlgorithmic / (i + 1));
+                    this.results.get("size").add((long) size * 10000);
+                    this.results.get("total").add(sumTotal / runs);
+                    this.results.get("algo").add(sumAlgorithmic / runs);
+                    this.results.get("nodes").add((long) this.createdNetwork.getNodeCount());
                 }
 
-                this.reset();
                 var networkManager = registrar.getService(CyNetworkManager.class);
                 networkManager.destroyNetwork(this.createdNetwork);
+                this.reset();
                 watch.reset();
-                Thread.sleep(12000);
             }
-            System.out.println("---------------------------------------------------------------");
-            System.out.println(size);
-            System.out.println("---------------------------------------------------------------");
         }
 
-        for (int i = 1; i <= 18; i++) {
-            System.out.println(String.format("(%d,%d)", i, totalTimes.get(i - 1)));
-        }
-        System.out.println();
-        for (int i = 1; i <= 18; i++) {
-            System.out.println(String.format("(%d,%d)", i, algoTimes.get(i - 1)));
-        }
+        printResults();
     }
 
     public void reset() {
