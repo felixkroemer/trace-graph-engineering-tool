@@ -23,9 +23,9 @@ public class SelectBinsController {
         return this.parameter;
     }
 
-    public Collection<CyTable> getSourceTables() {
+    public Collection<CyTable> getTraces() {
         var manager = registrar.getService(TraceGraphManager.class);
-        return manager.getSourceTables(parameter.getPdm());
+        return manager.getTraces(parameter.getPdm());
     }
 
     public void setNewBins(List<Float> bins) {

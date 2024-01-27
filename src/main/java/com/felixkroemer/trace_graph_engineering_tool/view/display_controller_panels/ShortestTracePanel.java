@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
@@ -23,7 +23,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;
 
-    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller, TraceExtension trace) {
+    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller, SubTraceExtension trace) {
         this.controller = controller;
         this.traceInfoTable = new CustomTreeTable();
         this.traceSequenceTable = new CustomTreeTable();
@@ -61,7 +61,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
         });
     }
 
-    private void updatePanels(TraceExtension trace) {
+    private void updatePanels(SubTraceExtension trace) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         for (var x : trace.getIndices()) {
             root.add(new MultiObjectTreeTableNode(x.getValue0(), x.getValue1()));
@@ -69,7 +69,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
         this.traceSequenceTable.setModel(new CustomTreeTableModel(root, 2));
 
         root = new DefaultMutableTreeTableNode("Root");
-        root.add(new MultiObjectTreeTableNode("Source table", trace.getSourceTable()));
+        root.add(new MultiObjectTreeTableNode("Source table", trace.getTable()));
         root.add(new MultiObjectTreeTableNode("Length", trace.getSequence().size()));
         root.add(new MultiObjectTreeTableNode("Unique nodes", trace.getUniqueSequence().size()));
         this.traceInfoTable.setModel(new CustomTreeTableModel(root, 2));
@@ -83,7 +83,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(ShortestTraceEdgeDisplayController.TRACE)) {
-            this.updatePanels((TraceExtension) evt.getNewValue());
+            this.updatePanels((SubTraceExtension) evt.getNewValue());
         }
     }
 

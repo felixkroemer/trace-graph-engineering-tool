@@ -13,9 +13,9 @@ import java.util.stream.LongStream;
 public class TraceGraphPrimaryColumn implements CyColumn {
 
     private final Long suid = SUIDFactory.getNextSUID();
-    private TraceGraphSourceTable table;
+    private Trace table;
 
-    public TraceGraphPrimaryColumn(TraceGraphSourceTable table) {
+    public TraceGraphPrimaryColumn(Trace table) {
         this.table = table;
     }
 

@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.ShortestTracePanel;
@@ -18,15 +18,16 @@ import java.beans.PropertyChangeListener;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayController implements ShowTraceEventListener {
+public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayController implements
+        ShowTraceEventListener {
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
     public static final String TRACE = "trace";
     //TODO: find better way to pass initial trace
-    private TraceExtension trace;
+    private SubTraceExtension trace;
 
-    public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph
-            , TraceExtension trace, RenderingController renderingController) {
+    public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                              SubTraceExtension trace, RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.trace = trace;
     }
@@ -68,7 +69,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
         return RENDERING_MODE_SHORTEST_TRACE;
     }
 
-    public void showTrace(TraceExtension trace) {
+    public void showTrace(SubTraceExtension trace) {
         this.hideAllEdges();
         for (int i = 0; i < trace.getSequence().size() - 1; i++) {
             CyEdge edge;
@@ -90,8 +91,7 @@ public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayContr
         }
         this.trace = e.getTrace();
         this.showTrace(e.getTrace());
-        pcs.firePropertyChange(new PropertyChangeEvent(this, ShortestTraceEdgeDisplayController.TRACE, null,
-                e.getTrace()));
+        pcs.firePropertyChange(new PropertyChangeEvent(this, ShortestTraceEdgeDisplayController.TRACE, null, e.getTrace()));
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {

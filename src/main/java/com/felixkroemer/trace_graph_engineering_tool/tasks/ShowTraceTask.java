@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTableUtil;
@@ -35,7 +35,7 @@ public class ShowTraceTask extends AbstractTask {
             var traceGraph = controller.getTraceGraph();
             var trace = traceGraph.findTrace(nodes);
             if (trace != null) {
-                TraceExtension extension = new TraceExtension(trace, traceGraph, Color.BLACK);
+                SubTraceExtension extension = new SubTraceExtension(trace, traceGraph, Color.BLACK);
                 helper.fireEvent(new ShowTraceEvent(this, extension, network));
             } else {
                 throw new Exception("No Trace found");

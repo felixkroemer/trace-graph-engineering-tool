@@ -29,14 +29,14 @@ public class DiscreteTrackRenderer extends JComponent implements TrackRenderer {
     private Color highlightColor;
     private JXMultiThumbSlider<Void> slider;
 
-    public DiscreteTrackRenderer(float minValue, float maxValue, String name, Collection<CyTable> sourceTables,
+    public DiscreteTrackRenderer(float minValue, float maxValue, String name, Collection<CyTable> traces,
                                  List<Boolean> visibleBins) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.visibleBins = visibleBins;
         this.name = name;
         this.highlightColor = new Color(0, 255, 0, 127);
-        this.tables = sourceTables;
+        this.tables = traces;
         this.heatMap = this.initHeatMap();
     }
 

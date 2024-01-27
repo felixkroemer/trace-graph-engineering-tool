@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.model;
 public class Profiler {
 
     private static Profiler instance;
-    private long addSourceTableResult;
+    private long addTraceResult;
     private long updateTraceGraphResult;
     private long impactedSituations;
     private long foundNodes;
@@ -24,7 +24,7 @@ public class Profiler {
     }
 
     public void reset() {
-        this.addSourceTableResult = 0;
+        this.addTraceResult = 0;
         this.updateTraceGraphResult = 0;
         this.impactedSituations = 0;
         this.foundNodes = 0;
@@ -36,12 +36,12 @@ public class Profiler {
     private Profiler() {
     }
 
-    public long getAddSourceTableResult() {
-        return this.addSourceTableResult;
+    public long getAddTraceResult() {
+        return this.addTraceResult;
     }
 
-    public void setAddSourceTableResult(long result) {
-        this.addSourceTableResult = result;
+    public void setAddTraceResult(long result) {
+        this.addTraceResult = result;
     }
 
     public long getUpdateTraceGraphResult() {

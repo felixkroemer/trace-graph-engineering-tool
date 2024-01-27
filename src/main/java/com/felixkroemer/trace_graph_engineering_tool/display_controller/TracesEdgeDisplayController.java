@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
-import com.felixkroemer.trace_graph_engineering_tool.model.TraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.TracesPanel;
@@ -30,13 +30,14 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     private static int colorIndex = 0;
     private int length;
     private CyServiceRegistrar registrar;
-    private List<TraceExtension> traces;
+    private List<SubTraceExtension> traces;
     private Pair<Integer, Integer> displayRange;
     private Set<CyEdge> multiEdges;
     private Set<CyEdge> highlightedEdges;
-    private Map<CyEdge, TraceExtension> traceMapping;
+    private Map<CyEdge, SubTraceExtension> traceMapping;
 
-    public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, int length, RenderingController renderingController) {
+    public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                       int length, RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.registrar = registrar;
         this.length = length;
@@ -50,22 +51,23 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         return new Color[]{new Color(0, 0, 0), new Color(87, 87, 87), new Color(173, 35, 35), new Color(42, 75, 215), new Color(29, 105, 20), new Color(129, 74, 25), new Color(129, 38, 192), new Color(160, 160, 160), new Color(129, 197, 122), new Color(157, 175, 255), new Color(41, 208, 208), new Color(255, 146, 51), new Color(255, 238, 51), new Color(233, 222, 187), new Color(255, 205, 243), new Color(255, 255, 255)};
     }
 
-    public static void findNextNodes(int index, TraceExtension trace, TraceGraph traceGraph, CyTable sourceTable, int length, boolean up) {
-        CyNode currentNode = traceGraph.findNode(sourceTable, index);
+    public static void findNextNodes(int index, SubTraceExtension subTrace, TraceGraph traceGraph, CyTable trace,
+                                     int length, boolean up) {
+        CyNode currentNode = traceGraph.findNode(trace, index);
         CyNode nextNode;
         int found = 0;
         while (true) {
             index = up ? index - 1 : index + 1;
-            if (index < 1 || index > sourceTable.getRowCount() || found == length) {
+            if (index < 1 || index > trace.getRowCount() || found == length) {
                 return;
             }
             // must exist
-            nextNode = traceGraph.findNode(sourceTable, index);
+            nextNode = traceGraph.findNode(trace, index);
 
             if (up) {
-                trace.addBefore(nextNode);
+                subTrace.addBefore(nextNode);
             } else {
-                trace.addAfter(nextNode);
+                subTrace.addAfter(nextNode);
             }
             if (nextNode != currentNode) {
                 found++;
@@ -74,19 +76,20 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         }
     }
 
-    public static List<TraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length, boolean isEdge) {
-        List<TraceExtension> traces = new ArrayList<>();
+    public static List<SubTraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph,
+                                                          int length, boolean isEdge) {
+        List<SubTraceExtension> subTraces = new ArrayList<>();
         Collection<Integer> sourceRows;
-        for (CyTable sourceTable : traceGraph.getSourceTables()) {
+        for (CyTable trace : traceGraph.getTraces()) {
             Set<Integer> foundIndices = new HashSet<>();
             CyNode startNode;
             if (isEdge) {
                 CyEdge edge = (CyEdge) identifiable;
-                sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(sourceTable);
+                sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(trace);
                 startNode = ((CyEdge) identifiable).getSource();
             } else {
                 startNode = ((CyNode) identifiable);
-                sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(sourceTable);
+                sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(trace);
             }
             if (sourceRows == null) {
                 continue;
@@ -100,16 +103,16 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                TraceExtension trace = new TraceExtension(sourceTable, startNode, sourceIndex, traceGraph, getNextColor());
-                traces.add(trace);
-                findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, true);
-                findNextNodes(sourceIndex, trace, traceGraph, sourceTable, length, false);
-                for (int i = 0; i < trace.getSequence().size(); i++) {
-                    foundIndices.add(trace.getStartIndex() + i);
+                SubTraceExtension subTrace = new SubTraceExtension(trace, startNode, sourceIndex, traceGraph, getNextColor());
+                subTraces.add(subTrace);
+                findNextNodes(sourceIndex, subTrace, traceGraph, trace, length, true);
+                findNextNodes(sourceIndex, subTrace, traceGraph, trace, length, false);
+                for (int i = 0; i < subTrace.getSequence().size(); i++) {
+                    foundIndices.add(subTrace.getStartIndex() + i);
                 }
             }
         }
-        return traces;
+        return subTraces;
     }
 
     private static Color getNextColor() {
@@ -175,20 +178,21 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         networkView.getModel().removeEdges(this.multiEdges);
     }
 
-    public List<TraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges, CyNetwork network) {
+    public List<SubTraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges,
+                                                   CyNetwork network) {
         network.removeEdges(this.multiEdges);
         this.multiEdges.clear();
         this.traceMapping.clear();
 
         if (!selectedNodes.isEmpty() || !selectedEdges.isEmpty()) {
-            List<TraceExtension> traces = new LinkedList<>();
+            List<SubTraceExtension> traces = new LinkedList<>();
             if (selectedNodes.size() == 1) {
                 traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
             }
             if (selectedEdges.size() == 1) {
                 traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
             }
-            traces.sort(Comparator.comparingInt(TraceExtension::getWeight).reversed());
+            traces.sort(Comparator.comparingInt(SubTraceExtension::getWeight).reversed());
             return traces;
         }
         return null;
@@ -238,7 +242,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         }
     }
 
-    public void highlightTrace(TraceExtension trace) {
+    public void highlightTrace(SubTraceExtension trace) {
         this.unhighlightEdges();
         if (!traces.contains(trace)) {
             throw new IllegalArgumentException("Trace does not exist");
@@ -247,7 +251,8 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         for (int i = 0; i < uniqueSequence.size() - 1; i++) {
             var source = uniqueSequence.get(i);
             var target = uniqueSequence.get(i + 1);
-            List<CyEdge> edges = this.traceGraph.getNetwork().getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
+            List<CyEdge> edges = this.traceGraph.getNetwork()
+                                                .getConnectingEdgeList(source, target, CyEdge.Type.DIRECTED);
             for (CyEdge edge : edges) {
                 var view = networkView.getEdgeView(edge);
                 if (edge.getTarget() == target && edge.getSource() == source && view.getVisualProperty(EDGE_STROKE_UNSELECTED_PAINT) == trace.getColor()) {
@@ -297,7 +302,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
         drawTraces();
     }
 
-    public List<TraceExtension> getTraces() {
+    public List<SubTraceExtension> getTraces() {
         return this.traces;
     }
 

@@ -174,7 +174,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                 taskManager.execute(iter);
                 SwingUtilities.invokeAndWait(watch::stop);
 
-                var algoResult = Profiler.getInstance().getAddSourceTableResult();
+                var algoResult = Profiler.getInstance().getAddTraceResult();
                 sumTotal += watch.getTime();
                 sumAlgorithmic += algoResult;
 

@@ -109,27 +109,28 @@ public class TraceGraphManager implements NetworkAboutToBeDestroyedListener, CyD
     public List<ParameterDiscretizationModel> findPDM(Collection<String> params) {
         List<ParameterDiscretizationModel> matchingPDMs = new ArrayList<>();
         for (var pdm : this.controllers.keySet()) {
-            if (pdm.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet()).equals(new HashSet<>(params))) {
+            if (pdm.getParameters().stream().map(Parameter::getName).collect(Collectors.toSet())
+                   .equals(new HashSet<>(params))) {
                 matchingPDMs.add(pdm);
             }
         }
         return matchingPDMs;
     }
 
-    public Set<CyTable> getSourceTables(ParameterDiscretizationModel pdm) {
+    public Set<CyTable> getTraces(ParameterDiscretizationModel pdm) {
         Set<CyTable> tables = new HashSet<>();
         var controllers = this.controllers.get(pdm);
         for (var controller : controllers) {
             if (controller instanceof TraceGraphController tgc) {
-                tables.addAll(tgc.getTraceGraph().getSourceTables());
+                tables.addAll(tgc.getTraceGraph().getTraces());
             }
         }
         return tables;
     }
 
     public String getAvailableRootNetworkName(String preferredName) {
-        var names =
-                this.controllers.keySet().stream().map(ParameterDiscretizationModel::getName).collect(Collectors.toSet());
+        var names = this.controllers.keySet().stream().map(ParameterDiscretizationModel::getName)
+                                    .collect(Collectors.toSet());
         int i = 1;
         String name = preferredName;
         while (names.contains(name)) {

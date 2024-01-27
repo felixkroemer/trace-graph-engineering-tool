@@ -30,13 +30,13 @@ public abstract class AuxiliaryInformation {
         return list;
     }
 
-    public void addSourceRow(CyTable sourceTable, int index) {
-        var list = this.getList(sourceTable);
+    public void addSourceRow(CyTable trace, int index) {
+        var list = this.getList(trace);
         list.add(index);
     }
 
-    public List<Integer> getSourceRows(CyTable sourceTable) {
-        return this.getList(sourceTable);
+    public List<Integer> getSourceRows(CyTable trace) {
+        return this.getList(trace);
     }
 
     public boolean hasNoSourceRows() {
@@ -48,7 +48,7 @@ public abstract class AuxiliaryInformation {
         return true;
     }
 
-    public Set<CyTable> getSourceTables() {
+    public Set<CyTable> getTraces() {
         return this.source_rows.stream().map(Pair::getValue0).collect(Collectors.toSet());
     }
 }

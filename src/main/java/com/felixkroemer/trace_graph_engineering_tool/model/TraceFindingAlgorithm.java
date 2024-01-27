@@ -10,17 +10,17 @@ import java.util.*;
 
 public class TraceFindingAlgorithm {
 
-    public static Trace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static SubTrace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = new Pair<>(0, Integer.MAX_VALUE);
-        CyTable minimumSourceTable = null;
-        for (CyTable sourceTable : traceGraph.getSourceTables()) {
-            if (isSolutionInfeasible(nodes, sourceTable, traceGraph)) {
+        CyTable minimumTrace = null;
+        for (CyTable trace : traceGraph.getTraces()) {
+            if (isSolutionInfeasible(nodes, trace, traceGraph)) {
                 continue;
             }
             Map<CyNode, Integer> index = new LinkedHashMap<>();
 
-            for (int i = 0; i < sourceTable.getRowCount(); i++) {
-                var node = traceGraph.findNode(sourceTable, i);
+            for (int i = 0; i < trace.getRowCount(); i++) {
+                var node = traceGraph.findNode(trace, i);
                 if (nodes.contains(node)) {
                     index.remove(node);
                     index.put(node, i);
@@ -28,84 +28,22 @@ public class TraceFindingAlgorithm {
                         int j = index.values().iterator().next();
                         if (minimumWindow.getValue1() - minimumWindow.getValue0() > i - j) {
                             minimumWindow = new Pair<>(j, i);
-                            minimumSourceTable = sourceTable;
+                            minimumTrace = trace;
                         }
                     }
                 }
             }
         }
-        return createTrace(traceGraph, minimumWindow, minimumSourceTable);
+        return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    /*public static Trace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static SubTrace findTraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
-        CyTable minimumSourceTable = null;
-        for (CyTable sourceTable : traceGraph.getSourceTables()) {
-            if (isSolutionInfeasible(nodes, sourceTable, traceGraph)) {
-                continue;
-            }
-
-            Map<CyNode, Integer> histogram = new HashMap<>(nodes.size());
-            nodes.forEach(n -> histogram.put(n, 0));
-            Collection<Integer> values = histogram.values();
-
-            int start = 1;
-            int end = sourceTable.getRowCount();
-
-            // find initial window
-            CyNode prevNodeEnd = null;
-            for (int i = 1; i <= sourceTable.getRowCount(); i++) {
-                if (!values.contains(0)) {
-                    end = i - 1;
-                    break;
-                } else {
-                    var node = traceGraph.findNode(sourceTable, i);
-                    if ((prevNodeEnd == null || prevNodeEnd != node) && nodes.contains(node)) {
-                        histogram.merge(node, 1, Integer::sum);
-                    }
-                    prevNodeEnd = node;
-                }
-            }
-            if (minimumWindow == null || end - 1 - start < minimumWindow.getValue1() - minimumWindow.getValue0()) {
-                minimumWindow = new Pair<>(start, end - 1);
-                minimumSourceTable = sourceTable;
-            }
-
-            CyNode prevNodeStart = traceGraph.findNode(sourceTable, 1);
-            while (end <= sourceTable.getRowCount()) {
-                var node = traceGraph.findNode(sourceTable, end);
-                if ((prevNodeEnd != node) && nodes.contains(node)) {
-                    histogram.merge(node, 1, Integer::sum);
-                }
-                end += 1;
-                prevNodeEnd = node;
-                while (!values.contains(0)) {
-                    node = traceGraph.findNode(sourceTable, start);
-                    if ((prevNodeStart != node) && nodes.contains(node)) {
-                        histogram.merge(node, -1, Integer::sum);
-                        if (values.contains(0)) {
-                            if (end - 1 - start < minimumWindow.getValue1() - minimumWindow.getValue0()) {
-                                minimumWindow = new Pair<>(start, end - 1);
-                                minimumSourceTable = sourceTable;
-                            }
-                        }
-                    }
-                    start += 1;
-                    prevNodeStart = node;
-                }
-            }
-        }
-
-        return createTrace(traceGraph, minimumWindow, minimumSourceTable);
-    }*/
-
-    public static Trace findTraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
-        Pair<Integer, Integer> minimumWindow = null;
-        CyTable minimumSourceTable = null;
-        for (CyTable sourceTable : traceGraph.getSourceTables()) {
+        CyTable minimumTrace = null;
+        for (CyTable trace : traceGraph.getTraces()) {
             Pair<Integer, Integer> window = null;
 
-            if (isSolutionInfeasible(nodes, sourceTable, traceGraph)) {
+            if (isSolutionInfeasible(nodes, trace, traceGraph)) {
                 continue;
             }
 
@@ -113,8 +51,8 @@ public class TraceFindingAlgorithm {
             var nodeA = list.get(0);
             var nodeB = list.get(1);
 
-            var sourcesA = traceGraph.getNodeAux(nodeA).getSourceRows(sourceTable);
-            var sourcesB = traceGraph.getNodeAux(nodeB).getSourceRows(sourceTable);
+            var sourcesA = traceGraph.getNodeAux(nodeA).getSourceRows(trace);
+            var sourcesB = traceGraph.getNodeAux(nodeB).getSourceRows(trace);
 
             if (sourcesA == null || sourcesB == null) {
                 continue;
@@ -139,46 +77,46 @@ public class TraceFindingAlgorithm {
             if (window != null) {
                 if (minimumWindow == null || window.getValue1() - window.getValue0() < minimumWindow.getValue1() - minimumWindow.getValue0()) {
                     minimumWindow = window;
-                    minimumSourceTable = sourceTable;
+                    minimumTrace = trace;
                 }
             }
         }
 
-        return createTrace(traceGraph, minimumWindow, minimumSourceTable);
+        return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    private static boolean isSolutionInfeasible(Collection<CyNode> nodes, CyTable sourceTable, TraceGraph traceGraph) {
+    private static boolean isSolutionInfeasible(Collection<CyNode> nodes, CyTable trace, TraceGraph traceGraph) {
         for (var node : nodes) {
-            if (traceGraph.getNodeAux(node).getSourceRows(sourceTable) == null) {
+            if (traceGraph.getNodeAux(node).getSourceRows(trace) == null) {
                 return true;
             }
         }
         return false;
     }
 
-    public static Trace findTraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
+    public static SubTrace findTraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
-        CyTable minimumSourceTable = null;
+        CyTable minimumTrace = null;
 
         CustomLoader.loadNativeLibraries();
 
-        for (CyTable sourceTable : traceGraph.getSourceTables()) {
+        for (CyTable trace : traceGraph.getTraces()) {
 
-            if (isSolutionInfeasible(nodes, sourceTable, traceGraph)) {
+            if (isSolutionInfeasible(nodes, trace, traceGraph)) {
                 continue;
             }
 
-            BoolVar[] vars = new BoolVar[sourceTable.getRowCount()];
-            BoolVar[] starts = new BoolVar[sourceTable.getRowCount()];
+            BoolVar[] vars = new BoolVar[trace.getRowCount()];
+            BoolVar[] starts = new BoolVar[trace.getRowCount()];
 
             CpModel model = new CpModel();
-            for (int i = 0; i < sourceTable.getRowCount(); i++) {
+            for (int i = 0; i < trace.getRowCount(); i++) {
                 vars[i] = model.newBoolVar("" + i);
                 starts[i] = model.newBoolVar("s" + i);
             }
 
             for (var node : nodes) {
-                var sources = traceGraph.getNodeAux(node).getSourceRows(sourceTable);
+                var sources = traceGraph.getNodeAux(node).getSourceRows(trace);
                 IntVar[] expressions = new IntVar[sources.size()];
                 int i = 0;
                 for (var x : sources) {
@@ -189,8 +127,7 @@ public class TraceFindingAlgorithm {
             }
 
             for (int i = 1; i < vars.length; i++) {
-                model.addLessOrEqual(LinearExpr.weightedSum(new Literal[]{vars[i], vars[i - 1], starts[i]},
-                        new long[]{1, -1, -1}), 0);
+                model.addLessOrEqual(LinearExpr.weightedSum(new Literal[]{vars[i], vars[i - 1], starts[i]}, new long[]{1, -1, -1}), 0);
             }
             model.addImplication(vars[0], starts[0]);
 
@@ -220,22 +157,22 @@ public class TraceFindingAlgorithm {
 
                 if (minimumWindow == null || end - start < minimumWindow.getValue1() - minimumWindow.getValue0()) {
                     minimumWindow = new Pair<>(start, end);
-                    minimumSourceTable = sourceTable;
+                    minimumTrace = trace;
                 }
             }
         }
 
-        return createTrace(traceGraph, minimumWindow, minimumSourceTable);
+        return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    private static Trace createTrace(TraceGraph traceGraph, Pair<Integer, Integer> minimumWindow,
-                                     CyTable minimumSourceTable) {
+    private static SubTrace createTrace(TraceGraph traceGraph, Pair<Integer, Integer> minimumWindow,
+                                        CyTable minimumTrace) {
         if (minimumWindow != null) {
             var traceNodes = new ArrayList<CyNode>();
             for (int i = minimumWindow.getValue0(); i <= minimumWindow.getValue1(); i++) {
-                traceNodes.add(traceGraph.findNode(minimumSourceTable, i));
+                traceNodes.add(traceGraph.findNode(minimumTrace, i));
             }
-            return new Trace(minimumSourceTable, traceNodes, minimumWindow.getValue0());
+            return new SubTrace(minimumTrace, traceNodes, minimumWindow.getValue0());
         } else {
             return null;
         }

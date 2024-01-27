@@ -46,10 +46,10 @@ public class SelectBinsPanel extends JPanel {
 
         this.bins = new ArrayList<>(controller.getParameter().getBins().size());
         var parameter = controller.getParameter();
-        this.minimum = controller.getSourceTables().stream().flatMap(t -> t.getAllRows().stream())
+        this.minimum = controller.getTraces().stream().flatMap(t -> t.getAllRows().stream())
                                  .min(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get()
                                  .get(parameter.getName(), Double.class).floatValue();
-        this.maximum = controller.getSourceTables().stream().flatMap(t -> t.getAllRows().stream())
+        this.maximum = controller.getTraces().stream().flatMap(t -> t.getAllRows().stream())
                                  .max(Comparator.comparingDouble(o -> o.get(parameter.getName(), Double.class))).get()
                                  .get(parameter.getName(), Double.class).floatValue();
         this.visibleBins = new ArrayList<>();
@@ -59,7 +59,7 @@ public class SelectBinsPanel extends JPanel {
 
         this.slider = new JXMultiThumbSlider<>();
         initButtons(controller.getParameter());
-        initSlider(controller.getParameter(), controller.getSourceTables());
+        initSlider(controller.getParameter(), controller.getTraces());
     }
 
     public void initButtons(Parameter param) {
@@ -117,11 +117,11 @@ public class SelectBinsPanel extends JPanel {
         this.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void initSlider(Parameter param, Collection<CyTable> sourceTables) {
+    public void initSlider(Parameter param, Collection<CyTable> traces) {
         this.slider.setThumbRenderer(new TriangleThumbRenderer());
         this.slider.setMinimumValue(0f);
         this.slider.setMaximumValue(1f);
-        DiscreteTrackRenderer trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(), sourceTables, this.visibleBins);
+        DiscreteTrackRenderer trackRenderer = new DiscreteTrackRenderer(this.minimum, this.maximum, param.getName(), traces, this.visibleBins);
         this.slider.setTrackRenderer(trackRenderer);
         this.add(slider, BorderLayout.CENTER);
 

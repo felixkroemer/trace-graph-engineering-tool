@@ -7,7 +7,7 @@ import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizati
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
-import com.felixkroemer.trace_graph_engineering_tool.model.source_table.TraceGraphSourceTable;
+import com.felixkroemer.trace_graph_engineering_tool.model.source_table.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMPanel;
 import com.google.gson.Gson;
@@ -111,10 +111,10 @@ public class LoadPDMTask extends AbstractTask {
             File path = null;
             try {
                 path = new File(traceFile.getParentFile(), csv);
-                var sourceTable = new TraceGraphSourceTable(csv, Files.lines(path.toPath()).count() - 1, registrar);
-                sourceTable.setTitle(csv);
-                Util.parseCSV(sourceTable, path);
-                loadTraceToTraceGraph(sourceTable, traceGraph);
+                var trace = new Trace(csv, Files.lines(path.toPath()).count() - 1, registrar);
+                trace.setTitle(csv);
+                Util.parseCSV(trace, path);
+                loadTraceToTraceGraph(trace, traceGraph);
             } catch (Exception e) {
                 logger.error("Could not load Trace with path " + path);
             }
@@ -122,31 +122,31 @@ public class LoadPDMTask extends AbstractTask {
     }
 
     public void loadTrace() throws Exception {
-        CyTable sourceTable = new TraceGraphSourceTable(traceFile.getName(), Files.lines(traceFile.toPath()).count() - 1, registrar);
-        Util.parseCSV(sourceTable, traceFile);
+        CyTable trace = new Trace(traceFile.getName(), Files.lines(traceFile.toPath()).count() - 1, registrar);
+        Util.parseCSV(trace, traceFile);
         List<String> params = new ArrayList<>();
-        sourceTable.getColumns().forEach(c -> {
+        trace.getColumns().forEach(c -> {
             if (!c.getName().equals(Columns.SOURCE_ID))
                 params.add(c.getName());
         });
         var pdms = manager.findPDM(params);
         if (pdms.isEmpty()) {
-            this.loadTraceToNewPDM(sourceTable);
+            this.loadTraceToNewPDM(trace);
         } else {
-            SwingUtilities.invokeLater(() -> Util.showDialog(new SelectMatchingPDMPanel(pdms, () -> this.loadTraceToNewPDM(sourceTable), (pdm) -> {
+            SwingUtilities.invokeLater(() -> Util.showDialog(new SelectMatchingPDMPanel(pdms, () -> this.loadTraceToNewPDM(trace), (pdm) -> {
                 var subNetwork = Util.createSubNetwork(pdm);
                 TraceGraph traceGraph = new TraceGraph(this.registrar, subNetwork, pdm);
-                this.loadTraceToTraceGraph(sourceTable, traceGraph);
+                this.loadTraceToTraceGraph(trace, traceGraph);
                 TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
                 manager.registerTraceGraph(traceGraph.getPDM(), controller);
             }, true), "Select matching PDM"));
         }
     }
 
-    private void loadTraceToNewPDM(CyTable sourceTable) {
-        var parameterNames = sourceTable.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
+    private void loadTraceToNewPDM(CyTable trace) {
+        var parameterNames = trace.getColumns().stream().map(CyColumn::getName).collect(Collectors.toList());
         var traceGraph = this.createTraceGraphAndPDM(parameterNames);
-        loadTraceToTraceGraph(sourceTable, traceGraph);
+        loadTraceToTraceGraph(trace, traceGraph);
         TraceGraphController controller = new TraceGraphController(registrar, traceGraph);
         manager.registerTraceGraph(traceGraph.getPDM(), controller);
     }
@@ -168,8 +168,8 @@ public class LoadPDMTask extends AbstractTask {
         return subNetwork;
     }
 
-    public void loadTraceToTraceGraph(CyTable sourceTable, TraceGraph traceGraph) {
-        traceGraph.addSourceTable(sourceTable);
+    public void loadTraceToTraceGraph(CyTable trace, TraceGraph traceGraph) {
+        traceGraph.addTrace(trace);
     }
 
     private ParameterDiscretizationModelDTO parsePDM() throws Exception {

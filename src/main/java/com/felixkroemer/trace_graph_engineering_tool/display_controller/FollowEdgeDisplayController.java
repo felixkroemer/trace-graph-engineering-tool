@@ -21,7 +21,8 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
     private CyNode previousNode;
     private Path path;
 
-    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph, RenderingController renderingController) {
+    public FollowEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                       RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
     }
 
@@ -32,8 +33,10 @@ public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
             CyNode neighbor = edge.getTarget() == previousNode ? edge.getSource() : edge.getTarget();
             traceGraph.getNetwork().getRow(edge).set(CyNetwork.SELECTED, false);
             traceGraph.getNetwork().getRow(neighbor).set(CyNetwork.SELECTED, true);
-            networkView.setVisualProperty(NETWORK_CENTER_X_LOCATION, networkView.getNodeView(neighbor).getVisualProperty(NODE_X_LOCATION));
-            networkView.setVisualProperty(NETWORK_CENTER_Y_LOCATION, networkView.getNodeView(neighbor).getVisualProperty(NODE_Y_LOCATION));
+            networkView.setVisualProperty(NETWORK_CENTER_X_LOCATION, networkView.getNodeView(neighbor)
+                                                                                .getVisualProperty(NODE_X_LOCATION));
+            networkView.setVisualProperty(NETWORK_CENTER_Y_LOCATION, networkView.getNodeView(neighbor)
+                                                                                .getVisualProperty(NODE_Y_LOCATION));
             this.path.addNode(traceGraph.getNodeAux(neighbor));
         } else if (event.nodesChanged() && event.getSelectedNodes().size() == 1) {
             var node = event.getSelectedNodes().iterator().next();
@@ -126,7 +129,7 @@ class PathElement {
     public PathElement(NodeAuxiliaryInformation nodeAux) {
         this.x = new HashMap<>();
         this.length = 1;
-        for (var trace : nodeAux.getSourceTables()) {
+        for (var trace : nodeAux.getTraces()) {
             this.x.put(trace, new LinkedList<>());
             for (var situation : nodeAux.getSourceRows(trace)) {
                 var list = new LinkedList<Integer>();
@@ -138,11 +141,12 @@ class PathElement {
 
     boolean addNode(NodeAuxiliaryInformation nodeAux) {
         this.length += 1;
-        if (Collections.disjoint(this.x.keySet(), nodeAux.getSourceTables())) {
+        if (Collections.disjoint(this.x.keySet(), nodeAux.getTraces())) {
             return false;
         }
         boolean found = false;
-        this.x = this.x.entrySet().stream().filter(e -> nodeAux.getSourceTables().contains(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.x = this.x.entrySet().stream().filter(e -> nodeAux.getTraces().contains(e.getKey()))
+                       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         for (var entry : this.x.entrySet()) {
             var situations = nodeAux.getSourceRows(entry.getKey());
             for (var list : entry.getValue()) {

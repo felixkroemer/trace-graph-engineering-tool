@@ -13,7 +13,7 @@ public class TraceGraph {
 
     private CyNetwork network;
     private ParameterDiscretizationModel pdm;
-    private Set<CyTable> sourceTables;
+    private Set<CyTable> traces;
     private CyTable defaultNodeTable;
     // hash to node suid
     private Map<Long, Long> suidHashMapping;
@@ -27,7 +27,7 @@ public class TraceGraph {
 
     public TraceGraph(CyServiceRegistrar registrar, CyNetwork network, ParameterDiscretizationModel pdm) {
         this.pdm = pdm;
-        this.sourceTables = new HashSet<>();
+        this.traces = new HashSet<>();
         this.network = network;
 
         // DEFAULT_ATTRS = Shared (root) + Local
@@ -70,15 +70,15 @@ public class TraceGraph {
         return currentNode;
     }
 
-    public void addSourceTable(CyTable sourceTable) {
+    public void addTrace(CyTable trace) {
         StopWatch watch = new StopWatch();
         watch.start();
-        this.sourceTables.add(sourceTable);
-        this.nodeMapping.put(sourceTable, new CyNode[sourceTable.getRowCount() + 1]);
+        this.traces.add(trace);
+        this.nodeMapping.put(trace, new CyNode[trace.getRowCount() + 1]);
 
         int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
-        for (CyRow sourceRow : sourceTable.getAllRows()) {
+        for (CyRow sourceRow : trace.getAllRows()) {
             Map<String, Object> values = sourceRow.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
@@ -93,8 +93,8 @@ public class TraceGraph {
             CyNode currentNode = getOrCreateNode(state);
             NodeAuxiliaryInformation currentNodeInfo = this.nodeInfo.get(currentNode);
 
-            this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
-            currentNodeInfo.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
+            this.nodeMapping.get(trace)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
+            currentNodeInfo.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
             if (prevNode != currentNode) {
                 currentNodeInfo.incrementFrequency();
             } else {
@@ -112,7 +112,7 @@ public class TraceGraph {
                     edgeAux = this.edgeInfo.get(edge);
                     edgeAux.increaseTraversals();
                 }
-                edgeAux.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                edgeAux.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
             }
             prevNode = currentNode;
         }
@@ -120,23 +120,23 @@ public class TraceGraph {
         this.fixNetworkName();
 
         long result = watch.getTime();
-        Profiler.getInstance().setAddSourceTableResult(result);
+        Profiler.getInstance().setAddTraceResult(result);
     }
 
     /**
      * Called when a trace is added to or extracted from this Trace Graph.
      */
     private void fixNetworkName() {
-        network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(sourceTables));
+        network.getRow(network).set(CyNetwork.NAME, Util.getSubNetworkName(traces));
     }
 
-    public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> sourceTablesToRemove) {
+    public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> tracesToRemove) {
         TraceGraph traceGraph = new TraceGraph(this.registrar, newNetwork, this.pdm);
-        for (CyTable table : sourceTablesToRemove) {
-            if (!this.sourceTables.contains(table)) {
+        for (CyTable table : tracesToRemove) {
+            if (!this.traces.contains(table)) {
                 throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
             } else {
-                this.sourceTables.remove(table);
+                this.traces.remove(table);
             }
         }
 
@@ -145,34 +145,34 @@ public class TraceGraph {
 
         for (CyNode node : this.network.getNodeList()) {
             var info = this.nodeInfo.get(node);
-            if (sourceTablesToRemove.containsAll(info.getSourceTables())) {
+            if (tracesToRemove.containsAll(info.getTraces())) {
                 nodesToRemove.add(node);
                 nodeInfo.remove(node);
             } else {
-                info.getSourceTables().removeIf(sourceTablesToRemove::contains);
+                info.getTraces().removeIf(tracesToRemove::contains);
             }
         }
 
         for (CyEdge edge : this.network.getEdgeList()) {
             var info = this.edgeInfo.get(edge);
-            if (sourceTablesToRemove.containsAll(info.getSourceTables())) {
+            if (tracesToRemove.containsAll(info.getTraces())) {
                 edgesToRemove.add(edge);
                 edgeInfo.remove(edge);
             } else {
-                info.getSourceTables().removeIf(sourceTablesToRemove::contains);
+                info.getTraces().removeIf(tracesToRemove::contains);
             }
         }
 
         this.network.removeNodes(nodesToRemove);
         this.network.removeEdges(edgesToRemove);
 
-        for (CyTable table : sourceTablesToRemove) {
+        for (CyTable table : tracesToRemove) {
             this.nodeMapping.remove(table);
         }
 
         //TODO: improvement: do not use init, pass data directly
-        for (CyTable table : sourceTablesToRemove) {
-            traceGraph.addSourceTable(table);
+        for (CyTable table : tracesToRemove) {
+            traceGraph.addTrace(table);
         }
 
         fixNetworkName();
@@ -202,19 +202,19 @@ public class TraceGraph {
     }
 
     /*
-     * Find the node that a row in the sourceTable belongs to
+     * Find the node that a row in the trace belongs to
      */
-    public CyNode findNode(CyTable sourceTable, int sourceTableIndex) {
-        var arr = this.nodeMapping.get(sourceTable);
-        return arr == null ? null : arr[sourceTableIndex];
+    public CyNode findNode(CyTable trace, int traceIndex) {
+        var arr = this.nodeMapping.get(trace);
+        return arr == null ? null : arr[traceIndex];
     }
 
     public CyNetwork getNetwork() {
         return this.network;
     }
 
-    public Set<CyTable> getSourceTables() {
-        return this.sourceTables;
+    public Set<CyTable> getTraces() {
+        return this.traces;
     }
 
     public ParameterDiscretizationModel getPDM() {
@@ -223,8 +223,8 @@ public class TraceGraph {
 
     public void refresh() {
         this.clearNodes();
-        for (CyTable trace : this.sourceTables) {
-            this.addSourceTable(trace);
+        for (CyTable trace : this.traces) {
+            this.addTrace(trace);
         }
     }
 
@@ -249,16 +249,16 @@ public class TraceGraph {
         }
         int[] state = new int[this.pdm.getParameterCount()];
         for (var source : this.nodeMapping.entrySet()) {
-            CyTable sourceTable = source.getKey();
-            for (int i = 1; i <= sourceTable.getRowCount(); i++) {
+            CyTable trace = source.getKey();
+            for (int i = 1; i <= trace.getRowCount(); i++) {
                 // old node, may contain source rows that don't belong to this node anymore (if bucket of source row
                 // changes)
                 // uses source row index to node map, not influenced by already changed parameter bins
-                var oldNode = this.nodeMapping.get(sourceTable)[i];
+                var oldNode = this.nodeMapping.get(trace)[i];
                 var oldNodeRow = this.pdm.getRootNetwork().getSharedNodeTable().getRow(oldNode.getSUID());
                 var oldNodeAux = this.nodeInfo.get(oldNode);
                 int oldNodeBucket = oldNodeRow.get(changedParameter.getName(), Integer.class);
-                var sourceRow = sourceTable.getRow((long) i);
+                var sourceRow = trace.getRow((long) i);
                 double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
                 var bucket = changedParameter.isEnabled() ? findBucket(sourceRowValue, changedParameter) : 0;
 
@@ -274,9 +274,9 @@ public class TraceGraph {
                     state[changedParameterIndex] = bucket;
                     CyNode newNode = getOrCreateNode(state);
                     NodeAuxiliaryInformation newNodeAux = this.nodeInfo.get(newNode);
-                    oldNodeAux.getSourceRows(sourceTable).remove((Object) i);
-                    newNodeAux.addSourceRow(sourceTable, i);
-                    this.nodeMapping.get(sourceTable)[i] = newNode;
+                    oldNodeAux.getSourceRows(trace).remove((Object) i);
+                    newNodeAux.addSourceRow(trace, i);
+                    this.nodeMapping.get(trace)[i] = newNode;
                 }
             }
         }
@@ -326,11 +326,10 @@ public class TraceGraph {
     public void generateEdges() {
         CyNode prevNode;
         CyNode currentNode;
-        for (CyTable sourceTable : this.sourceTables) {
+        for (CyTable trace : this.traces) {
             prevNode = null;
-            for (CyRow sourceRow : sourceTable.getAllRows()) {
-                currentNode = this.nodeMapping.get(sourceTable)[sourceRow.get(Columns.SOURCE_ID, Long.class)
-                                                                         .intValue()];
+            for (CyRow sourceRow : trace.getAllRows()) {
+                currentNode = this.nodeMapping.get(trace)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     EdgeAuxiliaryInformation edgeAux;
@@ -342,14 +341,14 @@ public class TraceGraph {
                         edgeAux = this.edgeInfo.get(edge);
                         edgeAux.increaseTraversals();
                     }
-                    edgeAux.addSourceRow(sourceTable, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                    edgeAux.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
                 }
                 prevNode = currentNode;
             }
         }
     }
 
-    public Trace findTrace(List<CyNode> nodes) {
+    public SubTrace findTrace(List<CyNode> nodes) {
         if (nodes.size() <= 2) {
             return TraceFindingAlgorithm.findTraceNaive(this, nodes);
         } else {

@@ -73,9 +73,9 @@ public class SplitTraceGraphPanel extends JPanel {
 
         this.cancelButton.addActionListener(e -> ((Window) getRootPane().getParent()).dispose());
 
-        var sourceTables = controller.getTraceGraph().getSourceTables();
-        for (CyTable table : sourceTables) {
-            this.leftListModel.addElement(table);
+        var traces = controller.getTraceGraph().getTraces();
+        for (CyTable trace : traces) {
+            this.leftListModel.addElement(trace);
         }
     }
 

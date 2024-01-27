@@ -47,7 +47,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.registerNetwork();
         var tableManager = registrar.getService(CyTableManager.class);
         var networkTableManager = registrar.getService(CyNetworkTableManager.class);
-        for (var table : traceGraph.getSourceTables()) {
+        for (var table : traceGraph.getTraces()) {
             tableManager.addTable(table);
             networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, table.getTitle(), table);
         }
@@ -85,7 +85,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
-        for (CyTable table : this.traceGraph.getSourceTables()) {
+        for (CyTable table : this.traceGraph.getTraces()) {
             var aux = traceGraph.getNodeAux(node);
             var rows = aux.getSourceRows(table);
             if (rows != null) {
@@ -123,15 +123,15 @@ public class TraceGraphController extends NetworkController implements SetCurren
         root.add(new MultiObjectTreeTableNode("Nodes", this.network.getNodeCount()));
         root.add(new MultiObjectTreeTableNode("Edges", this.network.getEdgeCount()));
 
-        var sourceTablesNode = new MultiObjectTreeTableNode("Source Tables", "");
-        for (CyTable sourceTable : this.traceGraph.getSourceTables()) {
-            var tableNode = new MultiObjectTreeTableNode(sourceTable.getTitle(), "");
-            var rowsNode = new MultiObjectTreeTableNode("Rows", sourceTable.getRowCount());
+        var traceNode = new MultiObjectTreeTableNode("Source Tables", "");
+        for (CyTable trace : this.traceGraph.getTraces()) {
+            var tableNode = new MultiObjectTreeTableNode(trace.getTitle(), "");
+            var rowsNode = new MultiObjectTreeTableNode("Rows", trace.getRowCount());
             tableNode.add(rowsNode);
-            sourceTablesNode.add(tableNode);
+            traceNode.add(tableNode);
         }
 
-        root.add(sourceTablesNode);
+        root.add(traceNode);
         return new CustomTreeTableModel(root, 2);
     }
 
@@ -182,9 +182,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         controller.dispose();
         this.renderingController.prepareForMergeOrSplit();
-        for (var sourceTable : controller.getTraceGraph().getSourceTables()) {
-            networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + sourceTable.hashCode(), sourceTable);
-            this.traceGraph.addSourceTable(sourceTable);
+        for (var trace : controller.getTraceGraph().getTraces()) {
+            networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + trace.hashCode(), trace);
+            this.traceGraph.addTrace(trace);
         }
         // delete the network only after its nodes have been transferred, weird error
         // where some edge views are not created occurs otherwise

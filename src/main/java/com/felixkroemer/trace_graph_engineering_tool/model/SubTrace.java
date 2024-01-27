@@ -8,31 +8,31 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Trace {
+public class SubTrace {
 
     protected LinkedList<CyNode> sequence;
     protected int startIndex;
-    protected CyTable sourceTable;
+    protected CyTable table;
 
-    private Trace(CyTable sourceTable) {
-        this.sourceTable = sourceTable;
+    private SubTrace(CyTable trace) {
+        this.table = trace;
         this.sequence = new LinkedList<>();
     }
 
-    public Trace(CyTable sourceTable, List<CyNode> nodes, int startIndex) {
-        this(sourceTable);
+    public SubTrace(CyTable trace, List<CyNode> nodes, int startIndex) {
+        this(trace);
         this.sequence = new LinkedList<>(nodes);
         this.startIndex = startIndex;
     }
 
-    public Trace(CyTable sourceTable, CyNode node, int index) {
-        this(sourceTable);
+    public SubTrace(CyTable trace, CyNode node, int index) {
+        this(trace);
         this.sequence.add(node);
         this.startIndex = index;
     }
 
-    public Trace(Trace trace) {
-        this.sourceTable = trace.getSourceTable();
+    public SubTrace(SubTrace trace) {
+        this.table = trace.getTable();
         this.sequence = (LinkedList<CyNode>) trace.getSequence();
         this.startIndex = trace.getWindow().getValue0();
     }
@@ -74,8 +74,8 @@ public class Trace {
         return indices;
     }
 
-    public CyTable getSourceTable() {
-        return this.sourceTable;
+    public CyTable getTable() {
+        return this.table;
     }
 
     public Pair<Integer, Integer> getWindow() {

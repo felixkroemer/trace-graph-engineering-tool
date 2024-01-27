@@ -8,7 +8,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 
 import java.util.*;
 
-public class TraceGraphSourceTable implements CyTable {
+public class Trace implements CyTable {
 
     private final CyServiceRegistrar registrar;
     private final Long suid;
@@ -20,7 +20,7 @@ public class TraceGraphSourceTable implements CyTable {
     private boolean isPublic;
     private int rowCount;
 
-    public TraceGraphSourceTable(String title, long rowCount, CyServiceRegistrar registrar) {
+    public Trace(String title, long rowCount, CyServiceRegistrar registrar) {
         this.title = title;
         this.columns = new HashMap<>();
         this.registrar = registrar;
@@ -88,7 +88,7 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public void deleteColumn(String fullyQualifiedName) {
-        throw new NotImplementedException("deleteColumn is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("deleteColumn is not implemented for Trace");
     }
 
     @Override
@@ -106,13 +106,13 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public <T> void createListColumn(String fullyQualifiedName, Class<T> listElementType, boolean isImmutable) {
-        throw new NotImplementedException("createListColumn is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("createListColumn is not implemented for Trace");
     }
 
     @Override
     public <T> void createListColumn(String fullyQualifiedName, Class<T> listElementType, boolean isImmutable,
                                      List<T> defaultValue) {
-        throw new NotImplementedException("createListColumn is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("createListColumn is not implemented for Trace");
     }
 
     @Override
@@ -129,7 +129,7 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public boolean deleteRows(Collection<?> primaryKeys) {
-        throw new NotImplementedException("deleteRows is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("deleteRows is not implemented for Trace");
     }
 
     @Override
@@ -144,17 +144,17 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public Collection<CyRow> getMatchingRows(String fullyQualifiedName, Object value) {
-        throw new NotImplementedException("getMatchingRows is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("getMatchingRows is not implemented for Trace");
     }
 
     @Override
     public <T> Collection<T> getMatchingKeys(String fullyQualifiedName, Object value, Class<T> type) {
-        throw new NotImplementedException("getMatchingKeys is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("getMatchingKeys is not implemented for Trace");
     }
 
     @Override
     public int countMatchingRows(String fullyQualifiedName, Object value) {
-        throw new NotImplementedException("countMatchingRows is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("countMatchingRows is not implemented for Trace");
     }
 
     @Override
@@ -165,12 +165,12 @@ public class TraceGraphSourceTable implements CyTable {
     @Override
     public String addVirtualColumn(String virtualColumn, String sourceColumn, CyTable sourceTable, String targetJoinKey,
                                    boolean isImmutable) {
-        throw new NotImplementedException("addVirtualColumn is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("addVirtualColumn is not implemented for Trace");
     }
 
     @Override
     public void addVirtualColumns(CyTable sourceTable, String targetJoinKey, boolean isImmutable) {
-        throw new NotImplementedException("addVirtualColumn is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("addVirtualColumn is not implemented for Trace");
     }
 
     @Override
@@ -180,12 +180,12 @@ public class TraceGraphSourceTable implements CyTable {
 
     @Override
     public void setSavePolicy(SavePolicy policy) {
-        throw new NotImplementedException("setSavePolicy is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("setSavePolicy is not implemented for Trace");
     }
 
     @Override
     public void swap(CyTable otherTable) {
-        throw new NotImplementedException("swap is not implemented for TraceGraphSourceTable");
+        throw new NotImplementedException("swap is not implemented for Trace");
     }
 
     public double getValue(String name, long index) {
@@ -261,7 +261,7 @@ public class TraceGraphSourceTable implements CyTable {
 
         @Override
         public CyTable getTable() {
-            return TraceGraphSourceTable.this;
+            return Trace.this;
         }
 
         @Override
