@@ -19,6 +19,13 @@ public abstract class AuxiliaryInformation {
         this.source_rows = new LinkedList<>();
     }
 
+    public AuxiliaryInformation(AuxiliaryInformation source) {
+        this.source_rows = new LinkedList<>();
+        for (var trace : source.source_rows) {
+            this.source_rows.add(new Pair<>(trace.getValue0(), new LinkedList<>(trace.getValue1())));
+        }
+    }
+
     private List<Integer> getList(CyTable table) {
         for (var x : this.source_rows) {
             if (x.getValue0() == table) {
@@ -30,7 +37,7 @@ public abstract class AuxiliaryInformation {
         return list;
     }
 
-    public void addSourceRow(CyTable trace, int index) {
+    public void addSituation(CyTable trace, int index) {
         var list = this.getList(trace);
         list.add(index);
     }
@@ -50,5 +57,9 @@ public abstract class AuxiliaryInformation {
 
     public Set<CyTable> getTraces() {
         return this.source_rows.stream().map(Pair::getValue0).collect(Collectors.toSet());
+    }
+
+    public void removeTrace(CyTable trace) {
+        this.source_rows.removeIf((pair) -> pair.getValue0() == trace);
     }
 }

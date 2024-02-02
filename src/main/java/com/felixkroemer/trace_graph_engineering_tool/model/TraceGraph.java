@@ -94,7 +94,7 @@ public class TraceGraph {
             NodeAuxiliaryInformation currentNodeInfo = this.nodeInfo.get(currentNode);
 
             this.nodeMapping.get(trace)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
-            currentNodeInfo.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
+            currentNodeInfo.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
             if (prevNode != currentNode) {
                 currentNodeInfo.incrementFrequency();
             } else {
@@ -112,7 +112,7 @@ public class TraceGraph {
                     edgeAux = this.edgeInfo.get(edge);
                     edgeAux.increaseTraversals();
                 }
-                edgeAux.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                edgeAux.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
             }
             prevNode = currentNode;
         }
@@ -131,7 +131,6 @@ public class TraceGraph {
     }
 
     public TraceGraph extractTraceGraph(CyNetwork newNetwork, Set<CyTable> tracesToRemove) {
-        TraceGraph traceGraph = new TraceGraph(this.registrar, newNetwork, this.pdm);
         for (CyTable table : tracesToRemove) {
             if (!this.traces.contains(table)) {
                 throw new IllegalArgumentException("Source Table does not belong to this TraceGraph");
@@ -149,7 +148,11 @@ public class TraceGraph {
                 nodesToRemove.add(node);
                 nodeInfo.remove(node);
             } else {
-                info.getTraces().removeIf(tracesToRemove::contains);
+                for (var trace : info.getTraces()) {
+                    if (tracesToRemove.contains(trace)) {
+                        info.removeTrace(trace);
+                    }
+                }
             }
         }
 
@@ -159,7 +162,11 @@ public class TraceGraph {
                 edgesToRemove.add(edge);
                 edgeInfo.remove(edge);
             } else {
-                info.getTraces().removeIf(tracesToRemove::contains);
+                for (var trace : info.getTraces()) {
+                    if (tracesToRemove.contains(trace)) {
+                        info.removeTrace(trace);
+                    }
+                }
             }
         }
 
@@ -170,14 +177,15 @@ public class TraceGraph {
             this.nodeMapping.remove(table);
         }
 
+        fixNetworkName();
+        fixAux();
+        registrar.getService(UndoSupport.class).reset();
+
+        TraceGraph traceGraph = new TraceGraph(this.registrar, newNetwork, this.pdm);
         //TODO: improvement: do not use init, pass data directly
         for (CyTable table : tracesToRemove) {
             traceGraph.addTrace(table);
         }
-
-        fixNetworkName();
-        fixAux();
-        registrar.getService(UndoSupport.class).reset();
 
         return traceGraph;
     }
@@ -275,7 +283,7 @@ public class TraceGraph {
                     CyNode newNode = getOrCreateNode(state);
                     NodeAuxiliaryInformation newNodeAux = this.nodeInfo.get(newNode);
                     oldNodeAux.getSourceRows(trace).remove((Object) i);
-                    newNodeAux.addSourceRow(trace, i);
+                    newNodeAux.addSituation(trace, i);
                     this.nodeMapping.get(trace)[i] = newNode;
                 }
             }
@@ -341,11 +349,19 @@ public class TraceGraph {
                         edgeAux = this.edgeInfo.get(edge);
                         edgeAux.increaseTraversals();
                     }
-                    edgeAux.addSourceRow(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                    edgeAux.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
                 }
                 prevNode = currentNode;
             }
         }
+    }
+
+    public Map<CyNode, NodeAuxiliaryInformation> createNodeInfoSnapshot() {
+        Map<CyNode, NodeAuxiliaryInformation> snapshot = new HashMap<>();
+        for (var entry : this.nodeInfo.entrySet()) {
+            snapshot.put(entry.getKey(), new NodeAuxiliaryInformation(entry.getValue()));
+        }
+        return snapshot;
     }
 
     public SubTrace findTrace(List<CyNode> nodes) {

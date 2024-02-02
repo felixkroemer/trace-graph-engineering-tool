@@ -44,7 +44,7 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     public void onNetworkChanged() {
     }
 
-    public void prepareForMergeOrSplit() {
+    public void prepareForOperation() {
     }
 
     protected void hideAllEdges() {

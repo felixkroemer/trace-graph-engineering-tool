@@ -16,6 +16,12 @@ public class NodeAuxiliaryInformation extends AuxiliaryInformation {
         this.frequency = 0;
     }
 
+    public NodeAuxiliaryInformation(NodeAuxiliaryInformation information) {
+        super(information);
+        this.visitDuration = information.visitDuration;
+        this.frequency = information.frequency;
+    }
+
     public void incrementVisitDuration() {
         this.visitDuration += 1;
     }

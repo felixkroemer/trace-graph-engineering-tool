@@ -13,10 +13,10 @@ import java.util.stream.LongStream;
 public class TraceGraphPrimaryColumn implements CyColumn {
 
     private final Long suid = SUIDFactory.getNextSUID();
-    private Trace table;
+    private Trace trace;
 
-    public TraceGraphPrimaryColumn(Trace table) {
-        this.table = table;
+    public TraceGraphPrimaryColumn(Trace trace) {
+        this.trace = trace;
     }
 
     @Override
@@ -51,12 +51,12 @@ public class TraceGraphPrimaryColumn implements CyColumn {
 
     @Override
     public CyTable getTable() {
-        return this.table;
+        return this.trace;
     }
 
     @Override
     public <T> List<T> getValues(Class<? extends T> type) {
-        return (List<T>) LongStream.range(0, this.table.getRowCount()).boxed().collect(Collectors.toList());
+        return (List<T>) LongStream.range(0, this.trace.getRowCount()).boxed().collect(Collectors.toList());
     }
 
     @Override

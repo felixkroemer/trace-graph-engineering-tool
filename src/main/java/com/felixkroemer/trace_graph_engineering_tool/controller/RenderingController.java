@@ -301,9 +301,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         }
     }
 
-    public void prepareForMergeOrSplit() {
+    public void prepareForOperation() {
         Util.deselectAll(this.view);
-        this.displayController.prepareForMergeOrSplit();
+        this.displayController.prepareForOperation();
     }
 
     public EdgeDisplayControllerPanel getSettingsPanel() {

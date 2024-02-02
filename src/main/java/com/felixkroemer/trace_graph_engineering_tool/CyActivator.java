@@ -55,13 +55,13 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));
 
         var compareTraceGraphsTaskFactory = new CompareTraceGraphsTaskFactory(reg);
-        registerService(bundleContext, compareTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Compare Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
+        registerService(bundleContext, compareTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Compare Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.")));
 
         var splitTraceGraphTaskFactory = new SplitTraceGraphTaskFactory(reg);
-        registerService(bundleContext, splitTraceGraphTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Split Trace Graph", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
+        registerService(bundleContext, splitTraceGraphTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Split Trace Graph", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.3")));
 
         var combineTraceGraphsTaskFactory = new CombineTraceGraphsTaskFactory(reg);
-        registerService(bundleContext, combineTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Combine Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true")));
+        registerService(bundleContext, combineTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Combine Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.2")));
 
         var setPercentileFilterTaskFactory = new SetPercentileFilterTaskFactory(reg);
         registerService(bundleContext, setPercentileFilterTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Set Percentile Filter")));

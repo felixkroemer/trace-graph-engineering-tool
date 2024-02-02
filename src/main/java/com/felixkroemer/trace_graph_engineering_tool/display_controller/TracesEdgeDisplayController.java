@@ -133,7 +133,7 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     }
 
     @Override
-    public void prepareForMergeOrSplit() {
+    public void prepareForOperation() {
         this.networkView.getModel().removeEdges(this.multiEdges);
         this.multiEdges.clear();
     }

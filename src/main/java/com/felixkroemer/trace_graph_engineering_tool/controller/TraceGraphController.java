@@ -65,6 +65,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
 
     @Override
     public void updateNetwork(Parameter changedParameter) {
+        this.renderingController.prepareForOperation();
         if (SwingUtilities.isEventDispatchThread()) {
             //traceGraph.onParameterChangedInefficient(changedParameter);
             traceGraph.onParameterChangedSemiEfficient(changedParameter);
@@ -172,7 +173,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
             networkTableManager.removeTable(this.traceGraph.getNetwork(), CyNode.class, "" + table.hashCode());
             networkTableManager.setTable(subNetwork, CyNode.class, "" + table.hashCode(), table);
         }
-        this.renderingController.prepareForMergeOrSplit();
+        this.renderingController.prepareForOperation();
         TraceGraph newTg = this.traceGraph.extractTraceGraph(subNetwork, new HashSet<>(tables));
         this.renderingController.onNetworkChanged();
         return new TraceGraphController(registrar, newTg);
@@ -182,7 +183,7 @@ public class TraceGraphController extends NetworkController implements SetCurren
         var networkManager = registrar.getService(CyNetworkManager.class);
         var networkTableManager = this.registrar.getService(CyNetworkTableManager.class);
         controller.dispose();
-        this.renderingController.prepareForMergeOrSplit();
+        this.renderingController.prepareForOperation();
         for (var trace : controller.getTraceGraph().getTraces()) {
             networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + trace.hashCode(), trace);
             this.traceGraph.addTrace(trace);

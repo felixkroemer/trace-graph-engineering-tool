@@ -34,7 +34,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
     @Override
     public void run(TaskMonitor monitor) throws Exception {
-        this.profileTraceLoading();
+        this.profileTraceGraphUpdate();
         this.registrar.unregisterService(this, NetworkAddedListener.class);
     }
 
@@ -52,7 +52,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
     }
 
     public void profileTraceGraphUpdate() throws Exception {
-        String fileName = "";
+        String fileName = "C:\\Users\\kroem\\Dropbox\\HWS2023\\master_thesis\\pdms\\normal_speed_combined_cleaned.json";
 
         var task = new LoadPDMTask(this.registrar);
         TunableSetter setter = this.registrar.getService(TunableSetter.class);

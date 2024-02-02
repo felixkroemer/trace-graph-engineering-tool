@@ -4,17 +4,17 @@ import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentComparison
 import com.felixkroemer.trace_graph_engineering_tool.mappings.ComparisonSizeMapping;
 import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
+import com.felixkroemer.trace_graph_engineering_tool.model.NodeAuxiliaryInformation;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.event.CyEventHelper;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
+import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
@@ -26,6 +26,7 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.MutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -49,8 +50,9 @@ public class NetworkComparisonController extends NetworkController implements Se
     private boolean edgesBaseOnlyVisible;
     private boolean edgesDeltaOnlyVisible;
     private boolean edgesBaseDeltaVisible;
-    private TreeTableModel baseNetworkTableModel;
-    private TreeTableModel deltaNetworkTableModel;
+    private TreeTableModel treeTableModel;
+    private Map<CyNode, NodeAuxiliaryInformation> baseNodeInfoSnapshot;
+    private Map<CyNode, NodeAuxiliaryInformation> deltaNodeInfoSnapshot;
     private final VisualStyle defaultVisualStyle;
 
     public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController,
@@ -64,8 +66,9 @@ public class NetworkComparisonController extends NetworkController implements Se
         this.edgesBaseOnlyVisible = true;
         this.edgesDeltaOnlyVisible = true;
         this.edgesBaseDeltaVisible = true;
-        this.baseNetworkTableModel = baseController.createNetworkTableModel();
-        this.deltaNetworkTableModel = baseController.createNetworkTableModel();
+        this.baseNodeInfoSnapshot = baseController.getTraceGraph().createNodeInfoSnapshot();
+        this.deltaNodeInfoSnapshot = deltaController.getTraceGraph().createNodeInfoSnapshot();
+        this.treeTableModel = this.initializeTreeTableModel(baseController.createNetworkTableModel(), deltaController.createNetworkTableModel());
         this.defaultVisualStyle = createDefaultVisualStyle(baseController, deltaController);
 
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
@@ -86,7 +89,7 @@ public class NetworkComparisonController extends NetworkController implements Se
             this.network.addNode(node);
         }
         for (CyEdge edge : delta.getEdgeList()) {
-            if (!this.network.containsEdge(edge.getSource(), edge.getTarget()))
+            if (Util.getEdge(network, edge.getSource(), edge.getTarget()) == null)
                 this.network.addEdge(edge);
         }
 
@@ -100,8 +103,8 @@ public class NetworkComparisonController extends NetworkController implements Se
         }
         // edges are not unique, they are not defined by their source, target, multiedges are possible
         for (CyEdge edge : this.network.getEdgeList()) {
-            boolean inBase = base.containsEdge(edge.getSource(), edge.getTarget());
-            boolean inDelta = delta.containsEdge(edge.getSource(), edge.getTarget());
+            boolean inBase = Util.getEdge(base, edge.getSource(), edge.getTarget()) != null;
+            boolean inDelta = Util.getEdge(delta, edge.getSource(), edge.getTarget()) != null;
             var row = defaultEdgeTable.getRow(edge.getSUID());
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
@@ -142,17 +145,55 @@ public class NetworkComparisonController extends NetworkController implements Se
     public void updateNetwork(Parameter parameter) {
     }
 
+    private void createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root,
+                                           Map<CyNode, NodeAuxiliaryInformation> info) {
+        for (CyTable trace : info.get(node).getTraces()) {
+            var aux = info.get(node);
+            var rows = aux.getSourceRows(trace);
+            var tableNode = new DefaultMutableTreeTableNode(trace.getTitle());
+            root.add(tableNode);
+            for (var i : rows) {
+                tableNode.add(new DefaultMutableTreeTableNode("" + i));
+            }
+        }
+    }
+
     @Override
     public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
-        return null;
+        var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
+        if (group == 0 || group == 2) {
+            MultiObjectTreeTableNode base = new MultiObjectTreeTableNode("Base");
+            this.createSourceRowTableModel(node, base, this.baseNodeInfoSnapshot);
+            root.add(base);
+        }
+        if (group == 1 || group == 2) {
+            MultiObjectTreeTableNode delta = new MultiObjectTreeTableNode("Delta");
+            this.createSourceRowTableModel(node, delta, this.deltaNodeInfoSnapshot);
+            root.add(delta);
+        }
+        return new DefaultTreeTableModel(root);
+    }
+
+    private TreeTableModel initializeTreeTableModel(TreeTableModel baseModel, TreeTableModel deltaModel) {
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
+        var baseRoot = (MutableTreeTableNode) baseModel.getRoot();
+        MultiObjectTreeTableNode base = new MultiObjectTreeTableNode("Base");
+        while (baseRoot.getChildCount() > 0) {
+            base.add((MutableTreeTableNode) baseRoot.getChildAt(0));
+        }
+        root.add(base);
+        var deltaRoot = (MutableTreeTableNode) deltaModel.getRoot();
+        MultiObjectTreeTableNode delta = new MultiObjectTreeTableNode("Delta");
+        while (deltaRoot.getChildCount() > 0) {
+            delta.add((MutableTreeTableNode) deltaRoot.getChildAt(0));
+        }
+        root.add(delta);
+        return new CustomTreeTableModel(root, 2);
     }
 
     @Override
     public TreeTableModel createNetworkTableModel() {
-        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        root.add((MutableTreeTableNode) this.baseNetworkTableModel.getRoot());
-        root.add((MutableTreeTableNode) this.deltaNetworkTableModel.getRoot());
-        return new CustomTreeTableModel(root, 3);
+        return this.treeTableModel;
     }
 
     private VisualStyle createDefaultVisualStyle(TraceGraphController baseController,
@@ -222,12 +263,20 @@ public class NetworkComparisonController extends NetworkController implements Se
         }
     }
 
-    // TODO: what happens when the base or delta change but the comparison does not
-    // the info would become inconsistent or may lead to an error if the node no longer exists in
-    // the base or delta
     @Override
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
+        var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
+        if (group == 0 || group == 2) {
+            var aux = this.baseNodeInfoSnapshot.get(node);
+            map.put("Base Visit Duration", "" + aux.getVisitDuration());
+            map.put("Base Frequency", "" + aux.getFrequency());
+        }
+        if (group == 1 || group == 2) {
+            var aux = this.deltaNodeInfoSnapshot.get(node);
+            map.put("Delta Visit Duration", "" + aux.getVisitDuration());
+            map.put("Delta Frequency", "" + aux.getFrequency());
+        }
         return map;
     }
 
