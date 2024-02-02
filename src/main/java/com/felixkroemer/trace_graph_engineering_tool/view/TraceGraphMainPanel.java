@@ -134,6 +134,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         }
         this.hidePanel(this.nodeInfoPanel);
         this.hidePanel(this.nodeComparisonPanel);
+        this.hidePanel(this.traceGraphComparisonPanel);
     }
 
     @Override

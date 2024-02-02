@@ -51,7 +51,8 @@ public abstract class NetworkController implements CyDisposable {
         context.defaultSpringLength = 100;
         //context.numIterationsEdgeRepulsive = 10;
         context.defaultNodeMass = 10;
-        var views = getView().getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE)).collect(Collectors.toSet());
+        var views = getView().getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE))
+                             .collect(Collectors.toSet());
         return layoutFactory.createTaskIterator(getView(), context, views, null);
     }
 
@@ -100,15 +101,17 @@ public abstract class NetworkController implements CyDisposable {
 
     public abstract void updateNetwork(Parameter parameter);
 
-    public abstract TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root);
+    public abstract TreeTableModel createSituationTableModel(CyNode node, DefaultMutableTreeTableNode root);
 
     public abstract TreeTableModel createNetworkTableModel();
 
     public abstract Map<String, String> getNodeInfo(CyNode node);
 
     public void focusNode(CyNode node, boolean select) {
-        getView().setVisualProperty(NETWORK_CENTER_X_LOCATION, getView().getNodeView(node).getVisualProperty(NODE_X_LOCATION));
-        getView().setVisualProperty(NETWORK_CENTER_Y_LOCATION, getView().getNodeView(node).getVisualProperty(NODE_Y_LOCATION));
+        getView().setVisualProperty(NETWORK_CENTER_X_LOCATION, getView().getNodeView(node)
+                                                                        .getVisualProperty(NODE_X_LOCATION));
+        getView().setVisualProperty(NETWORK_CENTER_Y_LOCATION, getView().getNodeView(node)
+                                                                        .getVisualProperty(NODE_Y_LOCATION));
         if (select) {
             Util.deselectAll(getView());
             getView().getModel().getRow(node).set(CyNetwork.SELECTED, true);

@@ -85,10 +85,10 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     @Override
-    public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
+    public TreeTableModel createSituationTableModel(CyNode node, DefaultMutableTreeTableNode root) {
         for (CyTable table : this.traceGraph.getTraces()) {
             var aux = traceGraph.getNodeAux(node);
-            var rows = aux.getSourceRows(table);
+            var rows = aux.getSituations(table);
             if (rows != null) {
                 var tableNode = new DefaultMutableTreeTableNode(table.getTitle());
                 root.add(tableNode);

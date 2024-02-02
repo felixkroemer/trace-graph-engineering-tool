@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class TraceGraphColumn implements CyColumn {
+final class TraceColumn implements CyColumn {
 
     private final Trace table;
     private final Long suid = SUIDFactory.getNextSUID();
     private String columnName;
     private double[] data;
 
-    TraceGraphColumn(final Trace table, final String columnName, double[] data) {
+    TraceColumn(final Trace table, final String columnName, double[] data) {
         this.table = table;
         this.columnName = columnName;
         this.data = data;

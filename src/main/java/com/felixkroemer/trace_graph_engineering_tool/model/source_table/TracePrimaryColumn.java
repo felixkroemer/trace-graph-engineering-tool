@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-public class TraceGraphPrimaryColumn implements CyColumn {
+public class TracePrimaryColumn implements CyColumn {
 
     private final Long suid = SUIDFactory.getNextSUID();
     private Trace trace;
 
-    public TraceGraphPrimaryColumn(Trace trace) {
+    public TracePrimaryColumn(Trace trace) {
         this.trace = trace;
     }
 

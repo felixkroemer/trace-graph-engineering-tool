@@ -145,11 +145,11 @@ public class NetworkComparisonController extends NetworkController implements Se
     public void updateNetwork(Parameter parameter) {
     }
 
-    private void createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root,
-                                           Map<CyNode, NodeAuxiliaryInformation> info) {
+    private void createTraceTableModel(CyNode node, DefaultMutableTreeTableNode root,
+                                       Map<CyNode, NodeAuxiliaryInformation> info) {
         for (CyTable trace : info.get(node).getTraces()) {
             var aux = info.get(node);
-            var rows = aux.getSourceRows(trace);
+            var rows = aux.getSituations(trace);
             var tableNode = new DefaultMutableTreeTableNode(trace.getTitle());
             root.add(tableNode);
             for (var i : rows) {
@@ -159,16 +159,16 @@ public class NetworkComparisonController extends NetworkController implements Se
     }
 
     @Override
-    public TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root) {
+    public TreeTableModel createSituationTableModel(CyNode node, DefaultMutableTreeTableNode root) {
         var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
         if (group == 0 || group == 2) {
             MultiObjectTreeTableNode base = new MultiObjectTreeTableNode("Base");
-            this.createSourceRowTableModel(node, base, this.baseNodeInfoSnapshot);
+            this.createTraceTableModel(node, base, this.baseNodeInfoSnapshot);
             root.add(base);
         }
         if (group == 1 || group == 2) {
             MultiObjectTreeTableNode delta = new MultiObjectTreeTableNode("Delta");
-            this.createSourceRowTableModel(node, delta, this.deltaNodeInfoSnapshot);
+            this.createTraceTableModel(node, delta, this.deltaNodeInfoSnapshot);
             root.add(delta);
         }
         return new DefaultTreeTableModel(root);

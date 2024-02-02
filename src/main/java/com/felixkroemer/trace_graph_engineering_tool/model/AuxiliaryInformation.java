@@ -13,27 +13,27 @@ import java.util.stream.Collectors;
  */
 public abstract class AuxiliaryInformation {
 
-    protected List<Pair<CyTable, List<Integer>>> source_rows;
+    protected List<Pair<CyTable, List<Integer>>> situations;
 
     public AuxiliaryInformation() {
-        this.source_rows = new LinkedList<>();
+        this.situations = new LinkedList<>();
     }
 
     public AuxiliaryInformation(AuxiliaryInformation source) {
-        this.source_rows = new LinkedList<>();
-        for (var trace : source.source_rows) {
-            this.source_rows.add(new Pair<>(trace.getValue0(), new LinkedList<>(trace.getValue1())));
+        this.situations = new LinkedList<>();
+        for (var trace : source.situations) {
+            this.situations.add(new Pair<>(trace.getValue0(), new LinkedList<>(trace.getValue1())));
         }
     }
 
     private List<Integer> getList(CyTable table) {
-        for (var x : this.source_rows) {
+        for (var x : this.situations) {
             if (x.getValue0() == table) {
                 return x.getValue1();
             }
         }
         var list = new LinkedList<Integer>();
-        this.source_rows.add(new Pair<>(table, list));
+        this.situations.add(new Pair<>(table, list));
         return list;
     }
 
@@ -42,12 +42,12 @@ public abstract class AuxiliaryInformation {
         list.add(index);
     }
 
-    public List<Integer> getSourceRows(CyTable trace) {
+    public List<Integer> getSituations(CyTable trace) {
         return this.getList(trace);
     }
 
-    public boolean hasNoSourceRows() {
-        for (var x : this.source_rows) {
+    public boolean hasNoSituations() {
+        for (var x : this.situations) {
             if (!x.getValue1().isEmpty()) {
                 return false;
             }
@@ -56,10 +56,10 @@ public abstract class AuxiliaryInformation {
     }
 
     public Set<CyTable> getTraces() {
-        return this.source_rows.stream().map(Pair::getValue0).collect(Collectors.toSet());
+        return this.situations.stream().map(Pair::getValue0).collect(Collectors.toSet());
     }
 
     public void removeTrace(CyTable trace) {
-        this.source_rows.removeIf((pair) -> pair.getValue0() == trace);
+        this.situations.removeIf((pair) -> pair.getValue0() == trace);
     }
 }

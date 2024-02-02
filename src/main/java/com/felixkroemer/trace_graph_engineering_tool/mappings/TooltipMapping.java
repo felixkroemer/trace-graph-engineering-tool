@@ -43,7 +43,9 @@ public class TooltipMapping implements PassthroughMapping<CyRow, String> {
     public String getMappedValue(CyRow row) {
         StringBuilder sb = new StringBuilder();
         for (var e : row.getAllValues().entrySet()) {
-            if (!e.getKey().equals("name") && !e.getKey().equals("selected") && !e.getKey().equals("shared name")) {
+            if (!e.getKey().equals("name") && !e.getKey().equals("selected") && !e.getKey()
+                                                                                  .equals("shared name") && !e.getKey()
+                                                                                                              .equals("SUID")) {
                 sb.append(String.format("%-20s%4d\n", e.getKey(), e.getValue()));
             }
         }

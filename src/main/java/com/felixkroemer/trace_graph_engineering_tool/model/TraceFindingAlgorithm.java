@@ -51,8 +51,8 @@ public class TraceFindingAlgorithm {
             var nodeA = list.get(0);
             var nodeB = list.get(1);
 
-            var sourcesA = traceGraph.getNodeAux(nodeA).getSourceRows(trace);
-            var sourcesB = traceGraph.getNodeAux(nodeB).getSourceRows(trace);
+            var sourcesA = traceGraph.getNodeAux(nodeA).getSituations(trace);
+            var sourcesB = traceGraph.getNodeAux(nodeB).getSituations(trace);
 
             if (sourcesA == null || sourcesB == null) {
                 continue;
@@ -87,7 +87,7 @@ public class TraceFindingAlgorithm {
 
     private static boolean isSolutionInfeasible(Collection<CyNode> nodes, CyTable trace, TraceGraph traceGraph) {
         for (var node : nodes) {
-            if (traceGraph.getNodeAux(node).getSourceRows(trace) == null) {
+            if (traceGraph.getNodeAux(node).getSituations(trace) == null) {
                 return true;
             }
         }
@@ -116,7 +116,7 @@ public class TraceFindingAlgorithm {
             }
 
             for (var node : nodes) {
-                var sources = traceGraph.getNodeAux(node).getSourceRows(trace);
+                var sources = traceGraph.getNodeAux(node).getSituations(trace);
                 IntVar[] expressions = new IntVar[sources.size()];
                 int i = 0;
                 for (var x : sources) {

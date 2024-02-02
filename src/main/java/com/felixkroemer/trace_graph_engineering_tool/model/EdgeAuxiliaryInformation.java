@@ -19,7 +19,7 @@ public class EdgeAuxiliaryInformation extends AuxiliaryInformation {
 
     public void fixTraversals() {
         int traversals = 0;
-        for (var pair : this.source_rows) {
+        for (var pair : this.situations) {
             traversals += pair.getValue1().size();
         }
         this.traversals = traversals;

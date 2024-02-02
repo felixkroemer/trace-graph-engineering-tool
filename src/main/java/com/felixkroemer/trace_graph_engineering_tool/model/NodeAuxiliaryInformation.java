@@ -42,7 +42,7 @@ public class NodeAuxiliaryInformation extends AuxiliaryInformation {
         int visitDuration = 0;
         int frequency = 0;
 
-        for (var pair : this.source_rows) {
+        for (var pair : this.situations) {
             Collections.sort(pair.getValue1());
             int prev = Integer.MIN_VALUE;
             for (int i : pair.getValue1()) {

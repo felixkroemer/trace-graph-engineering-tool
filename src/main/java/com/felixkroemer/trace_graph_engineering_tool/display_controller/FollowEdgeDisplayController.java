@@ -131,7 +131,7 @@ class PathElement {
         this.length = 1;
         for (var trace : nodeAux.getTraces()) {
             this.x.put(trace, new LinkedList<>());
-            for (var situation : nodeAux.getSourceRows(trace)) {
+            for (var situation : nodeAux.getSituations(trace)) {
                 var list = new LinkedList<Integer>();
                 list.add(situation);
                 x.get(trace).add(list);
@@ -148,7 +148,7 @@ class PathElement {
         this.x = this.x.entrySet().stream().filter(e -> nodeAux.getTraces().contains(e.getKey()))
                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         for (var entry : this.x.entrySet()) {
-            var situations = nodeAux.getSourceRows(entry.getKey());
+            var situations = nodeAux.getSituations(entry.getKey());
             for (var list : entry.getValue()) {
                 for (var situation : situations) {
                     if (list.get(list.size() - 1) == situation - 1) {

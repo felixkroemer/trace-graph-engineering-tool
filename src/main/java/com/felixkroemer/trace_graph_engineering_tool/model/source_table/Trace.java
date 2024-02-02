@@ -30,7 +30,7 @@ public class Trace implements CyTable {
         this.rowCount = (int) rowCount;
         this.rows = new CyRow[(int) rowCount];
         for (int i = 1; i <= rowCount; i++) {
-            rows[i - 1] = new TraceGraphSourceRow(i);
+            rows[i - 1] = new TraceRow(i);
         }
     }
 
@@ -73,7 +73,7 @@ public class Trace implements CyTable {
 
     @Override
     public CyColumn getPrimaryKey() {
-        return new TraceGraphPrimaryColumn(this);
+        return new TracePrimaryColumn(this);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class Trace implements CyTable {
                                  T defaultValue) {
         var data = new double[rowCount + 1];
         this.data.put(fullyQualifiedName, data);
-        this.columns.put(fullyQualifiedName, new TraceGraphColumn(this, fullyQualifiedName, data));
+        this.columns.put(fullyQualifiedName, new TraceColumn(this, fullyQualifiedName, data));
     }
 
     @Override
@@ -202,12 +202,12 @@ public class Trace implements CyTable {
         return this.getTitle();
     }
 
-    private final class TraceGraphSourceRow implements CyRow {
+    private final class TraceRow implements CyRow {
 
         private long index;
         private Long suid = SUIDFactory.getNextSUID();
 
-        public TraceGraphSourceRow(long index) {
+        public TraceRow(long index) {
             this.index = index;
         }
 
@@ -227,12 +227,12 @@ public class Trace implements CyTable {
 
         @Override
         public <T> List<T> getList(String fullyQualifiedName, Class<T> listElementType) {
-            throw new NotImplementedException("swap is not implemented for TraceGraphSourceRow");
+            throw new NotImplementedException("swap is not implemented for TraceRow");
         }
 
         @Override
         public <T> List<T> getList(String fullyQualifiedName, Class<T> listElementType, List<T> defaultValue) {
-            throw new NotImplementedException("swap is not implemented for TraceGraphSourceRow");
+            throw new NotImplementedException("swap is not implemented for TraceRow");
         }
 
         @Override

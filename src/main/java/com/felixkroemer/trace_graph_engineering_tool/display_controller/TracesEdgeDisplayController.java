@@ -79,24 +79,24 @@ public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
     public static List<SubTraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph,
                                                           int length, boolean isEdge) {
         List<SubTraceExtension> subTraces = new ArrayList<>();
-        Collection<Integer> sourceRows;
+        Collection<Integer> situations;
         for (CyTable trace : traceGraph.getTraces()) {
             Set<Integer> foundIndices = new HashSet<>();
             CyNode startNode;
             if (isEdge) {
                 CyEdge edge = (CyEdge) identifiable;
-                sourceRows = traceGraph.getEdgeAux(edge).getSourceRows(trace);
+                situations = traceGraph.getEdgeAux(edge).getSituations(trace);
                 startNode = ((CyEdge) identifiable).getSource();
             } else {
                 startNode = ((CyNode) identifiable);
-                sourceRows = traceGraph.getNodeAux(startNode).getSourceRows(trace);
+                situations = traceGraph.getNodeAux(startNode).getSituations(trace);
             }
-            if (sourceRows == null) {
+            if (situations == null) {
                 continue;
             } else {
-                sourceRows = new ArrayList<>(sourceRows);
+                situations = new ArrayList<>(situations);
             }
-            var iterator = sourceRows.iterator();
+            var iterator = situations.iterator();
             while (iterator.hasNext()) {
                 int sourceIndex = iterator.next();
                 iterator.remove();

@@ -105,6 +105,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
 
     public void clear() {
         this.pdmPanel.removeAll();
+        this.infoTreeTable.setModel(null);
     }
 
     @Override

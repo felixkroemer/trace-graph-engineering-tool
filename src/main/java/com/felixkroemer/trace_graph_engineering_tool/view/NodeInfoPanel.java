@@ -44,7 +44,7 @@ public class NodeInfoPanel extends TraceGraphPanel {
         this.nodeInfoPanel.setLayout(new BorderLayout());
         this.nodeInfoPanel.add(nodeInfoTable, BorderLayout.CENTER);
 
-        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder("Source Rows"));
+        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder("Situations"));
 
         this.add(nodeInfoPanel, BorderLayout.NORTH);
         this.add(infoTreeTable, BorderLayout.CENTER);
@@ -64,15 +64,15 @@ public class NodeInfoPanel extends TraceGraphPanel {
         }
     }
 
-    public void updateSourceRowPanel(NetworkController controller, CyNode node) {
+    public void updateSituationPanel(NetworkController controller, CyNode node) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        var model = controller.createSourceRowTableModel(node, root);
+        var model = controller.createSituationTableModel(node, root);
         this.infoTreeTable.setModel(model);
     }
 
     public void setNode(NetworkController controller, CyNode node) {
         this.updateInfoPanel(controller, node);
-        this.updateSourceRowPanel(controller, node);
+        this.updateSituationPanel(controller, node);
     }
 
     @Override

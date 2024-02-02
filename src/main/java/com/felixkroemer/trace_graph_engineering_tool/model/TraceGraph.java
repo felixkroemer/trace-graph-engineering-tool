@@ -18,7 +18,7 @@ public class TraceGraph {
     // hash to node suid
     private Map<Long, Long> suidHashMapping;
     // source table to array of nodes
-    // every source row index must always be mapped to an existing node in the graph
+    // every situation index must always be mapped to an existing node in the graph
     private Map<CyTable, CyNode[]> nodeMapping;
     // node to node auxiliary information
     private Map<CyNode, NodeAuxiliaryInformation> nodeInfo;
@@ -78,8 +78,8 @@ public class TraceGraph {
 
         int[] state = new int[this.pdm.getParameterCount()];
         CyNode prevNode = null;
-        for (CyRow sourceRow : trace.getAllRows()) {
-            Map<String, Object> values = sourceRow.getAllValues();
+        for (CyRow situation : trace.getAllRows()) {
+            Map<String, Object> values = situation.getAllValues();
             int i = 0;
             for (Parameter param : pdm.getParameters()) {
                 if (param.isEnabled()) {
@@ -93,8 +93,8 @@ public class TraceGraph {
             CyNode currentNode = getOrCreateNode(state);
             NodeAuxiliaryInformation currentNodeInfo = this.nodeInfo.get(currentNode);
 
-            this.nodeMapping.get(trace)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
-            currentNodeInfo.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue());
+            this.nodeMapping.get(trace)[situation.get(Columns.SOURCE_ID, Long.class).intValue()] = currentNode;
+            currentNodeInfo.addSituation(trace, situation.get(Columns.SOURCE_ID, Long.class).intValue());
             if (prevNode != currentNode) {
                 currentNodeInfo.incrementFrequency();
             } else {
@@ -112,7 +112,7 @@ public class TraceGraph {
                     edgeAux = this.edgeInfo.get(edge);
                     edgeAux.increaseTraversals();
                 }
-                edgeAux.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                edgeAux.addSituation(trace, situation.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
             }
             prevNode = currentNode;
         }
@@ -259,18 +259,18 @@ public class TraceGraph {
         for (var source : this.nodeMapping.entrySet()) {
             CyTable trace = source.getKey();
             for (int i = 1; i <= trace.getRowCount(); i++) {
-                // old node, may contain source rows that don't belong to this node anymore (if bucket of source row
+                // old node, may contain situations that don't belong to this node anymore (if bucket of situation
                 // changes)
-                // uses source row index to node map, not influenced by already changed parameter bins
+                // uses situation index to node map, not influenced by already changed parameter bins
                 var oldNode = this.nodeMapping.get(trace)[i];
                 var oldNodeRow = this.pdm.getRootNetwork().getSharedNodeTable().getRow(oldNode.getSUID());
                 var oldNodeAux = this.nodeInfo.get(oldNode);
                 int oldNodeBucket = oldNodeRow.get(changedParameter.getName(), Integer.class);
-                var sourceRow = trace.getRow((long) i);
-                double sourceRowValue = sourceRow.get(changedParameter.getName(), Double.class);
-                var bucket = changedParameter.isEnabled() ? findBucket(sourceRowValue, changedParameter) : 0;
+                var situation = trace.getRow((long) i);
+                double situationValue = situation.get(changedParameter.getName(), Double.class);
+                var bucket = changedParameter.isEnabled() ? findBucket(situationValue, changedParameter) : 0;
 
-                // source row j does not belong to this node anymore
+                // situation j does not belong to this node anymore
                 // create state of j, hash it, check if a node with that hash exists, add j to it,
                 // otherwise create a new node with the state of j
                 // move ingoing and outgoing edges belonging to j from oldNode to newNode
@@ -282,7 +282,7 @@ public class TraceGraph {
                     state[changedParameterIndex] = bucket;
                     CyNode newNode = getOrCreateNode(state);
                     NodeAuxiliaryInformation newNodeAux = this.nodeInfo.get(newNode);
-                    oldNodeAux.getSourceRows(trace).remove((Object) i);
+                    oldNodeAux.getSituations(trace).remove((Object) i);
                     newNodeAux.addSituation(trace, i);
                     this.nodeMapping.get(trace)[i] = newNode;
                 }
@@ -305,10 +305,10 @@ public class TraceGraph {
 
     private void removeLeftoverNodes() {
         List<CyNode> nodesToRemove = new ArrayList<>();
-        // if node source rows is empty there is no entry in node mapping that points to this node, it can be removed
+        // if node situations is empty there is no entry in node mapping that points to this node, it can be removed
         // from this network but may still exist in another network with the same pdm
         for (CyNode node : this.network.getNodeList()) {
-            if (this.nodeInfo.get(node).hasNoSourceRows()) {
+            if (this.nodeInfo.get(node).hasNoSituations()) {
                 nodesToRemove.add(node);
                 this.nodeInfo.remove(node);
             }
@@ -336,8 +336,8 @@ public class TraceGraph {
         CyNode currentNode;
         for (CyTable trace : this.traces) {
             prevNode = null;
-            for (CyRow sourceRow : trace.getAllRows()) {
-                currentNode = this.nodeMapping.get(trace)[sourceRow.get(Columns.SOURCE_ID, Long.class).intValue()];
+            for (CyRow situation : trace.getAllRows()) {
+                currentNode = this.nodeMapping.get(trace)[situation.get(Columns.SOURCE_ID, Long.class).intValue()];
                 if (prevNode != null && prevNode != currentNode) {
                     CyEdge edge;
                     EdgeAuxiliaryInformation edgeAux;
@@ -349,7 +349,7 @@ public class TraceGraph {
                         edgeAux = this.edgeInfo.get(edge);
                         edgeAux.increaseTraversals();
                     }
-                    edgeAux.addSituation(trace, sourceRow.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
+                    edgeAux.addSituation(trace, situation.get(Columns.SOURCE_ID, Long.class).intValue() - 1);
                 }
                 prevNode = currentNode;
             }
