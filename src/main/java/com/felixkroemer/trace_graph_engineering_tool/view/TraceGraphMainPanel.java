@@ -171,6 +171,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
     @Override
     public void handleEvent(SetCurrentComparisonControllerEvent event) {
         this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
+        this.pdmPanel.registerCallbacks(event.getNetworkComparisonController());
         this.showPanel(this.traceGraphComparisonPanel);
         if (this.edgeDisplayControllerPanel != null) {
             this.hidePanel(this.edgeDisplayControllerPanel);

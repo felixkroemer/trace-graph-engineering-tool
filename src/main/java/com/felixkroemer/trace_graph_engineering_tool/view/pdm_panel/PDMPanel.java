@@ -6,7 +6,6 @@ import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.util.swing.LookAndFeelUtil;
-import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -84,8 +83,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     }
 
     private void updateInfoTreeTable() {
-        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
-        var model = this.controller.createNetworkTableModel(root);
+        var model = this.controller.createNetworkTableModel();
         this.infoTreeTable.setModel(model);
     }
 

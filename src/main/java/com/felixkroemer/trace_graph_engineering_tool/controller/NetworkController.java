@@ -102,7 +102,7 @@ public abstract class NetworkController implements CyDisposable {
 
     public abstract TreeTableModel createSourceRowTableModel(CyNode node, DefaultMutableTreeTableNode root);
 
-    public abstract TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root);
+    public abstract TreeTableModel createNetworkTableModel();
 
     public abstract Map<String, String> getNodeInfo(CyNode node);
 

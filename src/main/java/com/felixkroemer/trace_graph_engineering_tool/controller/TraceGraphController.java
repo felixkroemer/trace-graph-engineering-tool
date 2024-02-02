@@ -119,7 +119,8 @@ public class TraceGraphController extends NetworkController implements SetCurren
     }
 
     @Override
-    public TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root) {
+    public TreeTableModel createNetworkTableModel() {
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         root.add(new MultiObjectTreeTableNode("Nodes", this.network.getNodeCount()));
         root.add(new MultiObjectTreeTableNode("Edges", this.network.getEdgeCount()));
 

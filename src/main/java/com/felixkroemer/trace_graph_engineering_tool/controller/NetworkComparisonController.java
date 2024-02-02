@@ -6,6 +6,7 @@ import com.felixkroemer.trace_graph_engineering_tool.mappings.TooltipMapping;
 import com.felixkroemer.trace_graph_engineering_tool.model.Columns;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizationModel;
+import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -25,27 +26,22 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.view.vizmap.mappings.PassthroughMapping;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.MutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class NetworkComparisonController extends NetworkController implements SetCurrentNetworkListener, PropertyChangeListener {
+public class NetworkComparisonController extends NetworkController implements SetCurrentNetworkListener {
 
     public static final String BO = "BO";
     public static final String DO = "DO";
     public static final String BD = "BD";
-    private TraceGraphController baseController;
-    private TraceGraphController deltaController;
-    private CyNetwork base;
-    private CyNetwork delta;
-    private CySubNetwork network;
+    private final CySubNetwork network;
     private CyNetworkView view;
     private boolean nodesBaseOnlyVisible;
     private boolean nodesDeltaOnlyVisible;
@@ -53,15 +49,14 @@ public class NetworkComparisonController extends NetworkController implements Se
     private boolean edgesBaseOnlyVisible;
     private boolean edgesDeltaOnlyVisible;
     private boolean edgesBaseDeltaVisible;
-    private VisualStyle defaultVisualStyle;
-    private boolean invalid;
+    private TreeTableModel baseNetworkTableModel;
+    private TreeTableModel deltaNetworkTableModel;
+    private final VisualStyle defaultVisualStyle;
 
-    public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController, CySubNetwork network, ParameterDiscretizationModel pdm, CyServiceRegistrar registrar) {
+    public NetworkComparisonController(TraceGraphController baseController, TraceGraphController deltaController,
+                                       CySubNetwork network, ParameterDiscretizationModel pdm,
+                                       CyServiceRegistrar registrar) {
         super(registrar, network, pdm);
-        this.baseController = baseController;
-        this.deltaController = deltaController;
-        this.base = baseController.getNetwork();
-        this.delta = deltaController.getNetwork();
         this.network = network;
         this.nodesBaseOnlyVisible = true;
         this.nodesDeltaOnlyVisible = true;
@@ -69,24 +64,28 @@ public class NetworkComparisonController extends NetworkController implements Se
         this.edgesBaseOnlyVisible = true;
         this.edgesDeltaOnlyVisible = true;
         this.edgesBaseDeltaVisible = true;
-        this.defaultVisualStyle = createDefaultVisualStyle();
-        this.invalid = false;
+        this.baseNetworkTableModel = baseController.createNetworkTableModel();
+        this.deltaNetworkTableModel = baseController.createNetworkTableModel();
+        this.defaultVisualStyle = createDefaultVisualStyle(baseController, deltaController);
 
-        this.pdm.getParameters().forEach(p -> p.addObserver(this));
         this.registrar.registerService(this, SetCurrentNetworkListener.class, new Properties());
 
         this.initTables();
+
+        var base = baseController.getNetwork();
+        var delta = deltaController.getNetwork();
+
         //TODO: maybe add more efficient batching version
-        for (CyNode node : this.base.getNodeList()) {
+        for (CyNode node : base.getNodeList()) {
             this.network.addNode(node);
         }
-        for (CyEdge edge : this.base.getEdgeList()) {
+        for (CyEdge edge : base.getEdgeList()) {
             this.network.addEdge(edge);
         }
-        for (CyNode node : this.delta.getNodeList()) {
+        for (CyNode node : delta.getNodeList()) {
             this.network.addNode(node);
         }
-        for (CyEdge edge : this.delta.getEdgeList()) {
+        for (CyEdge edge : delta.getEdgeList()) {
             if (!this.network.containsEdge(edge.getSource(), edge.getTarget()))
                 this.network.addEdge(edge);
         }
@@ -94,15 +93,15 @@ public class NetworkComparisonController extends NetworkController implements Se
         var defaultNodeTable = this.network.getDefaultNodeTable();
         var defaultEdgeTable = this.network.getDefaultEdgeTable();
         for (CyNode node : this.network.getNodeList()) {
-            boolean inBase = this.base.containsNode(node);
-            boolean inDelta = this.delta.containsNode(node);
+            boolean inBase = base.containsNode(node);
+            boolean inDelta = delta.containsNode(node);
             var row = defaultNodeTable.getRow(node.getSUID());
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
         // edges are not unique, they are not defined by their source, target, multiedges are possible
         for (CyEdge edge : this.network.getEdgeList()) {
-            boolean inBase = this.base.containsEdge(edge.getSource(), edge.getTarget());
-            boolean inDelta = this.delta.containsEdge(edge.getSource(), edge.getTarget());
+            boolean inBase = base.containsEdge(edge.getSource(), edge.getTarget());
+            boolean inDelta = delta.containsEdge(edge.getSource(), edge.getTarget());
             var row = defaultEdgeTable.getRow(edge.getSUID());
             row.set(Columns.COMPARISON_GROUP_MEMBERSHIP, (inBase && inDelta) ? 2 : (inBase ? 0 : 1));
         }
@@ -134,7 +133,6 @@ public class NetworkComparisonController extends NetworkController implements Se
 
     @Override
     public void dispose() {
-        pdm.getParameters().forEach(p -> p.removeObserver(this));
         this.registrar.unregisterService(this, SetCurrentNetworkListener.class);
         var visualMappingManager = registrar.getService(VisualMappingManager.class);
         visualMappingManager.removeVisualStyle(this.defaultVisualStyle);
@@ -150,11 +148,15 @@ public class NetworkComparisonController extends NetworkController implements Se
     }
 
     @Override
-    public TreeTableModel createNetworkTableModel(DefaultMutableTreeTableNode root) {
-        return null;
+    public TreeTableModel createNetworkTableModel() {
+        DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
+        root.add((MutableTreeTableNode) this.baseNetworkTableModel.getRoot());
+        root.add((MutableTreeTableNode) this.deltaNetworkTableModel.getRoot());
+        return new CustomTreeTableModel(root, 3);
     }
 
-    private VisualStyle createDefaultVisualStyle() {
+    private VisualStyle createDefaultVisualStyle(TraceGraphController baseController,
+                                                 TraceGraphController deltaController) {
         var visualStyleFactory = registrar.getService(org.cytoscape.view.vizmap.VisualStyleFactory.class);
         VisualStyle style = visualStyleFactory.createVisualStyle("default-comparison");
 
@@ -173,13 +175,13 @@ public class NetworkComparisonController extends NetworkController implements Se
         style.addVisualMappingFunction(edgeColorMapping);
 
         var baseMapping = new HashMap<Long, Integer>();
-        for (CyNode node : this.base.getNodeList()) {
-            baseMapping.put(node.getSUID(), this.baseController.getTraceGraph().getNodeAux(node).getFrequency());
+        for (CyNode node : baseController.getNetwork().getNodeList()) {
+            baseMapping.put(node.getSUID(), baseController.getTraceGraph().getNodeAux(node).getFrequency());
         }
 
         var deltaMapping = new HashMap<Long, Integer>();
-        for (CyNode node : this.delta.getNodeList()) {
-            deltaMapping.put(node.getSUID(), this.deltaController.getTraceGraph().getNodeAux(node).getFrequency());
+        for (CyNode node : deltaController.getNetwork().getNodeList()) {
+            deltaMapping.put(node.getSUID(), deltaController.getTraceGraph().getNodeAux(node).getFrequency());
         }
 
         PassthroughMapping<CyRow, Double> nodeSizeMapping = new ComparisonSizeMapping(baseMapping, deltaMapping);
@@ -226,14 +228,6 @@ public class NetworkComparisonController extends NetworkController implements Se
     @Override
     public Map<String, String> getNodeInfo(CyNode node) {
         HashMap<String, String> map = new HashMap<>();
-        var group = this.network.getRow(node).get(Columns.COMPARISON_GROUP_MEMBERSHIP, Integer.class);
-        map.put("Group", group == 2 ? "BD" : (group == 1 ? "DO" : "BO"));
-        if (group == 2 || group == 0) {
-            map.put("Base Frequency", baseController.getNodeInfo(node).get("Frequency"));
-        }
-        if (group == 2 || group == 1) {
-            map.put("Delta Frequency", deltaController.getNodeInfo(node).get("Frequency"));
-        }
         return map;
     }
 
@@ -297,10 +291,5 @@ public class NetworkComparisonController extends NetworkController implements Se
             }
         }
         this.updateVisibility();
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.invalid = true;
     }
 }
