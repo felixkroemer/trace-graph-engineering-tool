@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 
-public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController {
+public class DefaultEdgeDisplayController extends EdgeDisplayController {
 
     public static final String RENDERING_MODE_FULL = "RENDERING_MODE_FULL";
     public static final String DISPLAY_RANGE = "display_range";
@@ -58,7 +58,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
         int maxTraversals = 0;
         for (CyEdge edge : this.traceGraph.getNetwork().getEdgeList()) {
             int traversals = this.traceGraph.getEdgeAux(edge).getTraversals();
-            if (traversals > maxTraversals) maxTraversals = traversals;
+            if (traversals > maxTraversals)
+                maxTraversals = traversals;
         }
         this.maxTraversals = maxTraversals;
         this.pcs.firePropertyChange(DefaultEdgeDisplayController.MAX_TRAVERSALS, null, this.maxTraversals);
@@ -100,8 +101,8 @@ public class DefaultEdgeDisplayController extends AbstractEdgeDisplayController 
         helper.flushPayloadEvents();
         for (CyEdge edge : this.traceGraph.getNetwork().getEdgeList()) {
             var traversals = this.traceGraph.getEdgeAux(edge).getTraversals();
-            networkView.getEdgeView(edge).setVisualProperty(EDGE_VISIBLE,
-                    traversals >= displayRange.getValue0() && traversals <= displayRange.getValue1());
+            networkView.getEdgeView(edge)
+                       .setVisualProperty(EDGE_VISIBLE, traversals >= displayRange.getValue0() && traversals <= displayRange.getValue1());
         }
     }
 

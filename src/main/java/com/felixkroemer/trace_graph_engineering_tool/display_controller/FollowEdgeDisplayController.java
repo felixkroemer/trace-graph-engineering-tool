@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class FollowEdgeDisplayController extends AbstractEdgeDisplayController {
+public class FollowEdgeDisplayController extends EdgeDisplayController {
 
     public static final String RENDERING_MODE_FOLLOW = "RENDERING_MODE_SELECTED";
     private CyNode previousNode;

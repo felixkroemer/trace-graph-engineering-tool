@@ -20,7 +20,7 @@ public class ParameterDiscretizationModel {
     private CyServiceRegistrar registrar;
     private PropertyChangeSupport pcs;
     private List<Parameter> parameters;
-    private Map<Long, Long> suidHashMapping;
+    private Map<Long, Long> hashSuidMapping;
     private CyRootNetwork rootNetwork;
     private Pair<String, Double> percentile;
     private boolean updating;
@@ -31,7 +31,7 @@ public class ParameterDiscretizationModel {
             Parameter parameter = new Parameter(paramDto, this);
             this.parameters.add(parameter);
         }
-        this.suidHashMapping = new HashMap<>();
+        this.hashSuidMapping = new HashMap<>();
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
         this.registrar = registrar;
@@ -43,7 +43,7 @@ public class ParameterDiscretizationModel {
             Parameter parameter = new Parameter(parameterName, this);
             this.parameters.add(parameter);
         }
-        this.suidHashMapping = new HashMap<>();
+        this.hashSuidMapping = new HashMap<>();
         this.percentile = null;
         this.pcs = new PropertyChangeSupport(this);
         this.registrar = registrar;
@@ -98,8 +98,8 @@ public class ParameterDiscretizationModel {
         }
     }
 
-    public Map<Long, Long> getSuidHashMapping() {
-        return this.suidHashMapping;
+    public Map<Long, Long> getHashSuidMapping() {
+        return this.hashSuidMapping;
     }
 
     public CyRootNetwork getRootNetwork() {

@@ -43,7 +43,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     private TraceGraphController traceGraphController;
     private VisualStyle defaultStyle;
     private CyNetworkView view;
-    private AbstractEdgeDisplayController displayController;
+    private EdgeDisplayController displayController;
     private TraceGraph traceGraph;
     private FilteredState filteredState;
     private Set<CyNode> labeledNodes;
@@ -79,7 +79,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.hideNodes();
     }
 
-    public VisualStyle createDefaultVisualStyle() {
+    private VisualStyle createDefaultVisualStyle() {
         var VisualStyleFactory = registrar.getService(VisualStyleFactory.class);
         VisualStyle style = this.defaultStyle == null ? VisualStyleFactory.createVisualStyle("default-tracegraph") : this.defaultStyle;
 
@@ -227,7 +227,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         return this.defaultStyle;
     }
 
-    private void setDisplayController(AbstractEdgeDisplayController displayController) {
+    private void setDisplayController(EdgeDisplayController displayController) {
         if (this.displayController != null) {
             if (this.displayController.getClass() == displayController.getClass()) {
                 return;

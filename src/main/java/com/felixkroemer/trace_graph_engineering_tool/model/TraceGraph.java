@@ -14,9 +14,8 @@ public class TraceGraph {
     private CyNetwork network;
     private ParameterDiscretizationModel pdm;
     private Set<CyTable> traces;
-    private CyTable defaultNodeTable;
     // hash to node suid
-    private Map<Long, Long> suidHashMapping;
+    private Map<Long, Long> hashSuidMapping;
     // source table to array of nodes
     // every situation index must always be mapped to an existing node in the graph
     private Map<CyTable, CyNode[]> nodeMapping;
@@ -29,10 +28,7 @@ public class TraceGraph {
         this.pdm = pdm;
         this.traces = new HashSet<>();
         this.network = network;
-
-        // DEFAULT_ATTRS = Shared (root) + Local
-        this.defaultNodeTable = this.network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
-        this.suidHashMapping = this.pdm.getSuidHashMapping();
+        this.hashSuidMapping = this.pdm.getHashSuidMapping();
         this.nodeMapping = new HashMap<>();
         this.nodeInfo = new HashMap<>();
         this.edgeInfo = new HashMap<>();
@@ -41,7 +37,7 @@ public class TraceGraph {
 
     public CyNode getOrCreateNode(int[] state) {
         long hash = Arrays.hashCode(state);
-        Long suid = suidHashMapping.get(hash);
+        Long suid = hashSuidMapping.get(hash);
         CyNode currentNode;
         NodeAuxiliaryInformation currentNodeInfo;
         var rootNetwork = ((CySubNetwork) network).getRootNetwork();
@@ -59,7 +55,7 @@ public class TraceGraph {
         } else { // node does not exist yet
             Profiler.getInstance().addNodeNotFoundInRootNetwork();
             currentNode = network.addNode();
-            suidHashMapping.put(hash, currentNode.getSUID());
+            hashSuidMapping.put(hash, currentNode.getSUID());
             var currentRow = this.pdm.getRootNetwork().getSharedNodeTable().getRow(currentNode.getSUID());
             for (int j = 0; j < this.pdm.getParameters().size(); j++) {
                 currentRow.set(this.pdm.getParameters().get(j).getName(), state[j]);

@@ -18,8 +18,7 @@ import java.beans.PropertyChangeListener;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class ShortestTraceEdgeDisplayController extends AbstractEdgeDisplayController implements
-        ShowTraceEventListener {
+public class ShortestTraceEdgeDisplayController extends EdgeDisplayController implements ShowTraceEventListener {
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
     public static final String TRACE = "trace";

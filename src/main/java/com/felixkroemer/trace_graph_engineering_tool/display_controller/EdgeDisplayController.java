@@ -13,7 +13,7 @@ import java.beans.PropertyChangeSupport;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.EDGE_VISIBLE;
 
-public abstract class AbstractEdgeDisplayController implements CyDisposable {
+public abstract class EdgeDisplayController implements CyDisposable {
 
     protected CyServiceRegistrar registrar;
     protected CyNetworkView networkView;
@@ -22,8 +22,8 @@ public abstract class AbstractEdgeDisplayController implements CyDisposable {
     protected PropertyChangeSupport pcs;
 
     // assumes the network has the default style applied (besides EDGE_VISIBLE / NODE_VISIBLE)
-    public AbstractEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                         RenderingController renderingController) {
+    public EdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
+                                 RenderingController renderingController) {
         this.registrar = registrar;
         this.networkView = view;
         this.traceGraph = traceGraph;

@@ -22,7 +22,7 @@ import java.util.*;
 
 import static org.cytoscape.view.presentation.property.BasicVisualLexicon.*;
 
-public class TracesEdgeDisplayController extends AbstractEdgeDisplayController {
+public class TracesEdgeDisplayController extends EdgeDisplayController {
 
     public static final String RENDERING_MODE_TRACES = "RENDERING_MODE_TRACES";
     public static final String TRACES = "traces";

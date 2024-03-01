@@ -4,6 +4,9 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphContro
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.Profiler;
+import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.time.StopWatch;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
@@ -14,7 +17,8 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.*;
 
 import javax.swing.*;
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,7 +38,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
     @Override
     public void run(TaskMonitor monitor) throws Exception {
-        this.profileTraceGraphUpdate();
+        this.profileTraceLoading();
         this.registrar.unregisterService(this, NetworkAddedListener.class);
     }
 
@@ -52,7 +56,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
     }
 
     public void profileTraceGraphUpdate() throws Exception {
-        String fileName = "C:\\Users\\kroem\\Dropbox\\HWS2023\\master_thesis\\pdms\\normal_speed_combined_cleaned.json";
+        String fileName = "";
 
         var task = new LoadPDMTask(this.registrar);
         TunableSetter setter = this.registrar.getService(TunableSetter.class);
@@ -140,7 +144,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
     }
 
     public void profileTraceLoading() throws Exception {
-        String fileName = "";
+        String path = "";
         SynchronousTaskManager<?> taskManager = this.registrar.getService(SynchronousTaskManager.class);
         TunableSetter setter = this.registrar.getService(TunableSetter.class);
         StopWatch watch = new StopWatch();
@@ -150,14 +154,19 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
             results.put(p, new ArrayList<>());
         }
 
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        String pdmString = Files.readString(new File(path + ".json").toPath());
+        var pdm = gson.fromJson(pdmString, ParameterDiscretizationModelDTO.class);
+
         int preRuns = 1;
-        for (int size = 1; size <= 9; size++) {
+        for (int size = 5; size <= 90; size += 5) {
             System.out.println("---------------------------------------------------------------");
             System.out.println(size);
             System.out.println("---------------------------------------------------------------");
 
-            if (size > 1 && preRuns > 0) {
-                size = 1;
+            if (size > 5 && preRuns > 0) {
+                size = 5;
                 preRuns -= 1;
             }
 
@@ -166,10 +175,20 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
             int runs = 10;
             for (int i = 0; i < runs; i++) {
 
-                Thread.sleep(12000);
+                Thread.sleep(10000);
 
+                pdm.getCsvs().clear();
                 var task = new LoadPDMTask(this.registrar);
-                var iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(String.format(fileName, size))));
+                var tempTrace = File.createTempFile(String.format("temp_%d000", size), ".csv");
+                pruneFileToLineCount(new File(path + ".csv"), tempTrace, size * 1000 + 1);
+                pdm.getCsvs().add(tempTrace.getName());
+                var tempPDM = File.createTempFile(String.format("temp_%d000", size), ".json");
+                try (FileWriter writer = new FileWriter(tempPDM)) {
+                    gson.toJson(pdm, writer);
+                    writer.flush();
+                }
+
+                var iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", tempPDM));
                 watch.start();
                 taskManager.execute(iter);
                 SwingUtilities.invokeAndWait(watch::stop);
@@ -181,7 +200,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                 System.out.printf("Total: %d, Algorithmic: %d\n", watch.getTime(), algoResult);
 
                 if (i == runs - 1) {
-                    this.results.get("size").add((long) size * 10000);
+                    this.results.get("size").add((long) size * 1000);
                     this.results.get("total").add(sumTotal / runs);
                     this.results.get("algo").add(sumAlgorithmic / runs);
                     this.results.get("nodes").add((long) this.createdNetwork.getNodeCount());
@@ -210,5 +229,17 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
     @Override
     public void handleEvent(NetworkAddedEvent e) {
         this.createdNetwork = e.getNetwork();
+    }
+
+    public static void pruneFileToLineCount(File sourceFile, File targetFile, int lineCount) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(sourceFile)); BufferedWriter writer = new BufferedWriter(new FileWriter(targetFile))) {
+            String line;
+            int currentLine = 0;
+            while ((line = reader.readLine()) != null && currentLine < lineCount) {
+                writer.write(line);
+                writer.newLine();
+                currentLine++;
+            }
+        }
     }
 }
