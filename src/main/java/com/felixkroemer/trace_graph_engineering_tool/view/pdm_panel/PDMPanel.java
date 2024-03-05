@@ -26,9 +26,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener,
 
     public PDMPanel(CyServiceRegistrar reg) {
         this.reg = reg;
-
         this.infoTreeTable = new CustomTreeTable();
-
         this.pdmPanel = new JPanel();
         this.pdmPanel.setLayout(new BoxLayout(this.pdmPanel, BoxLayout.Y_AXIS));
         this.resetFilterPanel = new JPanel();

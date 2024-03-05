@@ -33,8 +33,6 @@ public class LoadPDMTask extends AbstractTask {
     private final Logger logger;
     private final TraceGraphManager manager;
     private final CyNetworkFactory networkFactory;
-    private final CyNetworkTableManager networkTableManager;
-    private final CyTableManager tableManager;
     private final CyServiceRegistrar registrar;
     @Tunable(description = "The trace to load", params = "input=true", required = true)
     public File traceFile;
@@ -43,8 +41,6 @@ public class LoadPDMTask extends AbstractTask {
         this.logger = LoggerFactory.getLogger(CyNetwork.NAME);
         this.manager = reg.getService(TraceGraphManager.class);
         this.networkFactory = reg.getService(CyNetworkFactory.class);
-        this.networkTableManager = reg.getService(CyNetworkTableManager.class);
-        this.tableManager = reg.getService(CyTableManager.class);
         this.registrar = reg;
     }
 

@@ -27,9 +27,12 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
 import org.javatuples.Pair;
 
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.DefaultEdgeDisplayController.RENDERING_MODE_FULL;
 import static com.felixkroemer.trace_graph_engineering_tool.display_controller.FollowEdgeDisplayController.RENDERING_MODE_FOLLOW;
@@ -108,12 +111,21 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         style.addVisualMappingFunction(new ColorMapping(visitDurationMapping, registrar.getService(CyEventHelper.class)));
         style.addVisualMappingFunction(new TooltipMapping(traceGraph.getPDM()));
 
+        var excessMappingFunctions = style.getAllVisualMappingFunctions().stream().filter(f -> {
+            var vp = f.getVisualProperty();
+            return !(vp.equals(NODE_SIZE) || vp.equals(NODE_FILL_COLOR) || vp.equals(NODE_TOOLTIP));
+        }).collect(Collectors.toSet());
+        for (var mappingFunction : excessMappingFunctions) {
+            style.removeVisualMappingFunction(mappingFunction.getVisualProperty());
+        }
+
         // ignored, because CyEdgeViewImpl has a boolean visible that decides if the edge is drawn
         // visible is only set in fireViewChangedEvent in response to setVisualProperty
         // setVisualProperty is never called when applying default values of a style
         // => hide edges manually
         // style.setDefaultValue(EDGE_VISIBLE, false);
         style.setDefaultValue(EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.DELTA);
+        style.setDefaultValue(EDGE_STROKE_UNSELECTED_PAINT, Color.BLACK);
 
         return style;
     }
@@ -148,9 +160,9 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
     }
 
     public void updateVisualStyle() {
-        var newStyle = createDefaultVisualStyle();
-        newStyle = displayController.adjustVisualStyle(newStyle);
-        this.defaultStyle = newStyle;
+        var style = createDefaultVisualStyle();
+        style = displayController.adjustVisualStyle(style);
+        this.defaultStyle = style;
     }
 
     public void hideNodesUsingPercentiles() {
@@ -239,6 +251,7 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         this.displayController = displayController;
 
         this.updateVisualStyle();
+        // style gets applied asynchronously, the visual properties that are set in .init() will be overwritten
         this.defaultStyle.apply(this.view);
         this.displayController.init();
 

@@ -17,7 +17,7 @@ import static org.cytoscape.util.swing.IconManager.ICON_EDIT;
 
 public class ParameterCell extends JPanel implements PropertyChangeListener {
 
-    private JLabel label;
+    private JLabel nameLabel;
     private JButton editButton;
     private JLabel filterIndicator;
 
@@ -28,9 +28,9 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         JCheckBox checkBox = new JCheckBox();
         this.add(checkBox, BorderLayout.WEST);
         checkBox.setSelected(parameter.isEnabled());
-        this.label = new JLabel(parameter.getName());
-        this.add(this.label, BorderLayout.CENTER);
-        this.label.setHorizontalAlignment(JLabel.CENTER);
+        this.nameLabel = new JLabel(parameter.getName());
+        this.add(this.nameLabel, BorderLayout.CENTER);
+        this.nameLabel.setHorizontalAlignment(JLabel.CENTER);
 
         var containerPanel = new JPanel();
         this.filterIndicator = new JLabel();
@@ -39,7 +39,8 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         containerPanel.add(this.editButton);
         this.add(containerPanel, BorderLayout.EAST);
 
-        this.editButton.setFont(iconManager.getIconFont(14.0f));
+        this.editButton.setFont(iconManager.getIconFont(18.0f));
+        this.editButton.setMargin(new Insets(5, 5, 5, 5));
         this.editButton.addActionListener(e -> SwingUtilities.invokeLater(() -> Util.showDialog(new SelectBinsPanel(controller.createSelectBinsController(parameter)), "Select bins")));
         checkBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -50,19 +51,16 @@ public class ParameterCell extends JPanel implements PropertyChangeListener {
         });
         this.setHighlightIndicator(parameter.getVisibleBins());
 
-        this.label.setEnabled(parameter.isEnabled());
+        this.nameLabel.setEnabled(parameter.isEnabled());
         this.editButton.setEnabled(parameter.isEnabled());
     }
 
-    public JLabel getLabel() {
-        return this.label;
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
             case Parameter.ENABLED -> {
-                this.label.setEnabled((boolean) evt.getNewValue());
+                this.nameLabel.setEnabled((boolean) evt.getNewValue());
                 this.editButton.setEnabled((boolean) evt.getNewValue());
             }
             case Parameter.BINS -> {
