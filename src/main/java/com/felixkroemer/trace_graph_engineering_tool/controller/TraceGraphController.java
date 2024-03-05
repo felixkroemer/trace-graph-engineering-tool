@@ -48,9 +48,9 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.registerNetwork();
         var tableManager = registrar.getService(CyTableManager.class);
         var networkTableManager = registrar.getService(CyNetworkTableManager.class);
-        for (var table : traceGraph.getTraces()) {
-            tableManager.addTable(table);
-            networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, table.getTitle(), table);
+        for (var trace : traceGraph.getTraces()) {
+            tableManager.addTable(trace);
+            networkTableManager.setTable(traceGraph.getNetwork(), CyNode.class, "" + trace.hashCode(), trace);
         }
     }
 
@@ -189,12 +189,12 @@ public class TraceGraphController extends NetworkController implements SetCurren
         this.renderingController.prepareForOperation();
         for (var trace : controller.getTraceGraph().getTraces()) {
             networkTableManager.setTable(this.getNetwork(), CyNode.class, "" + trace.hashCode(), trace);
+            networkTableManager.removeTable(controller.getNetwork(), CyNode.class, "" + trace.hashCode());
             this.traceGraph.addTrace(trace);
         }
         // delete the network only after its nodes have been transferred, weird error
         // where some edge views are not created occurs otherwise
-        var network = controller.getNetwork();
-        networkManager.destroyNetwork(network);
+        networkManager.destroyNetwork(controller.getNetwork());
         this.renderingController.onNetworkChanged();
     }
 
