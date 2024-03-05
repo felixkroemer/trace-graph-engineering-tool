@@ -67,13 +67,13 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void updateNetwork(Parameter changedParameter) {
         this.renderingController.prepareForOperation();
         if (SwingUtilities.isEventDispatchThread()) {
-            //traceGraph.onParameterChangedInefficient(changedParameter);
-            traceGraph.onParameterChangedSemiEfficient(changedParameter);
+            traceGraph.onParameterChangedInefficient(changedParameter);
+            //traceGraph.onParameterChangedSemiEfficient(changedParameter);
             renderingController.onNetworkChanged();
         } else {
             SwingUtilities.invokeLater(() -> {
-                //traceGraph.onParameterChangedInefficient(changedParameter);
-                traceGraph.onParameterChangedSemiEfficient(changedParameter);
+                traceGraph.onParameterChangedInefficient(changedParameter);
+                //traceGraph.onParameterChangedSemiEfficient(changedParameter);
                 renderingController.onNetworkChanged();
             });
         }

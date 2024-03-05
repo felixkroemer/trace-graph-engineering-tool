@@ -66,6 +66,9 @@ public class CyActivator extends AbstractCyActivator {
         var setPercentileFilterTaskFactory = new SetPercentileFilterTaskFactory(reg);
         registerService(bundleContext, setPercentileFilterTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Set Percentile Filter")));
 
+        var customTaskFactory = new CustomTaskFactory(reg);
+        registerService(bundleContext, customTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Custom Task")));
+
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
     }
 

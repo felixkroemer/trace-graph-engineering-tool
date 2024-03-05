@@ -24,10 +24,10 @@ public class ColorMapping extends ContinuousMappingImpl {
 
         BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
 
-        int stepMedium = (int) Math.round((max - min) * 0.05);
+        int stepMedium = (int) Math.round((max - min) * 0.02);
         BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<>(Color.GREEN, Color.GREEN, Color.GREEN);
 
-        int stepLarge = (int) Math.round((max - min) * 0.1);
+        int stepLarge = (int) Math.round((max - min) * 0.05);
         BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(Color.ORANGE, Color.ORANGE, Color.ORANGE);
 
         BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
