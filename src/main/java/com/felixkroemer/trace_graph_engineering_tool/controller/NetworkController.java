@@ -118,10 +118,6 @@ public abstract class NetworkController implements CyDisposable {
         }
     }
 
-    public void focusNode(CyNode node) {
-        this.focusNode(node, true);
-    }
-
     public SelectBinsController createSelectBinsController(Parameter parameter) {
         return new SelectBinsController(parameter, registrar);
     }

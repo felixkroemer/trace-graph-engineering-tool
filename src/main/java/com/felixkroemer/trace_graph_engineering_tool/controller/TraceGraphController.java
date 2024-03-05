@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.controller;
 import com.felixkroemer.trace_graph_engineering_tool.events.SetCurrentTraceGraphControllerEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedPDMEventListener;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedTraceGraphEvent;
 import com.felixkroemer.trace_graph_engineering_tool.model.FilteredState;
 import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
@@ -67,16 +68,18 @@ public class TraceGraphController extends NetworkController implements SetCurren
     public void updateNetwork(Parameter changedParameter) {
         this.renderingController.prepareForOperation();
         if (SwingUtilities.isEventDispatchThread()) {
-            traceGraph.onParameterChangedInefficient(changedParameter);
-            //traceGraph.onParameterChangedSemiEfficient(changedParameter);
+            //traceGraph.onParameterChangedInefficient(changedParameter);
+            traceGraph.onParameterChangedSemiEfficient(changedParameter);
             renderingController.onNetworkChanged();
         } else {
             SwingUtilities.invokeLater(() -> {
-                traceGraph.onParameterChangedInefficient(changedParameter);
-                //traceGraph.onParameterChangedSemiEfficient(changedParameter);
+                //traceGraph.onParameterChangedInefficient(changedParameter);
+                traceGraph.onParameterChangedSemiEfficient(changedParameter);
                 renderingController.onNetworkChanged();
             });
         }
+        CyEventHelper eventHelper = this.registrar.getService(CyEventHelper.class);
+        eventHelper.fireEvent(new UpdatedTraceGraphEvent(this));
     }
 
     @Override

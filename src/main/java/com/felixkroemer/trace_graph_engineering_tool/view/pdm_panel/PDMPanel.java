@@ -2,6 +2,8 @@ package com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedTraceGraphEvent;
+import com.felixkroemer.trace_graph_engineering_tool.events.UpdatedTraceGraphEventListener;
 import com.felixkroemer.trace_graph_engineering_tool.view.TraceGraphPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -12,7 +14,7 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener {
+public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener, UpdatedTraceGraphEventListener {
 
     private CustomTreeTable infoTreeTable;
     private JPanel pdmPanel;
@@ -55,6 +57,8 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
         this.initPDMPanel();
 
         this.resetFilterButton.addActionListener(e -> this.controller.getPDM().resetFilters());
+
+        this.reg.registerService(this, UpdatedTraceGraphEventListener.class);
     }
 
     public void registerCallbacks(NetworkController controller) {
@@ -83,8 +87,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     }
 
     private void updateInfoTreeTable() {
-        var model = this.controller.createNetworkTableModel();
-        this.infoTreeTable.setModel(model);
+        this.infoTreeTable.setModel(this.controller.createNetworkTableModel());
     }
 
     private void updateResetPanel() {
@@ -118,5 +121,12 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener 
     @Override
     public String getTitle() {
         return "PDM";
+    }
+
+    @Override
+    public void handleEvent(UpdatedTraceGraphEvent e) {
+        if (e.getSource() == this.controller) {
+            this.updateInfoTreeTable();
+        }
     }
 }
