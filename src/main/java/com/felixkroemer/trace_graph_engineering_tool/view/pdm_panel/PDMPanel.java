@@ -38,7 +38,7 @@ public class PDMPanel extends TraceGraphPanel implements PropertyChangeListener,
     }
 
     private void initInfoPanel() {
-        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder("Network Information"));
+        this.infoTreeTable.setBorder(LookAndFeelUtil.createTitledBorder(""));
         this.add(this.infoTreeTable, BorderLayout.NORTH);
     }
 

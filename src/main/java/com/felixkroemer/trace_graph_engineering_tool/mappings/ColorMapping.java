@@ -22,17 +22,27 @@ public class ColorMapping extends ContinuousMappingImpl {
             min = 1;
         }
 
-        BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(Color.BLUE, Color.BLUE, Color.BLUE);
+        Color purple = Color.decode("#440154");
+        Color blue = Color.decode("#39568C");
+        Color turquoise = Color.decode("#1F968B");
+        Color green = Color.decode("#73D055");
+        Color yellow = Color.decode("#FDE725");
 
-        int stepMedium = (int) Math.round((max - min) * 0.02);
-        BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<>(Color.GREEN, Color.GREEN, Color.GREEN);
+        BoundaryRangeValues<Paint> boundaryMin = new BoundaryRangeValues<>(purple, purple, purple);
 
-        int stepLarge = (int) Math.round((max - min) * 0.05);
-        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(Color.ORANGE, Color.ORANGE, Color.ORANGE);
+        int stepSmall = (int) Math.round((max - min) * 0.001);
+        BoundaryRangeValues<Paint> boundarySmall = new BoundaryRangeValues<>(blue, blue, blue);
 
-        BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(Color.RED, Color.RED, Color.RED);
+        int stepMedium = (int) Math.round((max - min) * 0.01);
+        BoundaryRangeValues<Paint> boundaryMedium = new BoundaryRangeValues<>(turquoise, turquoise, turquoise);
 
-        this.addPoint(min, boundarySmall);
+        int stepLarge = (int) Math.round((max - min) * 0.1);
+        BoundaryRangeValues<Paint> boundaryLarge = new BoundaryRangeValues<>(green, green, green);
+
+        BoundaryRangeValues<Paint> boundaryMax = new BoundaryRangeValues<>(yellow, yellow, yellow);
+
+        this.addPoint(min, boundaryMin);
+        this.addPoint(stepSmall, boundarySmall);
         this.addPoint(stepMedium, boundaryMedium);
         this.addPoint(stepLarge, boundaryLarge);
         this.addPoint(max, boundaryMax);

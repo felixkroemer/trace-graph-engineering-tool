@@ -7,12 +7,16 @@ import com.felixkroemer.trace_graph_engineering_tool.model.ParameterDiscretizati
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDTO;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import com.felixkroemer.trace_graph_engineering_tool.model.source_table.Trace;
 import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.felixkroemer.trace_graph_engineering_tool.view.SelectMatchingPDMPanel;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import org.cytoscape.model.*;
+import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
@@ -106,9 +110,9 @@ public class LoadPDMTask extends AbstractTask {
             File path = null;
             try {
                 path = new File(traceFile.getParentFile(), csv);
-                //var trace = new Trace(csv, Files.lines(path.toPath()).count() - 1, registrar);
-                var tableFactory = registrar.getService(CyTableFactory.class);
-                var trace = tableFactory.createTable(csv, "id", Long.class, true, true);
+                var trace = new Trace(csv, Files.lines(path.toPath()).count() - 1, registrar);
+                //var tableFactory = registrar.getService(CyTableFactory.class);
+                //var trace = tableFactory.createTable(csv, "id", Long.class, true, true);
                 trace.setTitle(csv);
                 Util.parseCSV(trace, path);
                 loadTraceToTraceGraph(trace, traceGraph);
@@ -119,9 +123,10 @@ public class LoadPDMTask extends AbstractTask {
     }
 
     public void loadTrace() throws Exception {
-        //CyTable trace = new Trace(traceFile.getName(), Files.lines(traceFile.toPath()).count() - 1, registrar);
-        var tableFactory = registrar.getService(CyTableFactory.class);
-        var trace = tableFactory.createTable(traceFile.getName(), "id", Long.class, true, true);
+        CyTable trace = new Trace(traceFile.getName(), Files.lines(traceFile.toPath()).count() - 1, registrar);
+        // code for comparison to default CyTableImpl
+        //var tableFactory = registrar.getService(CyTableFactory.class);
+        //var trace = tableFactory.createTable(traceFile.getName(), "id", Long.class, true, true);
         Util.parseCSV(trace, traceFile);
         List<String> params = new ArrayList<>();
         trace.getColumns().forEach(c -> {

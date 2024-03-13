@@ -161,21 +161,23 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
         int preRuns = 1;
         for (int size = 5; size <= 90; size += 5) {
-            System.out.println("---------------------------------------------------------------");
-            System.out.println(size);
-            System.out.println("---------------------------------------------------------------");
-
             if (size > 5 && preRuns > 0) {
                 size = 5;
                 preRuns -= 1;
             }
 
+            System.out.println("---------------------------------------------------------------");
+            System.out.println(size);
+            System.out.println("---------------------------------------------------------------");
+
             long sumTotal = 0;
             long sumAlgorithmic = 0;
-            int runs = 10;
+            int runs = 20;
             for (int i = 0; i < runs; i++) {
 
-                Thread.sleep(10000);
+                Thread.sleep(5000);
+
+                System.out.println("------------------------------");
 
                 pdm.getCsvs().clear();
                 var task = new LoadPDMTask(this.registrar);
@@ -205,6 +207,8 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                     this.results.get("algo").add(sumAlgorithmic / runs);
                     this.results.get("nodes").add((long) this.createdNetwork.getNodeCount());
                 }
+
+                System.out.println("------------------------------");
 
                 var networkManager = registrar.getService(CyNetworkManager.class);
                 networkManager.destroyNetwork(this.createdNetwork);
