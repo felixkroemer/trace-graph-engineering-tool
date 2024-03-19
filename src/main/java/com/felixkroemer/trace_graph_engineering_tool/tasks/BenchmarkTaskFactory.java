@@ -4,16 +4,16 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
-public class ProfilingTaskFactory extends AbstractTaskFactory {
+public class BenchmarkTaskFactory extends AbstractTaskFactory {
 
     private CyServiceRegistrar reg;
 
-    public ProfilingTaskFactory(CyServiceRegistrar reg) {
+    public BenchmarkTaskFactory(CyServiceRegistrar reg) {
         this.reg = reg;
     }
 
     @Override
     public TaskIterator createTaskIterator() {
-        return new TaskIterator(new ProfilingTask(this.reg));
+        return new TaskIterator(new BenchmarkTask(this.reg));
     }
 }

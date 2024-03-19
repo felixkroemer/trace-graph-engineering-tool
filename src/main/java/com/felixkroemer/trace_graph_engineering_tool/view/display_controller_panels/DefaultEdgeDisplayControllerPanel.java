@@ -68,7 +68,6 @@ public class DefaultEdgeDisplayControllerPanel extends EdgeDisplayControllerPane
             case DefaultEdgeDisplayController.MAX_TRAVERSALS -> this.slider.setMaximum((int) evt.getNewValue());
             case DefaultEdgeDisplayController.DISPLAY_RANGE -> {
                 var range = (Pair<Integer, Integer>) evt.getNewValue();
-                //TODO: fix displayRange semantics
                 this.slider.setMinimum(range.getValue0());
                 this.slider.setValue(range.getValue0());
             }

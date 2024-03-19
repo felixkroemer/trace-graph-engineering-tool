@@ -297,7 +297,6 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         var selectedNodes = CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true);
         var selectedEdges = CyTableUtil.getEdgesInState(network, CyNetwork.SELECTED, true);
         this.traces = this.calculateTraces(selectedNodes, selectedEdges, network);
-        // TODO: make range itself an observable attribute, -> dont poll number of traces from panel
         this.pcs.firePropertyChange(TracesEdgeDisplayController.TRACES, null, this.traces);
         drawTraces();
     }

@@ -11,6 +11,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class ShowTraceTask extends AbstractTask {
@@ -33,12 +34,14 @@ public class ShowTraceTask extends AbstractTask {
 
         if (controller != null) {
             var traceGraph = controller.getTraceGraph();
-            var trace = traceGraph.findTrace(nodes);
+            var trace = traceGraph.findMinimalSubtrace(nodes);
             if (trace != null) {
                 SubTraceExtension extension = new SubTraceExtension(trace, traceGraph, Color.BLACK);
                 helper.fireEvent(new ShowTraceEvent(this, extension, network));
             } else {
-                throw new Exception("No Trace found");
+                new Thread(() -> {
+                    JOptionPane.showMessageDialog(null, "No Subtrace found that contains all nodes", null, JOptionPane.ERROR_MESSAGE);
+                }).start();
             }
         }
     }

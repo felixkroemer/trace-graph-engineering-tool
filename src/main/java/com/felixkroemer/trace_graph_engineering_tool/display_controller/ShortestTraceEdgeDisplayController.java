@@ -22,7 +22,6 @@ public class ShortestTraceEdgeDisplayController extends EdgeDisplayController im
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
     public static final String TRACE = "trace";
-    //TODO: find better way to pass initial trace
     private SubTraceExtension trace;
 
     public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,

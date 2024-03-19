@@ -8,9 +8,9 @@ import org.javatuples.Pair;
 
 import java.util.*;
 
-public class TraceFindingAlgorithm {
+public class MinimalSubtraceAlgorithm {
 
-    public static SubTrace findTraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static SubTrace findMinimalSubtraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = new Pair<>(0, Integer.MAX_VALUE);
         CyTable minimumTrace = null;
         for (CyTable trace : traceGraph.getTraces()) {
@@ -37,7 +37,7 @@ public class TraceFindingAlgorithm {
         return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    public static SubTrace findTraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static SubTrace findMinimalSubtraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
         CyTable minimumTrace = null;
         for (CyTable trace : traceGraph.getTraces()) {
@@ -94,7 +94,7 @@ public class TraceFindingAlgorithm {
         return false;
     }
 
-    public static SubTrace findTraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
+    public static SubTrace findMinimalSubtraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
         CyTable minimumTrace = null;
 
@@ -167,7 +167,7 @@ public class TraceFindingAlgorithm {
 
     private static SubTrace createTrace(TraceGraph traceGraph, Pair<Integer, Integer> minimumWindow,
                                         CyTable minimumTrace) {
-        if (minimumWindow != null) {
+        if (minimumTrace != null) {
             var traceNodes = new ArrayList<CyNode>();
             for (int i = minimumWindow.getValue0(); i <= minimumWindow.getValue1(); i++) {
                 traceNodes.add(traceGraph.findNode(minimumTrace, i));

@@ -78,7 +78,6 @@ public class NetworkComparisonController extends NetworkController implements Se
         var base = baseController.getNetwork();
         var delta = deltaController.getNetwork();
 
-        //TODO: maybe add more efficient batching version
         for (CyNode node : base.getNodeList()) {
             this.network.addNode(node);
         }

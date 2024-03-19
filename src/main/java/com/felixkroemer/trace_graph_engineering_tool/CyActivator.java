@@ -33,8 +33,8 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
 
-        ProfilingTaskFactory profilingTaskFactory = new ProfilingTaskFactory(reg);
-        registerService(bundleContext, profilingTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Profile", TITLE, "Profile application")));
+        BenchmarkTaskFactory benchmarkTaskFactory = new BenchmarkTaskFactory(reg);
+        registerService(bundleContext, benchmarkTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Profile", TITLE, "Profile application")));
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
         registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or trace", INSERT_SEPARATOR_BEFORE, "true")));
@@ -65,9 +65,6 @@ public class CyActivator extends AbstractCyActivator {
 
         var setPercentileFilterTaskFactory = new SetPercentileFilterTaskFactory(reg);
         registerService(bundleContext, setPercentileFilterTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Set Percentile Filter")));
-
-        var customTaskFactory = new CustomTaskFactory(reg);
-        registerService(bundleContext, customTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Custom Task")));
 
         new com.felixkroemer.trace_graph_engineering_tool.renderer.ding.CyActivator().start(bundleContext);
     }

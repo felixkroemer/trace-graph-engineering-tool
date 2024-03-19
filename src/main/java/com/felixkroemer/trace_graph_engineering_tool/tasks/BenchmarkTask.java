@@ -21,13 +21,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
-public class ProfilingTask extends AbstractTask implements NetworkAddedListener {
+public class BenchmarkTask extends AbstractTask implements NetworkAddedListener {
 
     private CyServiceRegistrar registrar;
     private CyNetwork createdNetwork;
     private Map<String, List<Long>> results;
 
-    public ProfilingTask(CyServiceRegistrar reg) {
+    public BenchmarkTask(CyServiceRegistrar reg) {
         this.registrar = reg;
         this.results = new LinkedHashMap<>();
         registrar.registerService(this, NetworkAddedListener.class);

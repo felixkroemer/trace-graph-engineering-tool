@@ -28,7 +28,6 @@ public class SplitTraceGraphTask extends AbstractNetworkCollectionTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         var manager = registrar.getService(TraceGraphManager.class);
-        //TODO: find better solution
         TraceGraphController controller = (TraceGraphController) manager.findControllerForNetwork(network);
 
         SwingUtilities.invokeLater(() -> {

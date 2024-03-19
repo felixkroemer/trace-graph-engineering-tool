@@ -207,11 +207,8 @@ public class RenderingController implements SelectedNodesAndEdgesListener, Prope
         // do not hide any nodes if no bins are selected
         if (visibleBins.values().stream().allMatch(Set::isEmpty)) {
             for (var nodeView : this.view.getNodeViews()) {
-                /*
-                use setLockedValue here because the task on the EDT for the rowssetevent
-                will apply the default style to all nodes again after this runs and reveal all nodes.
-                => TODO: use setLockedValue for all temporary style changes in displayControllers
-                 */
+                // use setLockedValue here because the task on the EDT for the rowssetevent
+                // will apply the default style to all nodes again after this runs and reveal all nodes.
                 nodeView.setLockedValue(NODE_VISIBLE, true);
             }
             return;

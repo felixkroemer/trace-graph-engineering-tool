@@ -178,7 +178,6 @@ public class TraceGraph {
         registrar.getService(UndoSupport.class).reset();
 
         TraceGraph traceGraph = new TraceGraph(this.registrar, newNetwork, this.pdm);
-        //TODO: improvement: do not use init, pass data directly
         for (CyTable table : tracesToRemove) {
             traceGraph.addTrace(table);
         }
@@ -240,7 +239,7 @@ public class TraceGraph {
         Profiler.getInstance().setUpdateTraceGraphResult(result);
     }
 
-    public void onParameterChangedSemiEfficient(Parameter changedParameter) {
+    public void onParameterChangedEfficient(Parameter changedParameter) {
         StopWatch watch = new StopWatch();
         watch.start();
         clearEdges();
@@ -362,12 +361,8 @@ public class TraceGraph {
         return snapshot;
     }
 
-    public SubTrace findTrace(List<CyNode> nodes) {
-        if (nodes.size() <= 2) {
-            return TraceFindingAlgorithm.findTraceNaive(this, nodes);
-        } else {
-            return TraceFindingAlgorithm.findTraceEfficient(this, nodes);
-        }
+    public SubTrace findMinimalSubtrace(List<CyNode> nodes) {
+        return MinimalSubtraceAlgorithm.findMinimalSubtraceEfficient(this, nodes);
     }
 
     public Map<String, String> getNodeInfo(CyNode node) {

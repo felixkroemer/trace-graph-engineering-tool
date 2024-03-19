@@ -5,7 +5,6 @@ import com.felixkroemer.trace_graph_engineering_tool.controller.NetworkControlle
 import javax.swing.*;
 import java.awt.*;
 
-// TODO: validation, etc.
 public class SetPercentileFilterPanel extends JPanel {
 
     private NetworkController controller;
@@ -36,9 +35,12 @@ public class SetPercentileFilterPanel extends JPanel {
                 column = "frequency";
             }
 
-            int percentile = Integer.parseInt(this.percentileField.getText());
-
-            this.controller.getPDM().setPercentile(column, percentile);
+            try {
+                int percentile = Integer.parseInt(this.percentileField.getText());
+                this.controller.getPDM().setPercentile(column, percentile);
+            } catch (NumberFormatException err) {
+                JOptionPane.showMessageDialog(this, "Input must be integer", null, JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         this.cancelButton.addActionListener(e -> {
