@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.TracesEdgeDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.DrawableSubtrace;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
@@ -49,7 +49,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         controller.addObserver(this);
     }
 
-    private void updateNumberSlider(List<SubTraceExtension> traces) {
+    private void updateNumberSlider(List<DrawableSubtrace> traces) {
         if (traces != null) {
             this.numberSlider.setEnabled(true);
             var displayRange = this.controller.getDisplayRange();
@@ -64,7 +64,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         }
     }
 
-    private void initNumberSlider(List<SubTraceExtension> traces) {
+    private void initNumberSlider(List<DrawableSubtrace> traces) {
         this.updateNumberSlider(traces);
         this.numberSlider.setPaintTrack(true);
         this.numberSlider.setPaintTicks(true);
@@ -86,7 +86,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         this.future = this.scheduler.schedule(runnable, 200, TimeUnit.MILLISECONDS);
     }
 
-    private void updateLengthSlider(List<SubTraceExtension> traces) {
+    private void updateLengthSlider(List<DrawableSubtrace> traces) {
         if (traces != null) {
             this.lengthSlider.setEnabled(true);
             this.lengthSlider.setValue(controller.getLength());
@@ -95,7 +95,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         }
     }
 
-    private void initLengthSlider(List<SubTraceExtension> traces) {
+    private void initLengthSlider(List<DrawableSubtrace> traces) {
         this.updateLengthSlider(traces);
         this.lengthSlider.setMinimum(1);
         this.lengthSlider.setMaximum(10);
@@ -143,7 +143,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
                         var networkController = controller.getRenderingController().getTraceGraphController();
                         if (value instanceof CyNode node) {
                             networkController.focusNode(node, false);
-                        } else if (value instanceof SubTraceExtension trace) {
+                        } else if (value instanceof DrawableSubtrace trace) {
                             controller.highlightTrace(trace);
                         }
                     }
@@ -152,12 +152,12 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
         });
     }
 
-    private void initInfoTable(List<SubTraceExtension> traces) {
+    private void initInfoTable(List<DrawableSubtrace> traces) {
         this.tracesInfoTable.setBorder(LookAndFeelUtil.createTitledBorder("Traces"));
         this.updateInfoTable(traces);
     }
 
-    private void updateInfoTable(List<SubTraceExtension> traces) {
+    private void updateInfoTable(List<DrawableSubtrace> traces) {
         if (traces != null) {
             Map<CyTable, MultiObjectTreeTableNode> nodeMap = new HashMap<>();
             DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
@@ -190,7 +190,7 @@ public class TracesPanel extends EdgeDisplayControllerPanel implements PropertyC
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(TracesEdgeDisplayController.TRACES)) {
             this.loading = true;
-            var traces = (List<SubTraceExtension>) evt.getNewValue();
+            var traces = (List<DrawableSubtrace>) evt.getNewValue();
             this.updateNumberSlider(traces);
             this.updateLengthSlider(traces);
             this.updateInfoTable(traces);

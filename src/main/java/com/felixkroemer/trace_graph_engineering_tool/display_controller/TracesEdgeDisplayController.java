@@ -2,7 +2,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
-import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.DrawableSubtrace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.TracesPanel;
@@ -30,11 +30,11 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
     private static int colorIndex = 0;
     private int length;
     private CyServiceRegistrar registrar;
-    private List<SubTraceExtension> traces;
+    private List<DrawableSubtrace> traces;
     private Pair<Integer, Integer> displayRange;
     private Set<CyEdge> multiEdges;
     private Set<CyEdge> highlightedEdges;
-    private Map<CyEdge, SubTraceExtension> traceMapping;
+    private Map<CyEdge, DrawableSubtrace> traceMapping;
 
     public TracesEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
                                        int length, RenderingController renderingController) {
@@ -51,7 +51,7 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         return new Color[]{new Color(0, 0, 0), new Color(87, 87, 87), new Color(173, 35, 35), new Color(42, 75, 215), new Color(29, 105, 20), new Color(129, 74, 25), new Color(129, 38, 192), new Color(160, 160, 160), new Color(129, 197, 122), new Color(157, 175, 255), new Color(41, 208, 208), new Color(255, 146, 51), new Color(255, 238, 51), new Color(233, 222, 187), new Color(255, 205, 243), new Color(255, 255, 255)};
     }
 
-    public static void findNextNodes(int index, SubTraceExtension subTrace, TraceGraph traceGraph, CyTable trace,
+    public static void findNextNodes(int index, DrawableSubtrace subTrace, TraceGraph traceGraph, CyTable trace,
                                      int length, boolean up) {
         CyNode currentNode = traceGraph.findNode(trace, index);
         CyNode nextNode;
@@ -76,9 +76,9 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         }
     }
 
-    public static List<SubTraceExtension> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph,
-                                                          int length, boolean isEdge) {
-        List<SubTraceExtension> subTraces = new ArrayList<>();
+    public static List<DrawableSubtrace> calculateTraces(CyIdentifiable identifiable, TraceGraph traceGraph, int length,
+                                                         boolean isEdge) {
+        List<DrawableSubtrace> subTraces = new ArrayList<>();
         Collection<Integer> situations;
         for (CyTable trace : traceGraph.getTraces()) {
             Set<Integer> foundIndices = new HashSet<>();
@@ -103,7 +103,7 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
                 if (foundIndices.contains(sourceIndex)) {
                     continue;
                 }
-                SubTraceExtension subTrace = new SubTraceExtension(trace, startNode, sourceIndex, traceGraph, getNextColor());
+                DrawableSubtrace subTrace = new DrawableSubtrace(trace, startNode, sourceIndex, traceGraph, getNextColor());
                 subTraces.add(subTrace);
                 findNextNodes(sourceIndex, subTrace, traceGraph, trace, length, true);
                 findNextNodes(sourceIndex, subTrace, traceGraph, trace, length, false);
@@ -178,21 +178,21 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         networkView.getModel().removeEdges(this.multiEdges);
     }
 
-    public List<SubTraceExtension> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges,
-                                                   CyNetwork network) {
+    public List<DrawableSubtrace> calculateTraces(Collection<CyNode> selectedNodes, Collection<CyEdge> selectedEdges,
+                                                  CyNetwork network) {
         network.removeEdges(this.multiEdges);
         this.multiEdges.clear();
         this.traceMapping.clear();
 
         if (!selectedNodes.isEmpty() || !selectedEdges.isEmpty()) {
-            List<SubTraceExtension> traces = new LinkedList<>();
+            List<DrawableSubtrace> traces = new LinkedList<>();
             if (selectedNodes.size() == 1) {
                 traces = calculateTraces(selectedNodes.iterator().next(), traceGraph, length, false);
             }
             if (selectedEdges.size() == 1) {
                 traces = calculateTraces(selectedEdges.iterator().next(), traceGraph, length, true);
             }
-            traces.sort(Comparator.comparingInt(SubTraceExtension::getWeight).reversed());
+            traces.sort(Comparator.comparingInt(DrawableSubtrace::getWeight).reversed());
             return traces;
         }
         return null;
@@ -242,7 +242,7 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         }
     }
 
-    public void highlightTrace(SubTraceExtension trace) {
+    public void highlightTrace(DrawableSubtrace trace) {
         this.unhighlightEdges();
         if (!traces.contains(trace)) {
             throw new IllegalArgumentException("Trace does not exist");
@@ -301,7 +301,7 @@ public class TracesEdgeDisplayController extends EdgeDisplayController {
         drawTraces();
     }
 
-    public List<SubTraceExtension> getTraces() {
+    public List<DrawableSubtrace> getTraces() {
         return this.traces;
     }
 

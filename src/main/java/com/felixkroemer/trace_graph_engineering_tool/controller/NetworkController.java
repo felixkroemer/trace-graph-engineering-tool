@@ -47,9 +47,7 @@ public abstract class NetworkController implements CyDisposable {
         // available as preinstalled app
         CyLayoutAlgorithm layoutFactory = layoutManager.getLayout("force-directed-cl");
         var context = (CLLayoutContext) layoutFactory.getDefaultLayoutContext();
-        //context.numIterations = 300;
         context.defaultSpringLength = 100;
-        //context.numIterationsEdgeRepulsive = 10;
         context.defaultNodeMass = 10;
         var views = getView().getNodeViews().stream().filter(v -> v.getVisualProperty(NODE_VISIBLE))
                              .collect(Collectors.toSet());

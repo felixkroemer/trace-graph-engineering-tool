@@ -1,7 +1,7 @@
 package com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels;
 
 import com.felixkroemer.trace_graph_engineering_tool.display_controller.ShortestTraceEdgeDisplayController;
-import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.DrawableSubtrace;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTable;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.CustomTreeTableModel;
 import com.felixkroemer.trace_graph_engineering_tool.view.custom_tree_table.MultiObjectTreeTableNode;
@@ -23,7 +23,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     private CustomTreeTable traceSequenceTable;
     private ShortestTraceEdgeDisplayController controller;
 
-    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller, SubTraceExtension trace) {
+    public ShortestTracePanel(ShortestTraceEdgeDisplayController controller, DrawableSubtrace trace) {
         this.controller = controller;
         this.traceInfoTable = new CustomTreeTable();
         this.traceSequenceTable = new CustomTreeTable();
@@ -61,7 +61,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
         });
     }
 
-    private void updatePanels(SubTraceExtension trace) {
+    private void updatePanels(DrawableSubtrace trace) {
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode("Root");
         for (var x : trace.getIndices()) {
             root.add(new MultiObjectTreeTableNode(x.getValue0(), x.getValue1()));
@@ -83,7 +83,7 @@ public class ShortestTracePanel extends EdgeDisplayControllerPanel implements Pr
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(ShortestTraceEdgeDisplayController.TRACE)) {
-            this.updatePanels((SubTraceExtension) evt.getNewValue());
+            this.updatePanels((DrawableSubtrace) evt.getNewValue());
         }
     }
 

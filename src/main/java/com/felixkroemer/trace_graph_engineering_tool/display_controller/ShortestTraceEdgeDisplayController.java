@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.display_controller;
 import com.felixkroemer.trace_graph_engineering_tool.controller.RenderingController;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEventListener;
-import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.DrawableSubtrace;
 import com.felixkroemer.trace_graph_engineering_tool.model.TraceGraph;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.ShortestTracePanel;
@@ -22,10 +22,10 @@ public class ShortestTraceEdgeDisplayController extends EdgeDisplayController im
 
     public static final String RENDERING_MODE_SHORTEST_TRACE = "RENDERING_MODE_SHORTEST_TRACE";
     public static final String TRACE = "trace";
-    private SubTraceExtension trace;
+    private DrawableSubtrace trace;
 
     public ShortestTraceEdgeDisplayController(CyServiceRegistrar registrar, CyNetworkView view, TraceGraph traceGraph,
-                                              SubTraceExtension trace, RenderingController renderingController) {
+                                              DrawableSubtrace trace, RenderingController renderingController) {
         super(registrar, view, traceGraph, renderingController);
         this.trace = trace;
     }
@@ -67,7 +67,7 @@ public class ShortestTraceEdgeDisplayController extends EdgeDisplayController im
         return RENDERING_MODE_SHORTEST_TRACE;
     }
 
-    public void showTrace(SubTraceExtension trace) {
+    public void showTrace(DrawableSubtrace trace) {
         this.hideAllEdges();
         for (int i = 0; i < trace.getSequence().size() - 1; i++) {
             CyEdge edge;

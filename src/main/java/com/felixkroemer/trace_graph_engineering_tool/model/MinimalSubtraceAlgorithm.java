@@ -10,7 +10,7 @@ import java.util.*;
 
 public class MinimalSubtraceAlgorithm {
 
-    public static SubTrace findMinimalSubtraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static Subtrace findMinimalSubtraceEfficient(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = new Pair<>(0, Integer.MAX_VALUE);
         CyTable minimumTrace = null;
         for (CyTable trace : traceGraph.getTraces()) {
@@ -37,7 +37,7 @@ public class MinimalSubtraceAlgorithm {
         return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    public static SubTrace findMinimalSubtraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
+    public static Subtrace findMinimalSubtraceNaive(TraceGraph traceGraph, Collection<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
         CyTable minimumTrace = null;
         for (CyTable trace : traceGraph.getTraces()) {
@@ -94,7 +94,7 @@ public class MinimalSubtraceAlgorithm {
         return false;
     }
 
-    public static SubTrace findMinimalSubtraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
+    public static Subtrace findMinimalSubtraceCPSat(TraceGraph traceGraph, List<CyNode> nodes) {
         Pair<Integer, Integer> minimumWindow = null;
         CyTable minimumTrace = null;
 
@@ -165,14 +165,14 @@ public class MinimalSubtraceAlgorithm {
         return createTrace(traceGraph, minimumWindow, minimumTrace);
     }
 
-    private static SubTrace createTrace(TraceGraph traceGraph, Pair<Integer, Integer> minimumWindow,
+    private static Subtrace createTrace(TraceGraph traceGraph, Pair<Integer, Integer> minimumWindow,
                                         CyTable minimumTrace) {
         if (minimumTrace != null) {
             var traceNodes = new ArrayList<CyNode>();
             for (int i = minimumWindow.getValue0(); i <= minimumWindow.getValue1(); i++) {
                 traceNodes.add(traceGraph.findNode(minimumTrace, i));
             }
-            return new SubTrace(minimumTrace, traceNodes, minimumWindow.getValue0());
+            return new Subtrace(minimumTrace, traceNodes, minimumWindow.getValue0());
         } else {
             return null;
         }

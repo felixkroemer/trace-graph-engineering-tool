@@ -361,7 +361,7 @@ public class TraceGraph {
         return snapshot;
     }
 
-    public SubTrace findMinimalSubtrace(List<CyNode> nodes) {
+    public Subtrace findMinimalSubtrace(List<CyNode> nodes) {
         return MinimalSubtraceAlgorithm.findMinimalSubtraceEfficient(this, nodes);
     }
 

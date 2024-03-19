@@ -5,18 +5,18 @@ import org.cytoscape.model.CyTable;
 
 import java.awt.*;
 
-public class SubTraceExtension extends SubTrace {
+public class DrawableSubtrace extends Subtrace {
 
     private Color color;
     private TraceGraph traceGraph;
 
-    public SubTraceExtension(CyTable trace, CyNode startNode, int index, TraceGraph traceGraph, Color color) {
+    public DrawableSubtrace(CyTable trace, CyNode startNode, int index, TraceGraph traceGraph, Color color) {
         super(trace, startNode, index);
         this.traceGraph = traceGraph;
         this.color = color;
     }
 
-    public SubTraceExtension(SubTrace trace, TraceGraph traceGraph, Color color) {
+    public DrawableSubtrace(Subtrace trace, TraceGraph traceGraph, Color color) {
         super(trace);
         this.traceGraph = traceGraph;
         this.color = color;

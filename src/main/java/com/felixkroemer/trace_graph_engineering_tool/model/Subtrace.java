@@ -8,30 +8,30 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SubTrace {
+public class Subtrace {
 
     protected LinkedList<CyNode> sequence;
     protected int startIndex;
     protected CyTable table;
 
-    private SubTrace(CyTable trace) {
+    private Subtrace(CyTable trace) {
         this.table = trace;
         this.sequence = new LinkedList<>();
     }
 
-    public SubTrace(CyTable trace, List<CyNode> nodes, int startIndex) {
+    public Subtrace(CyTable trace, List<CyNode> nodes, int startIndex) {
         this(trace);
         this.sequence = new LinkedList<>(nodes);
         this.startIndex = startIndex;
     }
 
-    public SubTrace(CyTable trace, CyNode node, int index) {
+    public Subtrace(CyTable trace, CyNode node, int index) {
         this(trace);
         this.sequence.add(node);
         this.startIndex = index;
     }
 
-    public SubTrace(SubTrace trace) {
+    public Subtrace(Subtrace trace) {
         this.table = trace.getTable();
         this.sequence = (LinkedList<CyNode>) trace.getSequence();
         this.startIndex = trace.getWindow().getValue0();

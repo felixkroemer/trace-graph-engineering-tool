@@ -3,7 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.ShowTraceEvent;
-import com.felixkroemer.trace_graph_engineering_tool.model.SubTraceExtension;
+import com.felixkroemer.trace_graph_engineering_tool.model.DrawableSubtrace;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTableUtil;
@@ -36,7 +36,7 @@ public class ShowTraceTask extends AbstractTask {
             var traceGraph = controller.getTraceGraph();
             var trace = traceGraph.findMinimalSubtrace(nodes);
             if (trace != null) {
-                SubTraceExtension extension = new SubTraceExtension(trace, traceGraph, Color.BLACK);
+                DrawableSubtrace extension = new DrawableSubtrace(trace, traceGraph, Color.BLACK);
                 helper.fireEvent(new ShowTraceEvent(this, extension, network));
             } else {
                 new Thread(() -> {
