@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 
@@ -119,5 +121,46 @@ public class Util {
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         return dialog;
+    }
+
+    public static void clearFacadeRows(CyNetwork network) {
+        var root = ((CySubNetwork) network).getRootNetwork();
+        Object rootDefaultEdgeTable = root.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
+        Object rootDefaultNodeTable = root.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+
+        Object[] fields = {rootDefaultEdgeTable, rootDefaultNodeTable};
+        for (var f : fields) {
+            try {
+                // Assuming the field you want to access is named 'mapFieldName'
+                Field field = f.getClass().getSuperclass().getDeclaredField("facadeRows");
+                field.setAccessible(true); // Bypasses Java access checking
+
+                // Access the Map and clear it
+                Map<?, ?> map = (Map<?, ?>) field.get(f);
+                map.clear();
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void rehash(CyNetwork network) {
+        var root = ((CySubNetwork) network).getRootNetwork();
+        try {
+            var rootNetworkNodePointersField = root.getClass().getSuperclass().getSuperclass()
+                                                   .getDeclaredField("nodePointers");
+            var subnetworkNodePointersField = root.getClass().getSuperclass().getSuperclass()
+                                                  .getDeclaredField("nodePointers");
+            var method = rootNetworkNodePointersField.getType().getDeclaredMethod("rehash", int.class);
+            rootNetworkNodePointersField.setAccessible(true);
+            subnetworkNodePointersField.setAccessible(true);
+            method.setAccessible(true);
+            var rootNetworkNodePointers = rootNetworkNodePointersField.get(root);
+            var subnetworkNodePointers = subnetworkNodePointersField.get(network);
+            method.invoke(rootNetworkNodePointers, 100000);
+            method.invoke(subnetworkNodePointers, 100000);
+        } catch (NoSuchMethodException | IllegalAccessException | NoSuchFieldException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

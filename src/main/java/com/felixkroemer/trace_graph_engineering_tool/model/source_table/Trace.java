@@ -129,7 +129,8 @@ public class Trace implements CyTable {
 
     @Override
     public boolean deleteRows(Collection<?> primaryKeys) {
-        throw new NotImplementedException("deleteRows is not implemented for Trace");
+        //throw new NotImplementedException("deleteRows is not implemented for Trace");
+        return true;
     }
 
     @Override

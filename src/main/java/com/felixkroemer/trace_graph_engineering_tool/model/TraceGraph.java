@@ -287,6 +287,8 @@ public class TraceGraph {
         this.removeLeftoverNodes();
         this.generateEdges();
         this.fixAux();
+
+        Util.clearFacadeRows(this.network);
         registrar.getService(UndoSupport.class).reset();
 
         long result = watch.getTime();

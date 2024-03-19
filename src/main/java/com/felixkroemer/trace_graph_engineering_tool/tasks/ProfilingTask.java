@@ -2,9 +2,9 @@ package com.felixkroemer.trace_graph_engineering_tool.tasks;
 
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphController;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
-import com.felixkroemer.trace_graph_engineering_tool.model.Parameter;
 import com.felixkroemer.trace_graph_engineering_tool.model.Profiler;
 import com.felixkroemer.trace_graph_engineering_tool.model.dto.ParameterDiscretizationModelDTO;
+import com.felixkroemer.trace_graph_engineering_tool.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.time.StopWatch;
@@ -19,10 +19,7 @@ import org.cytoscape.work.*;
 import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProfilingTask extends AbstractTask implements NetworkAddedListener {
 
@@ -38,7 +35,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
     @Override
     public void run(TaskMonitor monitor) throws Exception {
-        this.profileTraceLoading();
+        this.profileTraceGraphUpdate();
         this.registrar.unregisterService(this, NetworkAddedListener.class);
     }
 
@@ -60,52 +57,76 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
         var task = new LoadPDMTask(this.registrar);
         TunableSetter setter = this.registrar.getService(TunableSetter.class);
-        var iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(fileName)));
+        var iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(fileName + ".json")));
         SynchronousTaskManager<?> taskManager = this.registrar.getService(SynchronousTaskManager.class);
         taskManager.execute(iter);
         SwingUtilities.invokeAndWait(() -> {
         });
         TraceGraphController controller = (TraceGraphController) registrar.getService(TraceGraphManager.class)
                                                                           .findControllerForNetwork(this.createdNetwork);
+        var originalBins = controller.getPDM().getParameter("speed").getBins();
         this.reset();
         var networkManager = registrar.getService(CyNetworkManager.class);
         networkManager.destroyNetwork(this.createdNetwork);
 
-        Parameter param = controller.getPDM().getParameter("speed");
-        var originalBins = param.getBins();
         StopWatch watch = new StopWatch();
         var params = new String[]{"situations", "total", "algo", "nodes", "nodesFound", "nodesNotFoundInSubnetwork", "nodesNotFoundInRootNetwork", "leftOverNodes"};
         for (var p : params) {
             results.put(p, new ArrayList<>());
         }
 
-        //var locs = new double[]{10.66, 20.39, 20.7, 35.7, 40.82, 50.68, 61.358, 61.5355, 61.55044};
-        var locs = new double[]{10.66, 10.66, 15, 20.39, 20.7, 28, 35.7, 40.82, 45, 50.68, 55, 61.358, 61.5355, 61.55044};
+        var locs = new ArrayList<Double>();
+        var trace = controller.getTraceGraph().getTraces().iterator().next();
+        var speeds = trace.getColumn("speed").getValues(Double.class);
+        Collections.sort(speeds);
+        var step = trace.getRowCount() / 12;
+        int n = 0;
+        locs.add(speeds.get(0));
+        for (var speed : speeds) {
+            if (n > step) {
+                locs.add(speed);
+                n = 0;
+            }
+            n++;
+        }
+
         Profiler.getInstance().reset();
 
-        for (int i = 0; i < locs.length; i++) {
+        int preRuns = 1;
+        for (int i = 0; i < locs.size(); i++) {
+            if (preRuns >= 0) {
+                i = 0;
+                preRuns -= 1;
+            }
             System.out.println("---------------------------------------------------------------");
             System.out.println(i);
             System.out.println("---------------------------------------------------------------");
 
             task = new LoadPDMTask(this.registrar);
-            iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(fileName)));
+            iter = setter.createTaskIterator(new TaskIterator(task), Map.of("traceFile", new File(fileName + ".json")));
             taskManager.execute(iter);
             SwingUtilities.invokeAndWait(() -> {
             });
             controller = (TraceGraphController) registrar.getService(TraceGraphManager.class)
                                                          .findControllerForNetwork(this.createdNetwork);
-            param = controller.getPDM().getParameter("speed");
+
+/*            var root = ((CySubNetwork) controller.getTraceGraph().getNetwork()).getRootNetwork();
+            var rootDefaultNodeTable = root.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS);
+            var rootDefaultEdgeTable = root.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS);
+            var x = registrar.getService(CyNetworkTableManager.class);
+            x.setTable(root, CyNode.class, CyNetwork.DEFAULT_ATTRS, null);
+            x.setTable(root, CyEdge.class, CyNetwork.DEFAULT_ATTRS, null);*/
+
+            var param = controller.getPDM().getParameter("speed");
 
             var bins = new ArrayList<>(originalBins);
-            bins.add(locs[i]);
+            bins.add(locs.get(i));
             long sumTotal = 0;
             long sumAlgorithmic = 0;
 
-            int runs = 10;
+            int runs = 20;
             for (int j = 0; j < runs; j++) {
-
-                Thread.sleep(12000);
+                Thread.sleep(10000);
 
                 watch.start();
                 param.setBins(bins);
@@ -134,6 +155,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
                 SwingUtilities.invokeAndWait(() -> {
                 });
                 watch.reset();
+                Util.rehash(controller.getNetwork());
                 this.reset();
             }
             networkManager.destroyNetwork(this.createdNetwork);
@@ -161,7 +183,7 @@ public class ProfilingTask extends AbstractTask implements NetworkAddedListener 
 
         int preRuns = 1;
         for (int size = 5; size <= 90; size += 5) {
-            if (size > 5 && preRuns > 0) {
+            if (preRuns >= 0) {
                 size = 5;
                 preRuns -= 1;
             }
