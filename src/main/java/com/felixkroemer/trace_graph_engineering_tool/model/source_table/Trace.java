@@ -14,7 +14,7 @@ public class Trace implements CyTable {
     private final Long suid;
     private final Object lock = new Object();
     private String title;
-    private Map<String, CyColumn> columns;
+    private SortedMap<String, CyColumn> columns;
     private Map<String, double[]> data;
     private CyRow[] rows;
     private boolean isPublic;
@@ -22,7 +22,7 @@ public class Trace implements CyTable {
 
     public Trace(String title, long rowCount, CyServiceRegistrar registrar) {
         this.title = title;
-        this.columns = new HashMap<>();
+        this.columns = new TreeMap<>();
         this.registrar = registrar;
         this.data = new HashMap<>();
         this.suid = SUIDFactory.getNextSUID();

@@ -3,6 +3,7 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.*;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
+import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.SliderControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -155,8 +156,6 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
                     BorderLayout layout = (BorderLayout) this.getLayout();
                     this.remove(layout.getLayoutComponent(BorderLayout.NORTH));
                 }
-                case SOUTH -> {
-                }
             }
         }
         this.edgeDisplayControllerPanel = newPanel;
@@ -174,9 +173,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
         this.pdmPanel.registerCallbacks(event.getNetworkComparisonController());
         this.showPanel(this.traceGraphComparisonPanel);
-        if (this.edgeDisplayControllerPanel != null) {
-            this.hidePanel(this.edgeDisplayControllerPanel);
-        }
+        this.replaceEdgeDisplayControllerPanel(new SliderControllerPanel(event.getNetworkComparisonController()));
     }
 
     public void showMainPanel() {
