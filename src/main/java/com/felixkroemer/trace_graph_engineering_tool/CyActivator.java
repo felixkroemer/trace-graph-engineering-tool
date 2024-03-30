@@ -33,8 +33,8 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, manager, TraceGraphManager.class, new Properties());
         registerService(bundleContext, manager, NetworkAboutToBeDestroyedListener.class, new Properties());
 
-        BenchmarkTaskFactory benchmarkTaskFactory = new BenchmarkTaskFactory(reg);
-        registerService(bundleContext, benchmarkTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Profile", TITLE, "Profile application")));
+        //BenchmarkTaskFactory benchmarkTaskFactory = new BenchmarkTaskFactory(reg);
+        //registerService(bundleContext, benchmarkTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Profile", TITLE, "Profile application")));
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
         registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or trace", INSERT_SEPARATOR_BEFORE, "true")));
@@ -43,13 +43,13 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, exportPDMTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Export", TITLE, "Export PDM to json")));
 
         RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
-        registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Follow Mode")));
+        registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Outgoing-Edges Mode")));
 
         RenderingModeTaskFactory fullModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FULL);
-        registerService(bundleContext, fullModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Full Mode")));
+        registerService(bundleContext, fullModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "All-Edges Mode")));
 
         RenderingModeTaskFactory tracesModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_TRACES);
-        registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Use Traces Mode")));
+        registerService(bundleContext, tracesModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Subtraces Mode")));
 
         var showTraceNodeTaskFactory = new ShowTraceNodeTaskFactory(reg);
         registerService(bundleContext, showTraceNodeTaskFactory, NodeViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Show Trace")));

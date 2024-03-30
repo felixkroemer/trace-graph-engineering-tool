@@ -3,7 +3,6 @@ package com.felixkroemer.trace_graph_engineering_tool.view;
 import com.felixkroemer.trace_graph_engineering_tool.controller.TraceGraphManager;
 import com.felixkroemer.trace_graph_engineering_tool.events.*;
 import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.EdgeDisplayControllerPanel;
-import com.felixkroemer.trace_graph_engineering_tool.view.display_controller_panels.SliderControllerPanel;
 import com.felixkroemer.trace_graph_engineering_tool.view.pdm_panel.PDMPanel;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -173,7 +172,7 @@ public class TraceGraphMainPanel extends JPanel implements CytoPanelComponent2, 
         this.traceGraphComparisonPanel.setComparisonController(event.getNetworkComparisonController());
         this.pdmPanel.registerCallbacks(event.getNetworkComparisonController());
         this.showPanel(this.traceGraphComparisonPanel);
-        this.replaceEdgeDisplayControllerPanel(new SliderControllerPanel(event.getNetworkComparisonController()));
+        this.replaceEdgeDisplayControllerPanel(null);
     }
 
     public void showMainPanel() {
