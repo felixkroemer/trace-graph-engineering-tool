@@ -55,20 +55,26 @@ public class SplitTraceGraphPanel extends JPanel {
         });
 
         this.confirmButton.addActionListener(e -> {
-            List<CyTable> toRemove = new ArrayList<>(rightListModel.size());
-            for (int i = 0; i < rightListModel.size(); i++) {
-                toRemove.add(rightListModel.get(i));
+            if (rightListModel.isEmpty() || leftListModel.isEmpty()) {
+                new Thread(() -> {
+                    JOptionPane.showMessageDialog(null, "Keep and Extract set may not be empty", null, JOptionPane.ERROR_MESSAGE);
+                }).start();
+            } else {
+                List<CyTable> toRemove = new ArrayList<>(rightListModel.size());
+                for (int i = 0; i < rightListModel.size(); i++) {
+                    toRemove.add(rightListModel.get(i));
+                }
+                var taskManager = registrar.getService(TaskManager.class);
+                taskManager.execute(new TaskIterator(new AbstractTask() {
+                    @Override
+                    public void run(TaskMonitor taskMonitor) {
+                        var newController = controller.splitTraceGraph(toRemove);
+                        var manager = registrar.getService(TraceGraphManager.class);
+                        manager.registerTraceGraph(controller.getPDM(), newController);
+                    }
+                }));
             }
             ((Window) getRootPane().getParent()).dispose();
-            var taskManager = registrar.getService(TaskManager.class);
-            taskManager.execute(new TaskIterator(new AbstractTask() {
-                @Override
-                public void run(TaskMonitor taskMonitor) {
-                    var newController = controller.splitTraceGraph(toRemove);
-                    var manager = registrar.getService(TraceGraphManager.class);
-                    manager.registerTraceGraph(controller.getPDM(), newController);
-                }
-            }));
         });
 
         this.cancelButton.addActionListener(e -> ((Window) getRootPane().getParent()).dispose());

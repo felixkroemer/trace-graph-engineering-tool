@@ -37,10 +37,10 @@ public class CyActivator extends AbstractCyActivator {
         //registerService(bundleContext, benchmarkTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Profile", TITLE, "Profile application")));
 
         LoadPDMTaskFactory loadPDMTaskFactory = new LoadPDMTaskFactory(reg);
-        registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or trace", INSERT_SEPARATOR_BEFORE, "true")));
+        registerService(bundleContext, loadPDMTaskFactory, TaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Import", TITLE, "Import PDM or Trace", INSERT_SEPARATOR_BEFORE, "true")));
 
         ExportPDMTaskFactory exportPDMTaskFactory = new ExportPDMTaskFactory(reg);
-        registerService(bundleContext, exportPDMTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Export", TITLE, "Export PDM to json")));
+        registerService(bundleContext, exportPDMTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "File.Export", TITLE, "Export PDM to JSON")));
 
         RenderingModeTaskFactory followModeTaskFactory = new RenderingModeTaskFactory(reg, RENDERING_MODE_FOLLOW);
         registerService(bundleContext, followModeTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph.Modes", TITLE, "Outgoing-Edges Mode")));
@@ -61,7 +61,7 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bundleContext, splitTraceGraphTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Split Trace Graph", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.3")));
 
         var combineTraceGraphsTaskFactory = new CombineTraceGraphsTaskFactory(reg);
-        registerService(bundleContext, combineTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Combine Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.2")));
+        registerService(bundleContext, combineTraceGraphsTaskFactory, NetworkCollectionTaskFactory.class, Util.genProperties(Map.of(TITLE, "Merge Trace Graphs", IN_NETWORK_PANEL_CONTEXT_MENU, "true", MENU_GRAVITY, "1.2")));
 
         var setPercentileFilterTaskFactory = new SetPercentileFilterTaskFactory(reg);
         registerService(bundleContext, setPercentileFilterTaskFactory, NetworkViewTaskFactory.class, Util.genProperties(Map.of(PREFERRED_MENU, "Trace Graph", TITLE, "Set Percentile Filter")));
